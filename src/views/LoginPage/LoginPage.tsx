@@ -113,10 +113,7 @@ const LoginPage = () => {
                       value={values.email}
                       onChange={handleChange}
                       onBlur={handleBlur}
-                      error={
-                        (Boolean(touched.email) && Boolean(errors.email))
-                      }
-                      helperText={touched.email && errors.email}
+                    
                     />
                     <TextField
                       margin="normal"
