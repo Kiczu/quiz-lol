@@ -10,27 +10,16 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
 import { Form, Formik } from "formik";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { paths } from "../../paths";
 
-const LoginWithGooglebutton = styled(Button)({
-  background: "linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)",
-  border: 0,
-  borderRadius: 3,
-  boxShadow: "0 3px 5px 2px rgba(255, 105, 135, .3)",
-  color: "white",
-  height: 48,
-  padding: "0 30px",
-  width: "100%",
-});
 const loginSchema = yup.object().shape({
   email: yup
     .string()
-    .email("Wprowadź poprawny adres E-Mail")
-    .required("E-Mail jest wymagany"),
-  password: yup.string().required("Hasło jest wymagane"),
+    .email("Please enter a valid email")
+    .required("E-Mail is required"),
+  password: yup.string().required("Password is required"),
 });
 
 interface Values {
@@ -83,7 +72,7 @@ const LoginPage = () => {
           >
             <Avatar sx={{ m: 1, bgcolor: "secondary.main" }}></Avatar>
             <Typography component="h1" variant="h5">
-              Zaloguj się
+              Sign in
             </Typography>
             <Formik
               initialValues={initValues}
@@ -104,7 +93,7 @@ const LoginPage = () => {
                       margin="normal"
                       fullWidth
                       id="email"
-                      label="Adres e-mail"
+                      label="E-Mail"
                       name="email"
                       autoComplete="email"
                       autoFocus
@@ -112,13 +101,15 @@ const LoginPage = () => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       error={Boolean(touched.email) && Boolean(errors.email)}
-                      helperText={touched.email && errors.email}
+                      helperText={
+                        touched.email && errors.email ? errors.email : " "
+                      }
                     />
                     <TextField
                       margin="normal"
                       fullWidth
                       name="password"
-                      label="Hasło"
+                      label="Password"
                       type="password"
                       id="password"
                       autoComplete="current-password"
@@ -128,35 +119,42 @@ const LoginPage = () => {
                       error={
                         Boolean(touched.password) && Boolean(errors.password)
                       }
-                      helperText={touched.password && errors.password}
+                      helperText={
+                        touched.password && errors.password
+                          ? errors.password
+                          : " "
+                      }
                     />
                     <Button
                       type="submit"
                       fullWidth
                       variant="contained"
-                      sx={{ mt: 3, mb: 2 }}
+                      sx={{ mb: 2 }}
                     >
                       Sign In
                     </Button>
                     <Grid container>
                       <Grid item xs>
                         <Link href={paths.RESET_PASSWORD} variant="body2">
-                          Zapomniałeś hasła?
+                          Forgot password?
                         </Link>
                       </Grid>
                       <Grid item>
                         <Link href={paths.REGISTER} variant="body2">
-                          {"Nie masz konta? Zarejestruj się"}
+                          Don't have an account? Sign Up
                         </Link>
                       </Grid>
                     </Grid>
                     <Box m={2} mx={0}>
-                      Lub zaloguj się za pomocą:
+                      Or login with:
                     </Box>
                     <Grid justifyContent="center">
-                      <LoginWithGooglebutton onClick={handleSignInWithGoogle}>
+                      <Button
+                        variant="outlined"
+                        onClick={handleSignInWithGoogle}
+                      >
                         Google
-                      </LoginWithGooglebutton>
+                      </Button>
                     </Grid>
                   </Box>
                 </Form>
