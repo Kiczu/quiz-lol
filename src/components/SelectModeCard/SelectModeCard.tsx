@@ -1,5 +1,4 @@
-import { Box, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Box, Typography, Link } from "@mui/material";
 
 type Props = {
   title: string;
@@ -9,8 +8,9 @@ type Props = {
 };
 
 const SelectModeCard = ({ title, desc, link, img }: Props) => {
+  
   return (
-    <Link to={link} style={{ textDecoration: "none" }}>
+    <Link href={link} style={{ textDecoration: "none" }}>
       <Box
         sx={{
           display: "flex",

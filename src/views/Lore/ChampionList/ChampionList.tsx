@@ -8,7 +8,7 @@ const ChampionList = ({ champions }: { champions: ChampionDetails[] }) => {
   };
 
   return (
-    <Grid container spacing={{ xs: 6, sm: 3 }}>
+    <Grid container spacing={{ xs: 6, sm: 3, lg: 10 }}>
       {champions.map((champion) => (
         <Grid item xs={12} sm={6} md={4} lg={3} key={champion.id}>
           <Link to={`/champions/${champion.id}`}>
@@ -27,10 +27,14 @@ const ChampionList = ({ champions }: { champions: ChampionDetails[] }) => {
                 loading="lazy"
               />
               <CardContent style={{ flexGrow: 1 }}>
-                <Typography variant="h5" component="div" paddingBottom={1}>
+                <Typography
+                  textAlign="center"
+                  variant="h5"
+                  component="div"
+                  paddingBottom={1}
+                >
                   {champion.name}
                 </Typography>
-                <Typography variant="body2">{champion.blurb}</Typography>
               </CardContent>
             </Card>
           </Link>

@@ -1,5 +1,5 @@
-import { Box, Button } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Box, Button, Link } from "@mui/material";
+import { Link as ReactRouter } from "react-router-dom";
 import logoQuiz from "../../../assets/images/logo-quiz2.png";
 
 interface DesktopNavProps {
@@ -31,7 +31,9 @@ const DesktopNav = ({ pages, handleCloseNavMenu }: DesktopNavProps) => {
             onClick={handleCloseNavMenu}
             sx={{ my: 2, color: "white", display: "block" }}
           >
-            <Link to={page.href}>{page.name}</Link>
+            <Link component={ReactRouter} to={page.href}>
+              {page.name}
+            </Link>
           </Button>
         ))}
       </Box>
