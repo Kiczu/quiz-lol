@@ -16,3 +16,9 @@ declare module '*.gif' {
   const src: string;
   export default src;
 }
+declare const require: {
+  context(directory: string, useSubdirectories?: boolean, regExp?: RegExp): {
+    keys: () => string[];
+    (key: string): any;
+  };
+};
