@@ -77,7 +77,10 @@ const Navigation = () => {
   const visibleSetting = userData ? settings : settingsNotLoggedIn;
 
   return (
-    <AppBar className="app-bar" sx={{ backgroundColor: "#0A1428" }}>
+    <AppBar
+      className="app-bar"
+      sx={{ position: "sticky", backgroundColor: "#0A1428" }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <MobileNav
@@ -88,7 +91,7 @@ const Navigation = () => {
             anchorElNav={anchorElNav}
           />
           <DesktopNav pages={pages} handleCloseNavMenu={handleCloseNavMenu} />
-          <Box sx={{ flexGrow: 0 }}>
+          <Box>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />

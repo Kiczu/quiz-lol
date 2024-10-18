@@ -16,10 +16,10 @@ const SearchBar = ({ initSearch, handleSearchChange, delay }: IUseDebounce) => {
   return (
     <>
       <TextField
-      sx={{
+        sx={{
           width: "100%",
           maxWidth: 200,
-          margin: "1rem auto",
+          margin: "20px auto",
         }}
         id="standard-search"
         label="Search field"

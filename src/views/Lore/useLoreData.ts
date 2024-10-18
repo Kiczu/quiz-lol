@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { characterService } from "../../api/characterService";
+import { characterService } from "../../services/characterService";
 import { ChampionDetails } from "../../api/types";
 
 export const useLoreData = () => {

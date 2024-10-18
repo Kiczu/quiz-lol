@@ -1,6 +1,13 @@
-import { Box, IconButton, Menu, MenuItem, Typography } from "@mui/material";
+import {
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  Typography,
+  Link,
+} from "@mui/material";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { Link } from "react-router-dom";
+import { Link as ReactRouter } from "react-router-dom";
 import logoQuiz from "../../../assets/images/logo-quiz2.png";
 
 interface MobileNavProps {
@@ -55,7 +62,7 @@ const MobileNav = ({
           }}
         >
           {pages.map((page) => (
-            <Link to={page.href} key={page.name}>
+            <Link component={ReactRouter} to={page.href} key={page.name}>
               <MenuItem onClick={handleCloseUserMenu}>
                 <Typography textAlign="center">{page.name}</Typography>
               </MenuItem>
