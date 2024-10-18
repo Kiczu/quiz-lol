@@ -1,6 +1,7 @@
-import { keyframes } from "@emotion/react";
 import styled from "@emotion/styled";
-import { Button } from "@mui/material";
+import { keyframes } from "@emotion/react";
+import { Button, Card } from "@mui/material";
+import { colors } from "./theme/colors";
 
 const shadowWave = keyframes`
 0% {
@@ -51,5 +52,20 @@ export const WavingButton = styled(Button)({
     },
     "&:hover": {
         transform: "scale(1)",
+    },
+});
+
+export const ChampionCard = styled(Card)({
+    position: "relative",
+    height: "100%",
+    display: "flex",
+    flexDirection: "column",
+    boxShadow: "0 5px 25px 1px rgb(0 0 0 / 50%)",
+    border: `1px solid ${colors.gold4}`,
+    borderRadius: "0",
+    transition: "border 0.2s, box-shadow 0.2s ease-in-out",
+    "&:hover": {
+        boxShadow: `0 0 20px ${colors.gold2}`,
+        border: `1px solid ${colors.gold2}`,
     },
 });

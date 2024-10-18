@@ -20,7 +20,7 @@ import { paths } from "../../paths";
 const pages = [
   {
     name: "Quiz",
-    href: paths.HOME,
+    href: paths.HANGMAN,
   },
   {
     name: "Home",
@@ -28,7 +28,7 @@ const pages = [
   },
   {
     name: "Ranking",
-    href: paths.HOME,
+    href: paths.RANKING,
   },
   {
     name: "Lore",
@@ -37,10 +37,6 @@ const pages = [
 ];
 
 const settings = [
-  {
-    name: "Profile",
-    href: paths.PROFILE,
-  },
   {
     name: "Dashboard",
     href: paths.DASHBOARD,
@@ -77,7 +73,10 @@ const Navigation = () => {
   const visibleSetting = userData ? settings : settingsNotLoggedIn;
 
   return (
-    <AppBar className="app-bar" sx={{ backgroundColor: "#0A1428" }}>
+    <AppBar
+      className="app-bar"
+      sx={{ position: "sticky", backgroundColor: "#0A1428" }}
+    >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <MobileNav
@@ -88,7 +87,7 @@ const Navigation = () => {
             anchorElNav={anchorElNav}
           />
           <DesktopNav pages={pages} handleCloseNavMenu={handleCloseNavMenu} />
-          <Box sx={{ flexGrow: 0 }}>
+          <Box>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
