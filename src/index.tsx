@@ -15,6 +15,7 @@ import Hangman from "./views/Hangman/Hangman";
 import LoginForm from "./views/AuthPage/LoginForm/LoginForm";
 import RegisterForm from "./views/AuthPage/RegisterForm/RegisterForm";
 import ForgotPassword from "./views/AuthPage/ForgotPassword/ForgotPassword";
+import UserDashboard from "./views/UserDashboard/UserDashboard";
 import "./index.css";
 
 const root = ReactDOM.createRoot(
@@ -47,6 +48,7 @@ root.render(
               </Route>
 
               <Route path={paths.LORE} element={<Lore />} />
+              <Route path={paths.DASHBOARD} element={<UserDashboard />} />
             </Route>
           </Routes>
         </Router>

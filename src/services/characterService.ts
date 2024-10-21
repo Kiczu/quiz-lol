@@ -1,5 +1,5 @@
-import { api } from './api';
-import { ApiResponse } from './types';
+import { api } from '../api/api';
+import { ApiResponse } from '../api/types';
 
 function getAll() {
     return api

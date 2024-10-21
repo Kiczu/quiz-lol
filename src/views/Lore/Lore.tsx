@@ -1,7 +1,7 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
+import { useLoreData } from "./useLoreData";
 import ChampionList from "./ChampionList/ChampionList";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import { useLoreData } from "./useLoreData";
 import backgroundMap from "../../assets/images/backgroundMap.jpg";
 
 const Lore = () => {
@@ -21,20 +21,23 @@ const Lore = () => {
     >
       <Box
         sx={{
+          minHeight: "100vh",
           backdropFilter: "blur(4px)",
           backgroundColor: "rgba(10, 20, 40 ,0.6)",
           padding: "20px 80px",
         }}
       >
-        <Typography variant="h4" component="h1">
-          LORE
-        </Typography>
-        <SearchBar
-          initSearch={search}
-          handleSearchChange={handleSearchChange}
-          delay={500}
-        />
-        <ChampionList champions={champions} />
+        <Container maxWidth="xl">
+          <Typography variant="h1" component="h1">
+            LORE
+          </Typography>
+          <SearchBar
+            initSearch={search}
+            handleSearchChange={handleSearchChange}
+            delay={500}
+          />
+          <ChampionList champions={champions} />
+        </Container>
       </Box>
     </Box>
   );

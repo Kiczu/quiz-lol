@@ -10,15 +10,15 @@ import {
 } from "firebase/auth";
 import { auth, createUser, db, provider } from "../../api/firebase/firebse";
 import { doc, getDoc } from "firebase/firestore";
-import { UserData } from "../../api/types";
+import { UserDataResponseRegister } from "../../api/types";
 
 interface Props {
   children: React.ReactNode;
 }
 
 interface LoginContextType {
-  userData: UserData | null;
-  handleCreateUser: (values: UserData) => void;
+  userData: UserDataResponseRegister | null;
+  handleCreateUser: (values: UserDataResponseRegister) => void;
   handleSendResetPasswordEmail: (email: string) => void;
   handleSignOut: () => void;
   handleSignInWithGoogle: () => void;
@@ -28,7 +28,7 @@ interface LoginContextType {
 export const LoginContext = createContext<LoginContextType | null>(null);
 
 export const LoginProvider = ({ children }: Props) => {
-  const [userData, setUserData] = useState<UserData | null>(null);
+  const [userData, setUserData] = useState<UserDataResponseRegister | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -44,10 +44,10 @@ export const LoginProvider = ({ children }: Props) => {
 
   const getUserData = async (id: string) => {
     const userData = await getDoc(doc(db, "users", id));
-    setUserData(userData.data() as UserData);
+    setUserData(userData.data() as UserDataResponseRegister);
   };
 
-  const handleCreateUser = async (values: UserData) => {
+  const handleCreateUser = async (values: UserDataResponseRegister) => {
     try {
       const auth = getAuth();
       const userCredential = await createUserWithEmailAndPassword(
