@@ -20,7 +20,7 @@ import { paths } from "../../paths";
 const pages = [
   {
     name: "Quiz",
-    href: paths.HOME,
+    href: paths.HANGMAN,
   },
   {
     name: "Home",
@@ -28,7 +28,7 @@ const pages = [
   },
   {
     name: "Ranking",
-    href: paths.HOME,
+    href: paths.RANKING,
   },
   {
     name: "Lore",
