@@ -2,20 +2,43 @@ import { doc, getDoc, updateDoc, deleteDoc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, updatePassword, GoogleAuthProvider, reauthenticateWithPopup } from "firebase/auth";
 import { db } from "../api/firebase/firebse";
+import { UserDataResponseRegister } from "../api/types";
+import { scoreService } from "./scoreService";
 
-const createUser = async ({ id, ...userData }: any) => {
+const createUser = async ({ id, username, ...userData }: any) => {
     await setDoc(doc(db, "users", id), userData);
+    await setDoc(doc(db, "leaderboards", id), { username: username, totalScore: 0 });
 };
 
-const getUserData = async (userId: string) => {
-    const userDoc = doc(db, "users", userId);
-    const docSnap = await getDoc(userDoc);
+const getUserData = async (id: string) => {
+    const userDoc = await getDoc(doc(db, "users", id));
+    if (!userDoc.exists()) return null;
 
-    if (docSnap.exists()) {
-        return docSnap.data();
-    } else {
-        return null;
-    }
+    const userDataFromFirestore = userDoc.data() as UserDataResponseRegister;
+
+    const leaderboardData = await getUserLeaderboardData(id);
+    const userScores = await scoreService.getUserScores(id);
+
+    return {
+        uid: id,
+        username: leaderboardData?.username || "Unknown",
+        avatar: userDataFromFirestore.avatar || "/default-avatar.png",
+        firstName: userDataFromFirestore.firstName,
+        lastName: userDataFromFirestore.lastName,
+        email: userDataFromFirestore.email,
+        totalScore: leaderboardData?.totalScore || 0,
+        scores: userScores,
+    };
+};
+
+const getUserLeaderboardData = async (userId: string) => {
+    const leaderboardDoc = await getDoc(doc(db, "leaderboard", userId));
+    if (!leaderboardDoc.exists()) return null;
+
+    return {
+        username: leaderboardDoc.data()?.username || "Unknown",
+        totalScore: leaderboardDoc.data()?.totalScore || 0,
+    };
 };
 
 const updateUserData = async (userId: string, data: Record<string, any>) => {

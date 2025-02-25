@@ -10,6 +10,11 @@ const saveGameScore = async (userId: string, gameId: string, points: number) => 
         score: increment(points),
         timestamp: new Date().toISOString(),
     }, { merge: true });
+
+    const leaderboardDoc = doc(db, "leaderboards", userId);
+    await setDoc(leaderboardDoc, {
+        totalScore: increment(points),
+    }, { merge: true });
 };
 
 const getUserScores = async (userId: string): Promise<Scores[]> => {
@@ -23,17 +28,16 @@ const getUserScores = async (userId: string): Promise<Scores[]> => {
     }));
 };
 
-// const getGameLeaderboard = async (gameId: string) => {
-//     const scoresRef = collection(db, "scores");
-//     const leaderboardQuery = query(
-//         scoresRef,
-//         where("gameId", "==", gameId),
-//         orderBy("score", "desc")
-//     );
-//     const querySnapshot = await getDocs(leaderboardQuery);
+const getLeaderboard = async () => {
+    const leaderboardRef = collection(db, "leaderboards");
+    const leaderboardQuery = query(leaderboardRef, orderBy("totalScore", "desc"));
+    const querySnapshot = await getDocs(leaderboardQuery);
 
-//     return querySnapshot.docs.map(doc => doc.data());
-// };
+    return querySnapshot.docs.map(doc => ({
+        userId: doc.id,
+        ...doc.data(),
+    }));
+};
 
 const groupScoresByGame = (scores: Scores[]): Scores[] => {
     const grouped: Record<string, number> = {};
@@ -54,6 +58,6 @@ const groupScoresByGame = (scores: Scores[]): Scores[] => {
 export const scoreService = {
     saveGameScore,
     getUserScores,
-    // getGameLeaderboard,
+    getLeaderboard,
     groupScoresByGame,
 };

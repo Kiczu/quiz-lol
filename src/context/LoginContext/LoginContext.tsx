@@ -53,8 +53,11 @@ export const LoginProvider = ({ children }: Props) => {
       if (!userDoc.exists()) return console.log("User data not found");
 
       const userDataFromFirestore = userDoc.data() as UserDataResponseRegister;
-      const scoresDoc = await getDoc(doc(db, "scores", id));
-      const username = scoresDoc.exists() ? scoresDoc.data()?.username : null;
+
+      const leaderboardDoc = await getDoc(doc(db, "leaderboard", id));
+      const username = leaderboardDoc.exists()
+        ? leaderboardDoc.data()?.username
+        : null;
 
       setUserData({
         uid: id,
@@ -88,12 +91,11 @@ export const LoginProvider = ({ children }: Props) => {
       };
 
       await userService.createUser(newUserData);
+      await setDoc(doc(db, "leaderboard", user.uid), {
+        username: values.username,
+        totalScore: 0,
+      });
 
-      if (values.username) {
-        await setDoc(doc(db, "scores", user.uid), {
-          username: values.username,
-        });
-      }
       console.log("User registered successfully");
     } catch (error) {
       console.error("Error registering user:", error);
@@ -109,6 +111,7 @@ export const LoginProvider = ({ children }: Props) => {
       console.error("Error sending password reset email:", error);
     }
   };
+  
   const handleSignOut = async () => {
     signOut(auth)
       .then(() => {
@@ -135,10 +138,7 @@ export const LoginProvider = ({ children }: Props) => {
           lastName: user.displayName,
           email: user.email,
         };
-        // await userService.createUser(newUserData);
-        // await setDoc(doc(db, "scores", user.uid), {
-        //   username: "",
-        // });
+
         await setDoc(doc(db, "users", user.uid), newUserData);
       }
       await getUserData(user.uid);
