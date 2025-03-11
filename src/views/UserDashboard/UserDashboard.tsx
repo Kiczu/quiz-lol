@@ -16,24 +16,25 @@ import {
 } from "./userDashboard.style";
 
 const UserDashboard = () => {
-  const { userData } = useAuth();
   const navigate = useNavigate();
-  const { formData, setFormData, updateUserProfile } = useUserProfile(
-    userData?.uid
-  );
+  const { userData } = useAuth();
+  const { formData, updateUserProfile, isUsernameEditable } = useUserProfile();
   const { scores } = useScores(userData?.uid);
 
   const handleDeleteAccount = async () => {
+    if (!userData?.uid) return;
+
     if (
       window.confirm(
         "Are you sure you want to delete your account? This action cannot be undone."
       )
     ) {
-      const success = await userService.deleteUser();
-      if (success) {
-        navigate(paths.LOGIN);
+      try {
+        await userService.deleteUser(userData.uid);
         alert("Account deleted successfully.");
-      } else {
+        navigate(paths.LOGIN);
+      } catch (error) {
+        console.error("Error deleting account:", error);
         alert("Failed to delete account.");
       }
     }
@@ -49,13 +50,8 @@ const UserDashboard = () => {
             <Typography variant="h5">Edit Your Data</Typography>
             <EditUserForm
               formData={formData}
-              handleInputChange={(e) =>
-                setFormData({
-                  ...formData,
-                  [e.target.name]: e.target.value,
-                })
-              }
-              handleSaveChanges={updateUserProfile}
+              isUsernameEditable={isUsernameEditable}
+              onSubmit={updateUserProfile}
             />
             <ChangePasswordForm
               handlePasswordChange={userService.handlePasswordChange}

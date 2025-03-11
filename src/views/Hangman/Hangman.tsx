@@ -10,7 +10,7 @@ const Hangman = () => {
 
   return (
     <GameBox title="Hangman">
-      <Box marginTop={5} padding={3} sx={boxContainer}>
+      <Box sx={boxContainer}>
         <Typography component="h1" variant="h3" sx={titleGame}>
           Hangman
         </Typography>

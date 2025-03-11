@@ -4,6 +4,11 @@ export const inputStyle = {
     backgroundColor: colors.backgroundSecondary,
     color: colors.textPrimary,
     mb: 2,
+        "& .MuiFormHelperText-root": {
+        backgroundColor: colors.background,
+        margin: 0,
+        pt: 1,
+    },
 };
 
 export const dashboardViewContainer = {

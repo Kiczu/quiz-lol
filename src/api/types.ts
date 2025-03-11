@@ -22,6 +22,7 @@ export type UserDataResponseRegister = {
     lastName: string;
     email: string;
     password: string;
+    username: string | null;
 }
 
 
@@ -68,6 +69,11 @@ export interface Scores {
     gameId: string;
     score: number;
 }
+
+export type LeaderboardData = {
+    username: string;
+    totalScore: number;
+};
 
 export enum GameState {
     NotStarted = "NotStarted",

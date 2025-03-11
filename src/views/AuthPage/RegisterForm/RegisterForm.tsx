@@ -15,23 +15,21 @@ import type { UserDataResponseRegister } from "../../../api/types";
 import { paths } from "../../../paths";
 
 const registerSchema = yup.object().shape({
-  firstName: yup.string().required("Imię jest wymagane"),
-  lastName: yup.string().required("Nazwisko jest wymagane"),
-  email: yup
-    .string()
-    .email("Wprowadź poprawny adres E-Mail")
-    .required("E-Mail jest wymagany"),
+  username: yup.string().required("Username is required"),
+  firstName: yup.string().required("Name is required"),
+  lastName: yup.string().required("Surname is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
   password: yup
     .string()
-    .required("Hasło jest wymagane")
-    .min(8, "Hasło musi mieć co najmniej 8 znaków")
-    .matches(/[A-Z]/, "Hasło musi zawierać dużą literę")
-    .matches(/[0-9]/, "Hasło musi zawierać cyfrę")
-    .matches(/[^\w]/, "Hasło musi zawierać znak specjalny"),
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters")
+    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .matches(/[0-9]/, "Password must contain at least one number")
+    .matches(/[^\w]/, "Password must contain at least one special character"),
   confirmPassword: yup
     .string()
-    .required("Hasła muszą być takie same")
-    .oneOf([yup.ref("password")], "Hasła muszą być takie same"),
+    .required("Confirm password is required")
+    .oneOf([yup.ref("password")], "Passwords must match"),
 });
 
 interface RegistrationData extends UserDataResponseRegister {
@@ -46,6 +44,7 @@ const initValues: RegistrationData = {
   email: "",
   password: "",
   confirmPassword: "",
+  username: "",
 };
 
 const RegisterForm = () => {
@@ -53,6 +52,40 @@ const RegisterForm = () => {
 
   const handleSubmit = (values: UserDataResponseRegister) =>
     handleCreateUser(values);
+
+  const formFields = [
+    {
+      name: "username",
+      label: "Username",
+      type: "text",
+      autoComplete: "username",
+    },
+    {
+      name: "firstName",
+      label: "First Name",
+      type: "text",
+      autoComplete: "given-name",
+    },
+    {
+      name: "lastName",
+      label: "Last Name",
+      type: "text",
+      autoComplete: "family-name",
+    },
+    { name: "email", label: "Email", type: "email", autoComplete: "email" },
+    {
+      name: "password",
+      label: "Password",
+      type: "password",
+      autoComplete: "new-password",
+    },
+    {
+      name: "confirmPassword",
+      label: "Confirm Password",
+      type: "password",
+      autoComplete: "new-password",
+    },
+  ];
 
   return (
     <Box
@@ -76,97 +109,31 @@ const RegisterForm = () => {
           touched,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="given-name"
-                  name="firstName"
-                  fullWidth
-                  id="firstName"
-                  label="First name"
-                  autoFocus
-                  value={values.firstName}
-                  onBlur={handleBlur}
-                  onChange={handleChange}
-                  error={
-                    Boolean(touched.firstName) && Boolean(errors.firstName)
-                  }
-                  helperText={
-                    touched.firstName && errors.firstName
-                      ? errors.firstName
-                      : " "
-                  }
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  autoComplete="family-name"
-                  name="lastName"
-                  fullWidth
-                  id="lastName"
-                  label="Last Name"
-                  value={values.lastName}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={Boolean(touched.lastName) && Boolean(errors.lastName)}
-                  helperText={
-                    touched.lastName && errors.lastName ? errors.lastName : " "
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  autoComplete="email"
-                  name="email"
-                  fullWidth
-                  id="email"
-                  label="Email"
-                  value={values.email}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={Boolean(touched.email) && Boolean(errors.email)}
-                  helperText={
-                    touched.email && errors.email ? errors.email : " "
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  value={values.password}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={Boolean(touched.password) && Boolean(errors.password)}
-                  helperText={
-                    touched.password && errors.password ? errors.password : " "
-                  }
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  name="confirmPassword"
-                  label="Confirm Password"
-                  type="password"
-                  id="confirmPassword"
-                  value={values.confirmPassword}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  error={
-                    Boolean(touched.confirmPassword) &&
-                    Boolean(errors.confirmPassword)
-                  }
-                  helperText={
-                    touched.confirmPassword && errors.confirmPassword
-                      ? errors.confirmPassword
-                      : " "
-                  }
-                />
-              </Grid>
+            <Grid container spacing={1}>
+              {formFields.map(({ name, label, type, autoComplete }) => (
+                <Grid item xs={12} sm={name === "username" ? 12 : 6} key={name}>
+                  <TextField
+                    fullWidth
+                    name={name}
+                    label={label}
+                    type={type}
+                    autoComplete={autoComplete}
+                    value={values[name as keyof typeof values]}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    error={
+                      Boolean(touched[name as keyof typeof values]) &&
+                      Boolean(errors[name as keyof typeof values])
+                    }
+                    helperText={
+                      touched[name as keyof typeof values] &&
+                      errors[name as keyof typeof values]
+                        ? errors[name as keyof typeof values]
+                        : " "
+                    }
+                  />
+                </Grid>
+              ))}
             </Grid>
             <Button
               type="submit"

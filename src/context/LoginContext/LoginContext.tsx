@@ -8,7 +8,7 @@ import {
   signInWithPopup,
   signOut,
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db, provider } from "../../api/firebase/firebse";
 import { userService } from "../../services/userService";
 import { UserDataResponseRegister } from "../../api/types";
@@ -19,12 +19,13 @@ interface Props {
 
 interface LoginContextType {
   userData: UserDataResponseRegister | null;
-  handleCreateUser: (values: UserDataResponseRegister) => void;
-  handleSendResetPasswordEmail: (email: string) => void;
-  handleSignOut: () => void;
-  handleSignInWithGoogle: () => void;
-  handleSignIn: (email: string, password: string) => void;
-  refreshUserData: () => void;
+  handleCreateUser: (values: UserDataResponseRegister) => Promise<void>;
+  handleSendResetPasswordEmail: (email: string) => Promise<void>;
+  handleSignOut: () => Promise<void>;
+  handleSignInWithGoogle: () => Promise<void>;
+  handleSignIn: (email: string, password: string) => Promise<void>;
+  refreshUserData: () => Promise<void>;
+  updateUsername: (newUsername: string) => Promise<void>;
 }
 
 export const LoginContext = createContext<LoginContextType | null>(null);
@@ -47,39 +48,55 @@ export const LoginProvider = ({ children }: Props) => {
   }, []);
 
   const getUserData = async (id: string) => {
-    const userData = await getDoc(doc(db, "users", id));
-    const userDataFromFirestore = userData.data() as UserDataResponseRegister;
+    try {
+      const userDoc = await getDoc(doc(db, "users", id));
+      if (!userDoc.exists()) return console.log("User data not found");
 
-    if (userDataFromFirestore) {
+      const userDataFromFirestore = userDoc.data() as UserDataResponseRegister;
+
+      const leaderboardDoc = await getDoc(doc(db, "leaderboard", id));
+      const username = leaderboardDoc.exists()
+        ? leaderboardDoc.data()?.username
+        : null;
+
       setUserData({
-        ...userDataFromFirestore,
-        uid: userData.id,
-        avatar: userDataFromFirestore.avatar,
-      });
-    } else {
-      console.log("User data not found in Firestore", id);
+        uid: id,
+        username,
+        avatar: userDataFromFirestore.avatar || "/default-avatar.png",
+        email: userDataFromFirestore.email,
+        firstName: userDataFromFirestore.firstName,
+        lastName: userDataFromFirestore.lastName,
+      } as UserDataResponseRegister);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
   };
 
   const handleCreateUser = async (values: UserDataResponseRegister) => {
     try {
-      const auth = getAuth();
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         values.email,
         values.password
       );
       const user = userCredential.user;
-      if (user) {
-        const newUserData = {
-          id: user.uid,
-          firstName: values.firstName,
-          lastName: values.lastName,
-          email: user.email,
-        };
-        await userService.createUser(newUserData);
-        console.log("User registered successfully");
-      }
+      if (!user) return;
+
+      const newUserData = {
+        id: user.uid,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: user.email,
+        avatar: values.avatar || "/default-avatar.png",
+      };
+
+      await userService.createUser(newUserData);
+      await setDoc(doc(db, "leaderboard", user.uid), {
+        username: values.username,
+        totalScore: 0,
+      });
+
+      console.log("User registered successfully");
     } catch (error) {
       console.error("Error registering user:", error);
     }
@@ -94,6 +111,7 @@ export const LoginProvider = ({ children }: Props) => {
       console.error("Error sending password reset email:", error);
     }
   };
+  
   const handleSignOut = async () => {
     signOut(auth)
       .then(() => {
@@ -107,9 +125,25 @@ export const LoginProvider = ({ children }: Props) => {
   const handleSignInWithGoogle = async () => {
     try {
       const authResult = await signInWithPopup(auth, provider);
-      console.log(authResult);
+      const user = authResult.user;
+      if (!user) return;
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+
+      if (!userDoc.exists()) {
+        const newUserData = {
+          id: user.uid,
+          avatar: "/default-avatar.png",
+          firstName: user.displayName,
+          lastName: user.displayName,
+          email: user.email,
+        };
+
+        await setDoc(doc(db, "users", user.uid), newUserData);
+      }
+      await getUserData(user.uid);
     } catch (error) {
-      console.log(error);
+      console.error("Error signing in with Google:", error);
     }
   };
 
@@ -121,10 +155,9 @@ export const LoginProvider = ({ children }: Props) => {
         password
       );
       const user = userCredential.user;
+      if (!user) return;
 
-      if (user) {
-        await getUserData(user.uid);
-      }
+      await getUserData(user.uid);
     } catch (error) {
       console.error("Error signing in:", error);
     }
@@ -133,6 +166,30 @@ export const LoginProvider = ({ children }: Props) => {
   const refreshUserData = async () => {
     if (userData?.uid) {
       await getUserData(userData.uid);
+    }
+  };
+
+  const updateUsername = async (newUsername: string) => {
+    if (!userData?.uid) return;
+
+    try {
+      await setDoc(
+        doc(db, "scores", userData.uid),
+        { username: newUsername },
+        { merge: true }
+      );
+
+      setUserData((prev) => {
+        if (!prev) return null;
+
+        return {
+          ...prev,
+          username: newUsername,
+          uid: prev.uid || "",
+        } as UserDataResponseRegister;
+      });
+    } catch (error) {
+      console.error("Error updating username:", error);
     }
   };
 
@@ -146,6 +203,7 @@ export const LoginProvider = ({ children }: Props) => {
         handleCreateUser,
         handleSendResetPasswordEmail,
         refreshUserData,
+        updateUsername,
       }}
     >
       {children}

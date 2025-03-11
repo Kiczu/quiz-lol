@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   AppBar,
   Box,
@@ -20,7 +20,7 @@ import { paths } from "../../paths";
 const pages = [
   {
     name: "Quiz",
-    href: paths.HOME,
+    href: paths.HANGMAN,
   },
   {
     name: "Home",
@@ -28,7 +28,7 @@ const pages = [
   },
   {
     name: "Ranking",
-    href: paths.HOME,
+    href: paths.RANKING,
   },
   {
     name: "Lore",
@@ -59,6 +59,10 @@ const Navigation = () => {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const { userData, handleSignOut } = useAuth();
+
+  useEffect(() => {
+    console.log("Updated userData in Navigation:", userData);
+  }, [userData]);
 
   const handleOpenUserMenu = (e: React.MouseEvent<HTMLElement>) =>
     setAnchorElUser(e.currentTarget);

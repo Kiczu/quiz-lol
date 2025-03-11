@@ -8,6 +8,9 @@ export const colors = {
     textPrimary: "#F0E6D2",
     textSecondary: "#A09B8C",
 
+    error: "#FF5733",
+    warning: "#FFC300",
+
     blue1: "#CDFAFA",
     blue2: "#0397AB",
     blue3: "#005A82",

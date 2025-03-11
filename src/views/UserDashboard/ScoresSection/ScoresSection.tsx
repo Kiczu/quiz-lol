@@ -8,23 +8,22 @@ interface Props {
 
 const ScoresSection = ({ scores }: Props) => {
   const totalScore =
-    scores?.reduce((total, { score }) => total + score, 0) ?? 0;
+    scores?.reduce((total, { score }) => total + score, 0) || 0;
 
   return (
     <Grid container spacing={4}>
-      {scores &&
-        scores.map(({ gameId, score }, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card sx={scoreCard}>
-              <CardContent>
-                <Typography variant="h5">{gameId}</Typography>
-                <Typography component="p" variant="h5" mt={1}>
-                  {score}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
+      {scores?.map(({ gameId, score }, index) => (
+        <Grid item xs={12} sm={6} md={3} key={index}>
+          <Card sx={scoreCard}>
+            <CardContent>
+              <Typography variant="h5">{gameId}</Typography>
+              <Typography component="p" variant="h5" mt={1}>
+                {score}
+              </Typography>
+            </CardContent>
+          </Card>
+        </Grid>
+      ))}
       <Grid item xs={12} sm={6} md={3}>
         <Card sx={totalScoreCard}>
           <CardContent>

@@ -40,9 +40,29 @@ export const theme = createTheme({
                             '&.Mui-focused fieldset': {
                                 borderColor: colors.gold4,
                             },
-                            '& .MuiInputBase-adornedEnd': {
-                                backgroundColor: 'transparent',
+                        },
+                    },
+                },
+                {
+                    props: { variant: 'outlined', disabled: true },
+                    style: {
+                        '& .MuiOutlinedInput-root': {
+                            '&.Mui-disabled fieldset': {
+                                borderColor: colors.gold5,
                             },
+                            '& .MuiInputBase-input.Mui-disabled': {
+                                WebkitTextFillColor: colors.textSecondary,
+                                cursor: 'not-allowed',
+                            },
+                        },
+                        '& .MuiInputLabel-root.Mui-disabled': {
+                            color: colors.textSecondary,
+                        },
+                        '& .MuiFormHelperText-root': {
+                            color: colors.warning,
+                            padding: '8px',
+                            margin: 0,
+                            backgroundColor: colors.gold5,
                         },
                     },
                 },
