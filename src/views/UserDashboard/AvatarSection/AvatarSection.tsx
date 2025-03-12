@@ -34,7 +34,7 @@ const AvatarSection = () => {
       <Avatar src={selectedAvatar || undefined} sx={avatarStyle} />
       <Grid container spacing={2} sx={smallAvatarsGrid}>
         {predefinedAvatars.map((avatar, index) => (
-          <Grid item xs={6} sm={3} key={index} sx={smallAvatarItem}>
+          <Grid item xs={3} key={index} sx={smallAvatarItem}>
             <Avatar
               src={avatar}
               sx={smallAvatarStyle}
@@ -42,7 +42,7 @@ const AvatarSection = () => {
             />
           </Grid>
         ))}
-        <Grid item xs={6} sm={3} sx={smallAvatarItem}>
+        <Grid item xs={3} sx={smallAvatarItem}>
           <Input
             type="file"
             id="upload-avatar"
