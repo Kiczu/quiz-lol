@@ -54,9 +54,9 @@ export const LoginProvider = ({ children }: Props) => {
 
       const userDataFromFirestore = userDoc.data() as UserDataResponseRegister;
 
-      const leaderboardDoc = await getDoc(doc(db, "leaderboard", id));
-      const username = leaderboardDoc.exists()
-        ? leaderboardDoc.data()?.username
+      const scoreDoc = await getDoc(doc(db, "scores", id));
+      const username = scoreDoc.exists()
+        ? scoreDoc.data()?.username
         : null;
 
       setUserData({
