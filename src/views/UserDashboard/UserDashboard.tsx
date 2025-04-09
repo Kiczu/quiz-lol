@@ -6,6 +6,7 @@ import AvatarSection from "./AvatarSection/AvatarSection";
 import ScoresSection from "./ScoresSection/ScoresSection";
 import EditUserForm from "./EditUserForm/EditUserForm";
 import ChangePasswordForm from "./ChangePasswordForm/CahngePasswordForm";
+import UserDataInfo from "./UserDataInfo/UserDataInfo";
 import DangerZone from "./DangerZone/DangerZone";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { userService } from "../../services/userService";
@@ -58,6 +59,7 @@ const UserDashboard = () => {
             />
           </Grid>
           <Grid item sm={12} md={4}>
+            <UserDataInfo />
             <DangerZone handleDeleteAccount={handleDeleteAccount} />
           </Grid>
         </Grid>

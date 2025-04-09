@@ -7,7 +7,7 @@ interface Props {
 
 const DangerZone = ({ handleDeleteAccount }: Props) => (
   <Box>
-    <Typography variant="h5" mb={2} sx={{ color: colors.gold2 }}>
+    <Typography variant="h5" mb={2} mt={2} sx={{ color: colors.gold2 }}>
       Danger Zone
     </Typography>
     <Typography variant="body1" mb={2}>
