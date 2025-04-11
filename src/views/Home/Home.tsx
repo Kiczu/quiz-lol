@@ -28,7 +28,7 @@ const modes = [
   {
     title: "Regions",
     desc: "Match the region to the champion.",
-    link: "/classic",
+    link: paths.REGION,
     img: regionIcon,
   },
   {
