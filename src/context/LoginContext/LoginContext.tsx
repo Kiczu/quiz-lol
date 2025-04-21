@@ -9,9 +9,10 @@ import {
   signOut,
 } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { auth, db, provider } from "../../api/firebase/firebse";
-import { userService } from "../../services/userService";
+import { auth, provider } from "../../api/firebase/auth";
+import { db } from "../../api/firebase/db";
 import { UserDataResponseRegister } from "../../api/types";
+import { userService } from "../../services/userService";
 
 interface Props {
   children: React.ReactNode;
@@ -55,9 +56,7 @@ export const LoginProvider = ({ children }: Props) => {
       const userDataFromFirestore = userDoc.data() as UserDataResponseRegister;
 
       const scoreDoc = await getDoc(doc(db, "scores", id));
-      const username = scoreDoc.exists()
-        ? scoreDoc.data()?.username
-        : null;
+      const username = scoreDoc.exists() ? scoreDoc.data()?.username : null;
 
       setUserData({
         uid: id,
@@ -111,7 +110,7 @@ export const LoginProvider = ({ children }: Props) => {
       console.error("Error sending password reset email:", error);
     }
   };
-  
+
   const handleSignOut = async () => {
     signOut(auth)
       .then(() => {

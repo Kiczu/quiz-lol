@@ -1,6 +1,6 @@
 import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { db } from "../../api/firebase/firebse";
+import { db } from "../../api/firebase/db";
 
 interface ScoreData {
     userId: string;

@@ -1,5 +1,5 @@
 import { doc, setDoc, increment, collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { db } from "../api/firebase/firebse";
+import { db } from "../api/firebase/db"; 
 import { Scores } from "../api/types";
 
 const saveGameScore = async (userId: string, gameId: string, points: number) => {

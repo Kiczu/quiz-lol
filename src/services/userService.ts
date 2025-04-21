@@ -1,7 +1,7 @@
 import { doc, getDoc, updateDoc, deleteDoc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, updatePassword, GoogleAuthProvider, reauthenticateWithPopup } from "firebase/auth";
-import { db } from "../api/firebase/firebse";
+import { db } from "../api/firebase/db"; 
 import { UserDataResponseRegister } from "../api/types";
 import { scoreService } from "./scoreService";
 
