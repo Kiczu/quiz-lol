@@ -1,5 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import { getAuth } from "firebase/auth";
+import { auth } from "../../api/firebase/auth";
 import { GameState } from "../../api/types";
 import { scoreService } from "../../services/scoreService";
 
@@ -35,7 +35,6 @@ export const GameProvider = ({ children }: Props) => {
   const [isWin, setIsWin] = useState<boolean>(false);
 
   useEffect(() => {
-    const auth = getAuth();
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUserId(user.uid);

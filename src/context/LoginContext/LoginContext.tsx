@@ -1,7 +1,6 @@
 import React, { createContext, useEffect, useState } from "react";
 import {
   createUserWithEmailAndPassword,
-  getAuth,
   onAuthStateChanged,
   sendPasswordResetEmail,
   signInWithEmailAndPassword,
@@ -103,7 +102,6 @@ export const LoginProvider = ({ children }: Props) => {
 
   const handleSendResetPasswordEmail = async (email: string) => {
     try {
-      const auth = getAuth();
       await sendPasswordResetEmail(auth, email);
       console.log("Password reset email sent");
     } catch (error) {

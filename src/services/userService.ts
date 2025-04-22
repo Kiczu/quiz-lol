@@ -1,7 +1,8 @@
 import { doc, getDoc, updateDoc, deleteDoc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { getAuth, updatePassword, GoogleAuthProvider, reauthenticateWithPopup } from "firebase/auth";
-import { db } from "../api/firebase/db"; 
+import { updatePassword, GoogleAuthProvider, reauthenticateWithPopup } from "firebase/auth";
+import { db } from "../api/firebase/db";
+import { auth } from "../api/firebase/auth";
 import { UserDataResponseRegister } from "../api/types";
 import { scoreService } from "./scoreService";
 
@@ -67,7 +68,6 @@ const deleteUser = async (userId: string) => {
     await deleteDoc(doc(db, "users", userId));
     await deleteDoc(doc(db, "scores", userId));
 
-    const auth = getAuth();
     const user = auth.currentUser;
     if (!user) throw new Error("No authenticated user found.");
 
@@ -75,7 +75,6 @@ const deleteUser = async (userId: string) => {
 };
 
 const changeUserPassword = async (newPassword: string) => {
-    const auth = getAuth();
     const user = auth.currentUser;
 
     if (user) {
@@ -102,7 +101,6 @@ const handlePasswordChange = async ({
     } catch (error: any) {
         if (error.code === "auth/requires-recent-login") {
             try {
-                const auth = getAuth();
                 const user = auth.currentUser;
 
                 if (user) {
