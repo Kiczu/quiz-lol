@@ -1,10 +1,11 @@
 import { Box, Avatar } from "@mui/material";
-import { useAvatar } from "./useAvatar";
 import AvatarSelection from "./AvatarSelection/AvatarSelection";
 import { avatarGridContainer, avatarStyle } from "./avatarSection.style";
+import { useAuth } from "../../../context/LoginContext/LoginContext";
 
 const AvatarSection = () => {
-  const { selectedAvatar } = useAvatar();
+  const { userData } = useAuth();
+  const selectedAvatar = userData?.avatar;
 
   return (
     <Box sx={avatarGridContainer}>
