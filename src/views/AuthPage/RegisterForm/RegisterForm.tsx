@@ -10,9 +10,10 @@ import {
 } from "@mui/material";
 import { Link as RouterLink } from "react-router-dom";
 import { Form, Formik } from "formik";
-import { useAuth } from "../../../context/LoginContext/LoginContext";
-import type { UserDataResponseRegister } from "../../../api/types";
+import type { UserPrivateData } from "../../../api/types";
 import { paths } from "../../../paths";
+import { userService } from "../../../services/userService";
+import { authService } from "../../../services/authService";
 
 const registerSchema = yup.object().shape({
   username: yup.string().required("Username is required"),
@@ -32,26 +33,37 @@ const registerSchema = yup.object().shape({
     .oneOf([yup.ref("password")], "Passwords must match"),
 });
 
-interface RegistrationData extends UserDataResponseRegister {
+interface RegistrationFormData extends Omit<UserPrivateData, "uid"> {
+  password: string;
   confirmPassword: string;
 }
 
-const initValues: RegistrationData = {
-  uid: "",
-  avatar: "",
+const initValues: RegistrationFormData = {
   firstName: "",
   lastName: "",
   email: "",
   password: "",
   confirmPassword: "",
-  username: "",
 };
 
 const RegisterForm = () => {
-  const { handleCreateUser } = useAuth();
+  const handleSubmit = async (values: RegistrationFormData) => {
+    const { firstName, lastName, email, password } = values;
 
-  const handleSubmit = (values: UserDataResponseRegister) =>
-    handleCreateUser(values);
+    try {
+      await authService.registerUser(email, password, {
+        firstName,
+        lastName,
+      });
+
+      const user = { firstName, lastName, email };
+      await userService.createUser(user);
+
+      // location to dashboard
+    } catch (error) {
+      console.error("Error during registration:", error);
+    }
+  };
 
   const formFields = [
     {
