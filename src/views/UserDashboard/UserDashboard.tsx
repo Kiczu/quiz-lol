@@ -1,11 +1,11 @@
 import { Box, Grid, Typography, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useUserProfile } from "./useUserFormData";
+import { useUserProfile } from "./useUserProfile";
 import { useScores } from "./ScoresSection/useScores";
 import AvatarSection from "./AvatarSection/AvatarSection";
 import ScoresSection from "./ScoresSection/ScoresSection";
 import EditUserForm from "./EditUserForm/EditUserForm";
-import ChangePasswordForm from "./ChangePasswordForm/CahngePasswordForm";
+import ChangePasswordForm from "./ChangePasswordForm/ChangePasswordForm";
 import UserDataInfo from "./UserDataInfo/UserDataInfo";
 import DangerZone from "./DangerZone/DangerZone";
 import { useAuth } from "../../context/LoginContext/LoginContext";
@@ -54,9 +54,7 @@ const UserDashboard = () => {
               isUsernameEditable={isUsernameEditable}
               onSubmit={updateUserProfile}
             />
-            <ChangePasswordForm
-              handlePasswordChange={userService.handlePasswordChange}
-            />
+            <ChangePasswordForm />
           </Grid>
           <Grid item sm={12} md={4}>
             <UserDataInfo />
