@@ -7,24 +7,18 @@ export type ApiResponse = {
 
 export type ApiData = Record<string, ChampionDetails>;
 
-export type UserData = {
-    name: string;
-    surname: string;
-    email: string;
-    password: string;
-    totalPoints: number;
-}
-
-export type UserDataResponseRegister = {
+export type UserPrivateData = {
     uid: string;
-    avatar: string;
     firstName: string;
     lastName: string;
     email: string;
-    password: string;
-    username: string | null;
 }
 
+export type UserPublicData = {
+    avatar: string;
+    username: string;
+    totalScore: number;
+}
 
 export type ChampionDetails = {
     id: string;
@@ -69,11 +63,6 @@ export interface Scores {
     gameId: string;
     score: number;
 }
-
-export type LeaderboardData = {
-    username: string;
-    totalScore: number;
-};
 
 export enum GameState {
     NotStarted = "NotStarted",
