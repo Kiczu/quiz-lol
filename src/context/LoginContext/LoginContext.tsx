@@ -61,15 +61,16 @@ export const LoginProvider = ({ children }: Props) => {
     const user = await authService.registerUser(email, password, {
       firstName,
       lastName,
+      username: "",
     });
     if (!user) throw new Error("User creation failed.");
 
     await userService.createUser({
-      id: user.uid,
+      uid: user.uid,
       firstName,
       lastName,
       email: user.email || "",
-      avatar: "/default-avatar.png",
+      // avatar: "/default-avatar.png",
       username: "",
     });
 
@@ -88,11 +89,11 @@ export const LoginProvider = ({ children }: Props) => {
     const userDoc = await userService.getUserData(user.uid);
     if (!userDoc) {
       await userService.createUser({
-        id: user.uid,
+        uid: user.uid,
         firstName: "",
         lastName: "",
         email: user.email || "",
-        avatar: "/default-avatar.png",
+        // avatar: "/default-avatar.png",
         username: "",
       });
     }

@@ -12,7 +12,6 @@ import { Link as RouterLink } from "react-router-dom";
 import { Form, Formik } from "formik";
 import type { UserPrivateData } from "../../../api/types";
 import { paths } from "../../../paths";
-import { userService } from "../../../services/userService";
 import { authService } from "../../../services/authService";
 
 const registerSchema = yup.object().shape({
@@ -34,11 +33,13 @@ const registerSchema = yup.object().shape({
 });
 
 interface RegistrationFormData extends Omit<UserPrivateData, "uid"> {
+  username: string;
   password: string;
   confirmPassword: string;
 }
 
 const initValues: RegistrationFormData = {
+  username: "",
   firstName: "",
   lastName: "",
   email: "",
@@ -48,17 +49,14 @@ const initValues: RegistrationFormData = {
 
 const RegisterForm = () => {
   const handleSubmit = async (values: RegistrationFormData) => {
-    const { firstName, lastName, email, password } = values;
+    const { username, firstName, lastName, email, password } = values;
 
     try {
       await authService.registerUser(email, password, {
+        username,
         firstName,
         lastName,
       });
-
-      const user = { firstName, lastName, email };
-      await userService.createUser(user);
-
       // location to dashboard
     } catch (error) {
       console.error("Error during registration:", error);
@@ -103,7 +101,7 @@ const RegisterForm = () => {
     <Box
       sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
     >
-      <Avatar sx={{ bgcolor: "secondary.main" }}></Avatar>
+      <Avatar sx={{ bgcolor: "secondary.main" }} />
       <Typography component="h1" variant="h5" mb={2} mt={1}>
         Sign up
       </Typography>
@@ -121,27 +119,25 @@ const RegisterForm = () => {
           touched,
         }) => (
           <Form onSubmit={handleSubmit}>
-            <Grid container spacing={1}>
+            <Grid container spacing={2}>
               {formFields.map(({ name, label, type, autoComplete }) => (
-                <Grid item xs={12} sm={name === "username" ? 12 : 6} key={name}>
+                <Grid item xs={12} sm={name === "email" ? 12 : 6} key={name}>
                   <TextField
                     fullWidth
-                    name={name}
                     label={label}
+                    name={name}
                     type={type}
                     autoComplete={autoComplete}
-                    value={values[name as keyof typeof values]}
+                    value={values[name as keyof RegistrationFormData]}
                     onChange={handleChange}
                     onBlur={handleBlur}
                     error={
-                      Boolean(touched[name as keyof typeof values]) &&
-                      Boolean(errors[name as keyof typeof values])
+                      touched[name as keyof RegistrationFormData] &&
+                      Boolean(errors[name as keyof RegistrationFormData])
                     }
                     helperText={
-                      touched[name as keyof typeof values] &&
-                      errors[name as keyof typeof values]
-                        ? errors[name as keyof typeof values]
-                        : " "
+                      touched[name as keyof RegistrationFormData] &&
+                      errors[name as keyof RegistrationFormData]
                     }
                   />
                 </Grid>
@@ -151,27 +147,20 @@ const RegisterForm = () => {
               type="submit"
               fullWidth
               variant="contained"
-              color="primary"
-              size="large"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign up
+              Sign Up
             </Button>
+            <Grid container justifyContent="flex-end">
+              <Grid item>
+                <Link component={RouterLink} to={paths.LOGIN} variant="body2">
+                  Already have an account? Sign in
+                </Link>
+              </Grid>
+            </Grid>
           </Form>
         )}
       </Formik>
-      <Grid container>
-        <Grid item xs>
-          <Link component={RouterLink} to={paths.RESET_PASSWORD}>
-            Forgot password?
-          </Link>
-        </Grid>
-        <Grid item>
-          <Link component={RouterLink} to={paths.LOGIN}>
-            Have an account? Sign in
-          </Link>
-        </Grid>
-      </Grid>
     </Box>
   );
 };

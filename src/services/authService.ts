@@ -1,6 +1,6 @@
-import { auth } from "../api/firebase/auth";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, reauthenticateWithPopup, updatePassword, sendPasswordResetEmail } from "firebase/auth";
 import { userService } from "./userService";
+import { auth } from "../api/firebase/auth";
 
 const getCurrentUser = () => {
     return auth.currentUser;
@@ -10,17 +10,18 @@ const onAuthStateChanged = (callback: (user: any) => void) => {
     return auth.onAuthStateChanged(callback);
 }
 
-const registerUser = async (email: string, password: string, userData: { firstName: string; lastName: string; }) => {
+const registerUser = async (email: string, password: string, userData: { username: string, firstName: string; lastName: string; }) => {
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
         const { user } = userCredential;
 
         await userService.createUser({
+            uid: user.uid,
+            username: userData.username,
             email: user.email!,
             firstName: userData.firstName,
             lastName: userData.lastName,
-            uid: user.uid,
         });
 
         return user;

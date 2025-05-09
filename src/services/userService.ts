@@ -3,9 +3,29 @@ import { db } from "../api/firebase/db";
 import { auth } from "../api/firebase/auth";
 import { scoreService } from "./scoreService";
 
-const createUser = async ({ id, username, ...userData }: any) => {
-    await setDoc(doc(db, "users", id), userData);
-    await setDoc(doc(db, "scores", id), { username: username, totalScore: 0 });
+interface CreateUserData {
+    uid: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    username: string;
+}
+
+const createUser = async ({
+    uid,
+    email,
+    firstName,
+    lastName,
+    username,
+}: CreateUserData) => {
+    await setDoc(doc(db, "users", uid), {
+        email,
+        firstName,
+        lastName,
+    });
+    if (username) {
+        await setDoc(doc(db, "scores", uid), { username, avatar: "/default-avatar.png", totalScore: 0 });
+    }
 };
 
 const getUserData = async (id: string) => {
