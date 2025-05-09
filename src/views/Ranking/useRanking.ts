@@ -1,6 +1,6 @@
-import { collection, doc, getDoc, getDocs } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import { db } from "../../api/firebase/firebse";
+import { collection, doc, getDoc, getDocs, QueryDocumentSnapshot } from "firebase/firestore";
+import { db } from "../../api/firebase/db";
 
 interface ScoreData {
     userId: string;
@@ -12,39 +12,58 @@ const useRanking = (selectedGameMode: string) => {
     const [ranking, setRanking] = useState<ScoreData[]>([]);
 
     useEffect(() => {
-        fetchRanking(selectedGameMode).then(setRanking).catch(() => setRanking([]));
+        const load = async () => {
+            const result = await fetchRanking(selectedGameMode);
+            setRanking(result);
+        };
+        load().catch(() => setRanking([]));
     }, [selectedGameMode]);
 
     return { ranking };
 };
 
 const fetchRanking = async (selectedGameMode: string): Promise<ScoreData[]> => {
-    try {
-        const querySnapshot = await getDocs(collection(db, "scores"));
-        const rankingData = processRankingData(querySnapshot.docs, selectedGameMode);
-        const userIds = Array.from(new Set(rankingData.map(item => item.userId)));
-        const usernames = await fetchUsernames(userIds);
-
-        return rankingData.map(item => ({
-            ...item,
-            username: usernames[item.userId] || "Unknown"
-        }));
-    } catch (error) {
-        console.error("Error fetching ranking:", error);
-        return [];
+    if (selectedGameMode === "TotalScore") {
+        return await fetchGlobalLeaderboard();
     }
+
+    const querySnapshot = await getDocs(collection(db, "scores"));
+    const rankingData = processRankingData(querySnapshot.docs, selectedGameMode);
+
+    const userIds = Array.from(new Set(rankingData.map(item => item.userId)));
+    const usernames = await fetchUsernames(userIds);
+
+    return rankingData.map(item => ({
+        ...item,
+        username: usernames[item.userId] || "Unknown"
+    }));
 };
 
-const processRankingData = (docs: any[], selectedGameMode: string): ScoreData[] => {
+const fetchGlobalLeaderboard = async (): Promise<ScoreData[]> => {
+    const snapshot = await getDocs(collection(db, "scores"));
+    const totalScores: ScoreData[] = [];
+
+    for (const docSnap of snapshot.docs) {
+        if (docSnap.id.includes("_")) continue;
+        const data = docSnap.data();
+        totalScores.push({
+            userId: docSnap.id,
+            score: data.totalScore || 0,
+            username: data.username || "Unknown"
+        });
+    }
+
+    return totalScores.sort((a, b) => b.score - a.score);
+};
+
+const processRankingData = (docs: QueryDocumentSnapshot[], selectedGameMode: string): ScoreData[] => {
     const rankingData: Record<string, number> = {};
 
     docs.forEach((doc) => {
         const [userId, gameMode] = doc.id.split("_");
         const score = doc.data().score || 0;
 
-        if (selectedGameMode === "TotalScore") {
-            rankingData[userId] = (rankingData[userId] || 0) + score;
-        } else if (gameMode === selectedGameMode) {
+        if (gameMode === selectedGameMode) {
             rankingData[userId] = score;
         }
     });

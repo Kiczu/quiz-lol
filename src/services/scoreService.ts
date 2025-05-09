@@ -1,5 +1,5 @@
 import { doc, setDoc, increment, collection, query, where, orderBy, getDocs } from "firebase/firestore";
-import { db } from "../api/firebase/firebse";
+import { db } from "../api/firebase/db";
 import { Scores } from "../api/types";
 
 const saveGameScore = async (userId: string, gameId: string, points: number) => {
@@ -11,7 +11,7 @@ const saveGameScore = async (userId: string, gameId: string, points: number) => 
         timestamp: new Date().toISOString(),
     }, { merge: true });
 
-    const leaderboardDoc = doc(db, "leaderboards", userId);
+    const leaderboardDoc = doc(db, "scores", userId);
     await setDoc(leaderboardDoc, {
         totalScore: increment(points),
     }, { merge: true });
@@ -29,8 +29,8 @@ const getUserScores = async (userId: string): Promise<Scores[]> => {
 };
 
 const getLeaderboard = async () => {
-    const leaderboardRef = collection(db, "leaderboards");
-    const leaderboardQuery = query(leaderboardRef, orderBy("totalScore", "desc"));
+    const userRef = collection(db, "scores");
+    const leaderboardQuery = query(userRef, orderBy("totalScore", "desc"));
     const querySnapshot = await getDocs(leaderboardQuery);
 
     return querySnapshot.docs.map(doc => ({

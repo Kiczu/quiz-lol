@@ -2,13 +2,8 @@ import * as yup from "yup";
 import { Box, TextField, Button } from "@mui/material";
 import { Formik, Form } from "formik";
 import { inputStyle } from "../userDashboard.style";
-
-interface Props {
-  handlePasswordChange: (passwordData: {
-    newPassword: string;
-    confirmPassword: string;
-  }) => void;
-}
+import { authService } from "../../../services/authService";
+import { useState } from "react";
 
 const validationSchema = yup.object({
   newPassword: yup
@@ -25,7 +20,24 @@ const validationSchema = yup.object({
     .required("Confirm password is required"),
 });
 
-const ChangePasswordForm = ({ handlePasswordChange }: Props) => {
+const ChangePasswordForm = () => {
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const handlePasswordChange = async (values: {
+    newPassword: string;
+    confirmPassword: string;
+  }) => {
+    try {
+      await authService.changePassword(values.newPassword);
+      setSuccess("Password changed successfully!");
+      setError(null);
+    } catch (error) {
+      setError("Failed to change password. Please try again.");
+      setSuccess(null);
+    }
+  };
+
   return (
     <Formik
       initialValues={{ newPassword: "", confirmPassword: "" }}

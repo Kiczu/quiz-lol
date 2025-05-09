@@ -19,12 +19,10 @@ const predefinedAvatars = [
 ];
 
 const AvatarSelection = () => {
-  const { updateAvatar, uploadAvatar } = useAvatar();
+  const { updateAvatar } = useAvatar();
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      uploadAvatar(event.target.files[0]);
-    }
+  const handleDeleteAvatar = () => {
+    console.log('usun avatar');
   };
 
   return (
@@ -44,7 +42,7 @@ const AvatarSelection = () => {
           id="upload-avatar"
           sx={{ display: "none" }}
           inputProps={{ accept: "image/*" }}
-          onChange={handleFileUpload}
+          onChange={handleDeleteAvatar}
         />
         <label htmlFor="upload-avatar">
           <Avatar

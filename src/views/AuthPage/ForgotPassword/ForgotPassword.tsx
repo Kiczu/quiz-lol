@@ -1,9 +1,9 @@
 import * as yup from "yup";
 import { Box, Button, Grid, TextField, Typography, Link } from "@mui/material";
 import { Form, Formik } from "formik";
-import { useAuth } from "../../../context/LoginContext/LoginContext";
 import { Link as RouterLink } from "react-router-dom";
 import { paths } from "../../../paths";
+import { authService } from "../../../services/authService";
 
 const emailSchema = yup.object().shape({
   email: yup
@@ -21,10 +21,8 @@ const initValues: Values = {
 };
 
 const ForgotPassword = () => {
-  const { handleSendResetPasswordEmail } = useAuth();
-
-  const handleSubmit = ({ email }: Values) =>
-    handleSendResetPasswordEmail(email);
+  const handleSendResetPasswordEmail = ({ email }: Values) =>
+    authService.sendResetPassword(email);
 
   return (
     <Box
@@ -42,7 +40,7 @@ const ForgotPassword = () => {
       </Typography>
       <Formik
         initialValues={initValues}
-        onSubmit={handleSubmit}
+        onSubmit={handleSendResetPasswordEmail}
         validationSchema={emailSchema}
       >
         {({
