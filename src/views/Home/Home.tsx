@@ -30,9 +30,9 @@ const Home = () => {
             }}
           >
             <SelectModeCard
-              title="Champions"
+              title="Guess the Region"
               desc="Play with friends"
-              link="/classic"
+              link={paths.REGION}
               img="/assets/images/classic.jpg"
             />
             <SelectModeCard

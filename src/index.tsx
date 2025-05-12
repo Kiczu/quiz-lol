@@ -12,6 +12,7 @@ import Champion from "./components/Champion/Champion";
 import AuthPage from "./views/AuthPage/AuthPage";
 import Lore from "./views/Lore/Lore";
 import Hangman from "./views/Hangman/Hangman";
+import GuessRegion from "./views/GuessRegion/GuessRegion";
 import LoginForm from "./views/AuthPage/LoginForm/LoginForm";
 import RegisterForm from "./views/AuthPage/RegisterForm/RegisterForm";
 import ForgotPassword from "./views/AuthPage/ForgotPassword/ForgotPassword";
@@ -37,6 +38,14 @@ root.render(
                 element={
                   <GameProvider>
                     <Hangman />
+                  </GameProvider>
+                }
+              />
+              <Route
+                path={paths.REGION}
+                element={
+                  <GameProvider>
+                    <GuessRegion />
                   </GameProvider>
                 }
               />

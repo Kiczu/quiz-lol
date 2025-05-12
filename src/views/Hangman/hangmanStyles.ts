@@ -2,22 +2,21 @@ import styled from "@emotion/styled"
 import { keyframes } from "@mui/material";
 
 type MinionProps = {
-    isActive: boolean;
+  isActive: boolean;
 }
 
 export const boxContainer = {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    background: "#010A13",
-    minHeight: "100vh",
-    overflow: "hidden",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  background: "#010A13",
+  minHeight: "100vh",
 }
 export const titleGame = {
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    color: "#C89B3C",
-    margin: "40px",
+  fontWeight: "bold",
+  textTransform: "uppercase",
+  color: "#C89B3C",
+  margin: "40px",
 }
 
 const impact = keyframes`
