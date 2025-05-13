@@ -1,8 +1,8 @@
 import { doc, getDoc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { scoreService } from "./scoreService";
 import { EditableUserFields } from "../api/types";
 import { db } from "../api/firebase/db";
 import { auth } from "../api/firebase/auth";
-import { scoreService } from "./scoreService";
 
 interface CreateUserData {
     uid: string;
