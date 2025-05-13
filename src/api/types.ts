@@ -20,6 +20,13 @@ export type UserPublicData = {
     totalScore: number;
 }
 
+export type EditableUserFields = {
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+}
+
 export type ChampionDetails = {
     id: string;
     key: string;
