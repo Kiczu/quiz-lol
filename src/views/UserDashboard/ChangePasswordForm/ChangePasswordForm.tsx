@@ -1,9 +1,9 @@
+import { useState } from "react";
 import * as yup from "yup";
 import { Box, TextField, Button } from "@mui/material";
 import { Formik, Form } from "formik";
 import { inputStyle } from "../userDashboard.style";
 import { authService } from "../../../services/authService";
-import { useState } from "react";
 
 const validationSchema = yup.object({
   newPassword: yup
