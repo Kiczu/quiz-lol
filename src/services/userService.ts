@@ -37,7 +37,7 @@ const getUserData = async (id: string) => {
 
     const userScores = await scoreService.getUserScores(id);
     const scoresDoc = await getDoc(doc(db, "scores", id));
-    const scoreData = scoresDoc.exists() ? scoresDoc.data() : { username: "Unknown", totalScore: 0 };
+    const scoreData = scoresDoc.exists() ? scoresDoc.data() : { username: "", totalScore: 0 };
 
     return {
         uid: id,
