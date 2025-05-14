@@ -1,51 +1,53 @@
 import * as yup from "yup";
-import { Box, TextField, Button } from "@mui/material";
+import { Box, TextField, Button, Typography } from "@mui/material";
 import { Formik, Form } from "formik";
 import { inputStyle } from "../userDashboard.style";
-
-interface Props {
-  formData: {
-    username: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  };
-  isUsernameEditable: boolean;
-  onSubmit: (values: {
-    username: string;
-    firstName: string;
-    lastName: string;
-    email: string;
-  }) => Promise<void>;
-}
+import { colors } from "../../../theme/colors";
+import { useAuth } from "../../../context/LoginContext/LoginContext";
+import { EditableUserFields } from "../../../api/types";
 
 const validationSchema = yup.object({
-  firstName: yup.string().required("First name is required"),
-  lastName: yup.string().required("Last name is required"),
-  email: yup.string().email("Invalid email").required("Email is required"),
+  firstName: yup.string(),
+  lastName: yup.string(),
+  email: yup.string().email("Invalid email"),
   username: yup
     .string()
     .test("is-username-editable", "Username is required", function (value) {
-      return this.options.context?.isUsernameEditable ? !!value : true;
+      return this.options.context?.isUsername ? !!value : true;
     }),
 });
 
-const EditUserForm = ({ formData, isUsernameEditable, onSubmit }: Props) => {
+const EditUserForm = () => {
+  const { userData, updateUserProfile } = useAuth();
+
+  if (!userData) return null;
+
+  const isUsername = !userData.username;
+
+  const handleSubmit = async (values: EditableUserFields): Promise<void> => {
+    if (!userData) return;
+    await updateUserProfile(values);
+  };
+
   return (
-    <Formik
+    <Formik<EditableUserFields>
       initialValues={{
-        username: formData.username || "",
-        firstName: "",
-        lastName: "",
-        email: "",
+        username: userData.username || "",
+        firstName: userData.firstName || "",
+        lastName: userData.lastName || "",
+        email: userData.email || "",
       }}
       validationSchema={validationSchema}
-      onSubmit={onSubmit}
-      context={{ isUsernameEditable }}
+      onSubmit={handleSubmit}
     >
       {({ values, handleChange, handleBlur, errors, touched }) => (
         <Form>
           <Box mb={3}>
+            {isUsername && (
+              <Typography color={colors.warning} sx={{ mb: 2 }}>
+                To finish setting up your account, please choose a username.
+              </Typography>
+            )}
             <TextField
               name="username"
               label="Username"
@@ -55,12 +57,12 @@ const EditUserForm = ({ formData, isUsernameEditable, onSubmit }: Props) => {
               fullWidth
               variant="outlined"
               sx={inputStyle}
-              disabled={!isUsernameEditable}
+              disabled={!isUsername}
               error={touched.username && Boolean(errors.username)}
               helperText={
                 touched.username && errors.username
                   ? errors.username
-                  : isUsernameEditable
+                  : isUsername
                   ? "The username is permanent, choose wisely!"
                   : "You cannot change your username"
               }

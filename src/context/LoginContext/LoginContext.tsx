@@ -1,7 +1,11 @@
 import React, { createContext, useEffect, useState, useContext } from "react";
 import { authService } from "../../services/authService";
 import { userService } from "../../services/userService";
-import { UserPrivateData, UserPublicData } from "../../api/types";
+import {
+  EditableUserFields,
+  UserPrivateData,
+  UserPublicData,
+} from "../../api/types";
 
 interface Props {
   children: React.ReactNode;
@@ -9,17 +13,11 @@ interface Props {
 
 interface LoginContextType {
   userData: (UserPrivateData & UserPublicData) | null;
-  handleCreateUser: (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string
-  ) => Promise<void>;
   handleSignIn: (email: string, password: string) => Promise<void>;
   handleSignInWithGoogle: () => Promise<void>;
   handleSignOut: () => Promise<void>;
   refreshUserData: () => Promise<void>;
-  updateUsername: (newUsername: string) => Promise<void>;
+  updateUserProfile: (updates: EditableUserFields) => Promise<void>;
 }
 
 const LoginContext = createContext<LoginContextType | null>(null);
@@ -52,31 +50,6 @@ export const LoginProvider = ({ children }: Props) => {
     setUserData(userData);
   };
 
-  const handleCreateUser = async (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string
-  ) => {
-    const user = await authService.registerUser(email, password, {
-      firstName,
-      lastName,
-      username: "",
-    });
-    if (!user) throw new Error("User creation failed.");
-
-    await userService.createUser({
-      uid: user.uid,
-      firstName,
-      lastName,
-      email: user.email || "",
-      // avatar: "/default-avatar.png",
-      username: "",
-    });
-
-    await refreshUserData();
-  };
-
   const handleSignIn = async (email: string, password: string) => {
     await authService.loginUser(email, password);
     await refreshUserData();
@@ -93,7 +66,6 @@ export const LoginProvider = ({ children }: Props) => {
         firstName: "",
         lastName: "",
         email: user.email || "",
-        // avatar: "/default-avatar.png",
         username: "",
       });
     }
@@ -106,10 +78,11 @@ export const LoginProvider = ({ children }: Props) => {
     setUserData(null);
   };
 
-  const updateUsername = async (newUsername: string) => {
-    if (!userData) throw new Error("No user data available.");
+  const updateUserProfile = async (updates: EditableUserFields) => {
+    const user = authService.getCurrentUser();
+    if (!user) throw new Error("User not logged in.");
 
-    await userService.updateUsername(userData.uid, newUsername);
+    await userService.updateUserData(user.uid, updates);
     await refreshUserData();
   };
 
@@ -117,12 +90,11 @@ export const LoginProvider = ({ children }: Props) => {
     <LoginContext.Provider
       value={{
         userData,
-        handleCreateUser,
         handleSignIn,
         handleSignInWithGoogle,
         handleSignOut,
         refreshUserData,
-        updateUsername,
+        updateUserProfile,
       }}
     >
       {children}
