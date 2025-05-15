@@ -1,12 +1,8 @@
-import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
-import { ReactNode } from "react";
+import { Dialog, DialogContent, DialogActions } from "@mui/material";
+import { forwardRef, ReactNode } from "react";
+import { motion } from "framer-motion";
+import { AppModalVariant } from "../../context/ModalContext/modal.types";
+import ModalHeader from "./ModalHeader";
 
 interface AppModalProps {
   open: boolean;
@@ -15,7 +11,14 @@ interface AppModalProps {
   children: ReactNode;
   actions?: ReactNode;
   disableClose?: boolean;
+  variant?: AppModalVariant;
 }
+
+const MotionDialogContent = motion.create(
+  forwardRef<HTMLDivElement, React.ComponentProps<typeof DialogContent>>(
+    (props, ref) => <DialogContent ref={ref} {...props} />
+  )
+);
 
 const AppModal = ({
   open,
@@ -24,6 +27,7 @@ const AppModal = ({
   children,
   actions,
   disableClose = false,
+  variant = "default",
 }: AppModalProps) => {
   return (
     <Dialog
@@ -33,17 +37,20 @@ const AppModal = ({
       hideBackdrop={false}
       PaperProps={{ sx: { borderRadius: 2, p: 2, minWidth: 400 } }}
     >
-      {title && (
-        <DialogTitle sx={{ display: "flex", justifyContent: "space-between" }}>
-          {title}
-          {!disableClose && onClose && (
-            <IconButton onClick={onClose}>
-              <CloseIcon />
-            </IconButton>
-          )}
-        </DialogTitle>
-      )}
-      <DialogContent>{children}</DialogContent>
+      <ModalHeader
+        title={title}
+        variant={variant}
+        onClose={onClose}
+        disableClose={disableClose}
+      />
+      <MotionDialogContent
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -20 }}
+        transition={{ duration: 0.25 }}
+      >
+        {children}
+      </MotionDialogContent>
       {actions && <DialogActions>{actions}</DialogActions>}
     </Dialog>
   );
