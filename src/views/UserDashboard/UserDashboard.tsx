@@ -1,5 +1,6 @@
-import { Box, Grid, Typography, Container } from "@mui/material";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { Box, Grid, Typography, Container } from "@mui/material";
 import { useScores } from "./ScoresSection/useScores";
 import AvatarSection from "./AvatarSection/AvatarSection";
 import ScoresSection from "./ScoresSection/ScoresSection";
@@ -8,6 +9,7 @@ import ChangePasswordForm from "./ChangePasswordForm/ChangePasswordForm";
 import UserDataInfo from "./UserDataInfo/UserDataInfo";
 import DangerZone from "./DangerZone/DangerZone";
 import { useAuth } from "../../context/LoginContext/LoginContext";
+import { useModal } from "../../context/ModalContext/ModalContext";
 import { userService } from "../../services/userService";
 import { paths } from "../../paths";
 import {
@@ -18,7 +20,22 @@ import {
 const UserDashboard = () => {
   const navigate = useNavigate();
   const { userData } = useAuth();
+  const { showModal } = useModal();
   const { scores } = useScores(userData?.uid);
+
+  useEffect(() => {
+    if (!userData) {
+      navigate(paths.LOGIN);
+    }
+    if (userData && !userData.username) {
+      showModal({
+        title: "Username Required",
+        content: <EditUserForm />,
+        variant: "warning",
+        disableClose: true,
+      });
+    }
+  }, [userData, navigate, showModal]);
 
   const handleDeleteAccount = async () => {
     if (!userData?.uid) return;
