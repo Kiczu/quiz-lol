@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Grid, Typography, Container } from "@mui/material";
 import { useScores } from "./ScoresSection/useScores";
@@ -18,6 +18,7 @@ import {
 } from "./userDashboard.style";
 
 const UserDashboard = () => {
+  const [modalShown, setModalShown] = useState(false);
   const navigate = useNavigate();
   const { userData } = useAuth();
   const { showModal } = useModal();
@@ -26,16 +27,18 @@ const UserDashboard = () => {
   useEffect(() => {
     if (!userData) {
       navigate(paths.LOGIN);
+      return;
     }
-    if (userData && !userData.username) {
+    if (userData && !userData.username && !modalShown) {
       showModal({
         title: "Username Required",
         content: <EditUserForm />,
         variant: "warning",
         disableClose: true,
       });
+      setModalShown(true);
     }
-  }, [userData, navigate, showModal]);
+  }, [userData, navigate, showModal, modalShown]);
 
   const handleDeleteAccount = async () => {
     if (!userData?.uid) return;
@@ -64,7 +67,7 @@ const UserDashboard = () => {
         <Grid container spacing={10} mt={0}>
           <Grid item sm={12} md={8} sx={dataFormsContainer}>
             <Typography variant="h5">Edit Your Data</Typography>
-            <EditUserForm />
+            {userData?.username && <EditUserForm />}
             <ChangePasswordForm />
           </Grid>
           <Grid item sm={12} md={4}>

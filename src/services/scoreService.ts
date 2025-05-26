@@ -1,31 +1,35 @@
-import { doc, setDoc, increment, collection, query, where, orderBy, getDocs } from "firebase/firestore";
+import { doc, setDoc, collection, query, orderBy, getDocs, getDoc } from "firebase/firestore";
 import { db } from "../api/firebase/db";
-import { Scores } from "../api/types";
+import { ScoresMap } from "../api/types";
 
 const saveGameScore = async (userId: string, gameId: string, points: number) => {
-    const scoreDoc = doc(db, "scores", `${userId}_${gameId}`);
-    await setDoc(scoreDoc, {
+    const scoreRef = doc(db, "scores", `${userId}_${gameId}`);
+    const scoreSnap = await getDoc(scoreRef);
+
+    const scores: ScoresMap = scoreSnap.exists() ? scoreSnap.data() : {
         userId,
         gameId,
-        score: increment(points),
-        timestamp: new Date().toISOString(),
-    }, { merge: true });
+        score: 0,
+    };
 
-    const leaderboardDoc = doc(db, "scores", userId);
-    await setDoc(leaderboardDoc, {
-        totalScore: increment(points),
+    const current = scores[gameId] || 0;
+    scores[gameId] = current + points;
+
+    const totalScore = Object.values(scores).reduce((acc, score) => acc + score, 0);
+
+    await setDoc(scoreRef, {
+        scores,
+        totalScore,
     }, { merge: true });
 };
 
-const getUserScores = async (userId: string): Promise<Scores[]> => {
-    const scoresRef = collection(db, "scores");
-    const userScoresQuery = query(scoresRef, where("userId", "==", userId));
-    const querySnapshot = await getDocs(userScoresQuery);
-
-    return querySnapshot.docs.map(doc => ({
-        gameId: doc.data().gameId,
-        score: doc.data().score,
-    }));
+const getUserScores = async (userId: string): Promise<ScoresMap> => {
+    const ref = doc(db, "scores", userId);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+        return {};
+    }
+    return snap.data().scores || {};
 };
 
 const getLeaderboard = async () => {
@@ -39,25 +43,8 @@ const getLeaderboard = async () => {
     }));
 };
 
-const groupScoresByGame = (scores: Scores[]): Scores[] => {
-    const grouped: Record<string, number> = {};
-
-    scores.forEach(({ gameId, score }) => {
-        if (!grouped[gameId]) {
-            grouped[gameId] = 0;
-        }
-        grouped[gameId] += score;
-    });
-
-    return Object.entries(grouped).map(([gameId, score]) => ({
-        gameId,
-        score,
-    }));
-};
-
 export const scoreService = {
     saveGameScore,
     getUserScores,
     getLeaderboard,
-    groupScoresByGame,
 };

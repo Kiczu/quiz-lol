@@ -1,9 +1,9 @@
 import { Grid, Card, CardContent, Typography } from "@mui/material";
-import { Scores } from "../../../api/types";
+import { ScoresMap } from "../../../api/types";
 import { scoreCard, totalScoreCard } from "./scoreSection.style";
 
 interface Props {
-  scores: Scores[] | null;
+  scores: ScoresMap[] | null;
 }
 
 const ScoresSection = ({ scores }: Props) => {

@@ -1,18 +1,14 @@
 import React, { createContext, useEffect, useState, useContext } from "react";
 import { authService } from "../../services/authService";
 import { userService } from "../../services/userService";
-import {
-  EditableUserFields,
-  UserPrivateData,
-  UserPublicData,
-} from "../../api/types";
+import { EditableUserFields, RawUserData } from "../../api/types";
 
 interface Props {
   children: React.ReactNode;
 }
 
 interface LoginContextType {
-  userData: (UserPrivateData & UserPublicData) | null;
+  userData: RawUserData | null;
   handleSignIn: (email: string, password: string) => Promise<void>;
   handleSignInWithGoogle: () => Promise<void>;
   handleSignOut: () => Promise<void>;
@@ -23,9 +19,7 @@ interface LoginContextType {
 const LoginContext = createContext<LoginContextType | null>(null);
 
 export const LoginProvider = ({ children }: Props) => {
-  const [userData, setUserData] = useState<
-    (UserPrivateData & UserPublicData) | null
-  >(null);
+  const [userData, setUserData] = useState<RawUserData | null>(null);
 
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged(async (user) => {
@@ -46,8 +40,17 @@ export const LoginProvider = ({ children }: Props) => {
       return;
     }
 
-    const userData = await userService.getUserData(user.uid);
-    setUserData(userData);
+    const fetchedData = await userService.getUserData(user.uid);
+
+    setUserData((prev) => {
+      if (
+        !fetchedData ||
+        JSON.stringify(fetchedData) === JSON.stringify(prev)
+      ) {
+        return prev;
+      }
+      return fetchedData;
+    });
   };
 
   const handleSignIn = async (email: string, password: string) => {

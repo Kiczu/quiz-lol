@@ -1,10 +1,11 @@
 import * as yup from "yup";
 import { Box, TextField, Button, Typography } from "@mui/material";
 import { Formik, Form } from "formik";
-import { inputStyle } from "../userDashboard.style";
 import { colors } from "../../../theme/colors";
 import { useAuth } from "../../../context/LoginContext/LoginContext";
+import { useModal } from "../../../context/ModalContext/ModalContext";
 import { EditableUserFields } from "../../../api/types";
+import { inputStyle } from "../userDashboard.style";
 
 const validationSchema = yup.object({
   firstName: yup.string(),
@@ -18,7 +19,8 @@ const validationSchema = yup.object({
 });
 
 const EditUserForm = () => {
-  const { userData, updateUserProfile } = useAuth();
+  const { userData, updateUserProfile, refreshUserData } = useAuth();
+  const { closeModal } = useModal();
 
   if (!userData) return null;
 
@@ -26,7 +28,18 @@ const EditUserForm = () => {
 
   const handleSubmit = async (values: EditableUserFields): Promise<void> => {
     if (!userData) return;
+
+    const isUnchanged =
+      values.username === userData.username &&
+      values.firstName === userData.firstName &&
+      values.lastName === userData.lastName &&
+      values.email === userData.email;
+
+    if (isUnchanged) return;
+
     await updateUserProfile(values);
+    await refreshUserData();
+    closeModal();
   };
 
   return (
@@ -37,6 +50,7 @@ const EditUserForm = () => {
         lastName: userData.lastName || "",
         email: userData.email || "",
       }}
+      enableReinitialize
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >

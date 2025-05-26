@@ -20,11 +20,22 @@ export type UserPublicData = {
     totalScore: number;
 }
 
+export type RawUserData = {
+    uid: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    avatar?: string;
+    totalScore?: number;
+    scores?: ScoresMap;
+}
+
 export type EditableUserFields = {
-  username: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    username?: string;
 }
 
 export type ChampionDetails = {
@@ -66,9 +77,8 @@ export type ChampionDetails = {
     ];
 };
 
-export interface Scores {
-    gameId: string;
-    score: number;
+export interface ScoresMap {
+    [gameId: string]: number;
 }
 
 export enum GameState {
