@@ -2,26 +2,25 @@ import { doc, setDoc, collection, query, orderBy, getDocs, getDoc } from "fireba
 import { db } from "../api/firebase/db";
 import { ScoresMap } from "../api/types";
 
-const saveGameScore = async (userId: string, gameId: string, points: number) => {
-    const scoreRef = doc(db, "scores", `${userId}_${gameId}`);
+const saveGameScore = async (userId: string, gameId: string, score: number) => {
+    const scoreRef = doc(db, "scores", userId);
     const scoreSnap = await getDoc(scoreRef);
 
-    const scores: ScoresMap = scoreSnap.exists() ? scoreSnap.data() : {
-        userId,
-        gameId,
-        score: 0,
-    };
+    const scores: ScoresMap = scoreSnap.exists()
+        ? scoreSnap.data().scores || {}
+        : {};
 
     const current = scores[gameId] || 0;
-    scores[gameId] = current + points;
+    scores[gameId] = current + score;
 
-    const totalScore = Object.values(scores).reduce((acc, score) => acc + score, 0);
+    const totalScore = Object.values(scores).reduce((acc, val) => acc + val, 0);
 
     await setDoc(scoreRef, {
         scores,
         totalScore,
     }, { merge: true });
 };
+
 
 const getUserScores = async (userId: string): Promise<ScoresMap> => {
     const ref = doc(db, "scores", userId);
