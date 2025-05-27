@@ -3,16 +3,14 @@ import { ScoresMap } from "../../../api/types";
 import { scoreCard, totalScoreCard } from "./scoreSection.style";
 
 interface Props {
-  scores: ScoresMap[] | null;
+  scores: ScoresMap | null;
+  totalScore: number;
 }
 
-const ScoresSection = ({ scores }: Props) => {
-  const totalScore =
-    scores?.reduce((total, { score }) => total + score, 0) || 0;
-
+const ScoresSection = ({ scores, totalScore }: Props) => {
   return (
     <Grid container spacing={4}>
-      {scores?.map(({ gameId, score }, index) => (
+      {Object.entries(scores || {}).map(([gameId, score], index) => (
         <Grid item xs={12} sm={6} md={3} key={index}>
           <Card sx={scoreCard}>
             <CardContent>

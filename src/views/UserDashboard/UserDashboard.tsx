@@ -22,7 +22,7 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const { userData } = useAuth();
   const { showModal } = useModal();
-  const { scores } = useScores(userData?.uid);
+  const { scores, totalScore } = useScores(userData?.uid);
 
   useEffect(() => {
     if (!userData) {
@@ -63,7 +63,7 @@ const UserDashboard = () => {
     <Box sx={dashboardViewContainer}>
       <Container maxWidth="xl">
         <AvatarSection />
-        <ScoresSection scores={scores} />
+        <ScoresSection scores={scores} totalScore={totalScore} />
         <Grid container spacing={10} mt={0}>
           <Grid item sm={12} md={8} sx={dataFormsContainer}>
             <Typography variant="h5">Edit Your Data</Typography>

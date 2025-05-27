@@ -22,13 +22,16 @@ const saveGameScore = async (userId: string, gameId: string, score: number) => {
 };
 
 
-const getUserScores = async (userId: string): Promise<ScoresMap> => {
+const getUserScores = async (userId: string): Promise<{ scores: ScoresMap; totalScore: number }> => {
     const ref = doc(db, "scores", userId);
     const snap = await getDoc(ref);
     if (!snap.exists()) {
-        return {};
+        return { scores: {}, totalScore: 0 };
     }
-    return snap.data().scores || {};
+    return {
+        scores: snap.data().scores || {},
+        totalScore: snap.data().totalScore || 0,
+    };
 };
 
 const getLeaderboard = async () => {
