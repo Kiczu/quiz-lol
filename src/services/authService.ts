@@ -1,4 +1,4 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, reauthenticateWithPopup, updatePassword, sendPasswordResetEmail } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, reauthenticateWithPopup, updatePassword, sendPasswordResetEmail, EmailAuthProvider, linkWithCredential, reauthenticateWithCredential } from "firebase/auth";
 import { userService } from "./userService";
 import { auth } from "../api/firebase/auth";
 
@@ -30,25 +30,34 @@ const registerUser = async (email: string, password: string, userData: { usernam
         throw error;
     }
 }
+const setPasswordForGoogleUser = async (email: string, password: string) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user is currently logged in.");
 
-const changePassword = async (newPassword: string) => {
+    const credential = EmailAuthProvider.credential(email, password);
+    await linkWithCredential(user, credential);
+}
+
+const updateUserPassword = async (newPassword: string, currentPassword?: string) => {
+    const user = auth.currentUser;
+    if (!user || !user.email) throw new Error("User not authenticated");
+
     try {
-        const user = auth.currentUser;
-        if (!user) throw new Error("No user is currently logged in.");
-
-        const provider = new GoogleAuthProvider();
-        await reauthenticateWithPopup(user, provider);
         await updatePassword(user, newPassword);
-
-        return "Password changed successfully.";
     } catch (error: any) {
         if (error.code === "auth/requires-recent-login") {
-            return "Reauthentication required. Please log in again.";
+            if (!currentPassword) {
+                throw new Error("Reauthentication required");
+            }
+
+            const credential = EmailAuthProvider.credential(user.email, currentPassword);
+            await reauthenticateWithCredential(user, credential);
+            await updatePassword(user, newPassword);
+        } else {
+            throw error;
         }
-        console.error("Error updating password:", error);
-        return "Failed to update password.";
     }
-}
+};
 
 const sendResetPassword = async (email: string) => {
     try {
@@ -80,7 +89,8 @@ export const authService = {
     getCurrentUser,
     onAuthStateChanged,
     registerUser,
-    changePassword,
+    setPasswordForGoogleUser,
+    updateUserPassword,
     sendResetPassword,
     loginUser,
     signInWithGoogle,

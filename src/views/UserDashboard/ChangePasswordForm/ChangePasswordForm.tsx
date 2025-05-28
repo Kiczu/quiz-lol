@@ -28,12 +28,28 @@ const ChangePasswordForm = () => {
     newPassword: string;
     confirmPassword: string;
   }) => {
+    const user = authService.getCurrentUser();
+    if (!user || !user.email) {
+      setError("User not authenticated.");
+      return;
+    }
+
+    const providerId = user.providerData[0]?.providerId;
+
     try {
-      await authService.changePassword(values.newPassword);
-      setSuccess("Password changed successfully!");
+      if (providerId === "google.com") {
+        await authService.setPasswordForGoogleUser(
+          user.email,
+          values.newPassword
+        );
+        setSuccess("Password set successfully for Google account.");
+      } else {
+        await authService.updateUserPassword(values.newPassword);
+        setSuccess("Password updated successfully.");
+      }
       setError(null);
-    } catch (error) {
-      setError("Failed to change password. Please try again.");
+    } catch (error: any) {
+      setError(error.message || "Failed to change password.");
       setSuccess(null);
     }
   };
