@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc, deleteDoc, query, collection, getDocs, where } from "firebase/firestore";
 import { EditableUserFields, RawUserData, UserPrivateData, UserPublicData } from "../api/types";
 import { db } from "../api/firebase/db";
 import { auth } from "../api/firebase/auth";
@@ -85,7 +85,11 @@ const updateUserData = async (uid: string, updates: EditableUserFields) => {
     }
 };
 
-
+const isUsernameTaken = async (username: string): Promise<boolean> => {
+    const q = query(collection(db, "scores"), where("username", "==", username));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+};
 const updateUserAvatar = async (uid: string, avatarPath: string) => {
     const userDoc = doc(db, "scores", uid);
     await updateDoc(userDoc, { avatar: avatarPath });
@@ -109,4 +113,5 @@ export const userService = {
     updateUserData,
     updateUserAvatar,
     deleteUser,
+    isUsernameTaken,
 };
