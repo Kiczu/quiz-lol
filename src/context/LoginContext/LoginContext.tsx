@@ -1,33 +1,25 @@
 import React, { createContext, useEffect, useState, useContext } from "react";
 import { authService } from "../../services/authService";
-import { userService } from "../../services/userService";
-import { UserPrivateData, UserPublicData } from "../../api/types";
+import { EditableUserFields, RawUserData } from "../../api/types";
+import { userAggregateService } from "../../services/userAggregateService";
 
 interface Props {
   children: React.ReactNode;
 }
 
 interface LoginContextType {
-  userData: (UserPrivateData & UserPublicData) | null;
-  handleCreateUser: (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string
-  ) => Promise<void>;
+  userData: RawUserData | null;
   handleSignIn: (email: string, password: string) => Promise<void>;
   handleSignInWithGoogle: () => Promise<void>;
   handleSignOut: () => Promise<void>;
   refreshUserData: () => Promise<void>;
-  updateUsername: (newUsername: string) => Promise<void>;
+  updateUserProfile: (updates: EditableUserFields) => Promise<void>;
 }
 
 const LoginContext = createContext<LoginContextType | null>(null);
 
 export const LoginProvider = ({ children }: Props) => {
-  const [userData, setUserData] = useState<
-    (UserPrivateData & UserPublicData) | null
-  >(null);
+  const [userData, setUserData] = useState<RawUserData | null>(null);
 
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged(async (user) => {
@@ -48,33 +40,17 @@ export const LoginProvider = ({ children }: Props) => {
       return;
     }
 
-    const userData = await userService.getUserData(user.uid);
-    setUserData(userData);
-  };
+    const fetchedData = await userAggregateService.getUserData(user.uid);
 
-  const handleCreateUser = async (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string
-  ) => {
-    const user = await authService.registerUser(email, password, {
-      firstName,
-      lastName,
-      username: "",
+    setUserData((prev) => {
+      if (
+        !fetchedData ||
+        JSON.stringify(fetchedData) === JSON.stringify(prev)
+      ) {
+        return prev;
+      }
+      return fetchedData;
     });
-    if (!user) throw new Error("User creation failed.");
-
-    await userService.createUser({
-      uid: user.uid,
-      firstName,
-      lastName,
-      email: user.email || "",
-      // avatar: "/default-avatar.png",
-      username: "",
-    });
-
-    await refreshUserData();
   };
 
   const handleSignIn = async (email: string, password: string) => {
@@ -86,14 +62,13 @@ export const LoginProvider = ({ children }: Props) => {
     const user = await authService.signInWithGoogle();
     if (!user) throw new Error("Google sign-in failed.");
 
-    const userDoc = await userService.getUserData(user.uid);
+    const userDoc = await userAggregateService.getUserData(user.uid);
     if (!userDoc) {
-      await userService.createUser({
+      await userAggregateService.createUser({
         uid: user.uid,
         firstName: "",
         lastName: "",
         email: user.email || "",
-        // avatar: "/default-avatar.png",
         username: "",
       });
     }
@@ -106,10 +81,11 @@ export const LoginProvider = ({ children }: Props) => {
     setUserData(null);
   };
 
-  const updateUsername = async (newUsername: string) => {
-    if (!userData) throw new Error("No user data available.");
+  const updateUserProfile = async (updates: EditableUserFields) => {
+    const user = authService.getCurrentUser();
+    if (!user) throw new Error("User not logged in.");
 
-    await userService.updateUsername(userData.uid, newUsername);
+    await userAggregateService.updateUserData(user.uid, updates);
     await refreshUserData();
   };
 
@@ -117,12 +93,11 @@ export const LoginProvider = ({ children }: Props) => {
     <LoginContext.Provider
       value={{
         userData,
-        handleCreateUser,
         handleSignIn,
         handleSignInWithGoogle,
         handleSignOut,
         refreshUserData,
-        updateUsername,
+        updateUserProfile,
       }}
     >
       {children}

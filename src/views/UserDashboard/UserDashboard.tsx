@@ -1,6 +1,6 @@
-import { Box, Grid, Typography, Container } from "@mui/material";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUserProfile } from "./useUserProfile";
+import { Box, Grid, Typography, Container } from "@mui/material";
 import { useScores } from "./ScoresSection/useScores";
 import AvatarSection from "./AvatarSection/AvatarSection";
 import ScoresSection from "./ScoresSection/ScoresSection";
@@ -9,18 +9,37 @@ import ChangePasswordForm from "./ChangePasswordForm/ChangePasswordForm";
 import UserDataInfo from "./UserDataInfo/UserDataInfo";
 import DangerZone from "./DangerZone/DangerZone";
 import { useAuth } from "../../context/LoginContext/LoginContext";
+import { useModal } from "../../context/ModalContext/ModalContext";
 import { userService } from "../../services/userService";
 import { paths } from "../../paths";
 import {
   dashboardViewContainer,
   dataFormsContainer,
 } from "./userDashboard.style";
+import { userAggregateService } from "../../services/userAggregateService";
 
 const UserDashboard = () => {
+  const [modalShown, setModalShown] = useState(false);
   const navigate = useNavigate();
   const { userData } = useAuth();
-  const { formData, updateUserProfile, isUsernameEditable } = useUserProfile();
-  const { scores } = useScores(userData?.uid);
+  const { showModal } = useModal();
+  const { scores, totalScore } = useScores(userData?.uid);
+
+  useEffect(() => {
+    if (!userData) {
+      navigate(paths.LOGIN);
+      return;
+    }
+    if (userData && !userData.username && !modalShown) {
+      showModal({
+        title: "Username Required",
+        content: <EditUserForm />,
+        variant: "warning",
+        disableClose: true,
+      });
+      setModalShown(true);
+    }
+  }, [userData, navigate, showModal, modalShown]);
 
   const handleDeleteAccount = async () => {
     if (!userData?.uid) return;
@@ -31,7 +50,7 @@ const UserDashboard = () => {
       )
     ) {
       try {
-        await userService.deleteUser(userData.uid);
+        await userAggregateService.deleteUserData(userData.uid);
         alert("Account deleted successfully.");
         navigate(paths.LOGIN);
       } catch (error) {
@@ -45,15 +64,11 @@ const UserDashboard = () => {
     <Box sx={dashboardViewContainer}>
       <Container maxWidth="xl">
         <AvatarSection />
-        <ScoresSection scores={scores} />
+        <ScoresSection scores={scores} totalScore={totalScore} />
         <Grid container spacing={10} mt={0}>
           <Grid item sm={12} md={8} sx={dataFormsContainer}>
             <Typography variant="h5">Edit Your Data</Typography>
-            <EditUserForm
-              formData={formData}
-              isUsernameEditable={isUsernameEditable}
-              onSubmit={updateUserProfile}
-            />
+            {userData?.username && <EditUserForm />}
             <ChangePasswordForm />
           </Grid>
           <Grid item sm={12} md={4}>

@@ -4,6 +4,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ThemeProvider } from "@emotion/react";
 import { LoginProvider } from "./context/LoginContext/LoginContext";
 import { GameProvider } from "./context/GameContext/GameContext";
+import { ModalProvider } from "./context/ModalContext/ModalContext";
 import { paths } from "./paths";
 import { theme } from "./theme/theme";
 import Layout from "./Layout/Layout";
@@ -26,34 +27,36 @@ root.render(
   <React.StrictMode>
     <LoginProvider>
       <ThemeProvider theme={theme}>
-        <Router basename="/">
-          <Routes>
-            <Route path={paths.HOME} element={<Layout />}>
-              <Route path={paths.HOME} element={<Home />} />
-              <Route path={paths.CHAMPION_DETAIL} element={<Champion />} />
-              <Route path={paths.RANKING} element={<Ranking />} />
-              <Route
-                path={paths.HANGMAN}
-                element={
-                  <GameProvider>
-                    <Hangman />
-                  </GameProvider>
-                }
-              />
-              <Route path={paths.AUTH} element={<AuthPage />}>
-                <Route path={paths.LOGIN} element={<LoginForm />} />
-                <Route path={paths.REGISTER} element={<RegisterForm />} />
+        <ModalProvider>
+          <Router basename="/">
+            <Routes>
+              <Route path={paths.HOME} element={<Layout />}>
+                <Route path={paths.HOME} element={<Home />} />
+                <Route path={paths.CHAMPION_DETAIL} element={<Champion />} />
+                <Route path={paths.RANKING} element={<Ranking />} />
                 <Route
-                  path={paths.RESET_PASSWORD}
-                  element={<ForgotPassword />}
+                  path={paths.HANGMAN}
+                  element={
+                    <GameProvider>
+                      <Hangman />
+                    </GameProvider>
+                  }
                 />
-              </Route>
+                <Route path={paths.AUTH} element={<AuthPage />}>
+                  <Route path={paths.LOGIN} element={<LoginForm />} />
+                  <Route path={paths.REGISTER} element={<RegisterForm />} />
+                  <Route
+                    path={paths.RESET_PASSWORD}
+                    element={<ForgotPassword />}
+                  />
+                </Route>
 
-              <Route path={paths.LORE} element={<Lore />} />
-              <Route path={paths.DASHBOARD} element={<UserDashboard />} />
-            </Route>
-          </Routes>
-        </Router>
+                <Route path={paths.LORE} element={<Lore />} />
+                <Route path={paths.DASHBOARD} element={<UserDashboard />} />
+              </Route>
+            </Routes>
+          </Router>
+        </ModalProvider>
       </ThemeProvider>
     </LoginProvider>
   </React.StrictMode>
