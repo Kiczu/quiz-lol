@@ -8,7 +8,6 @@ export type ApiResponse = {
 export type ApiData = Record<string, ChampionDetails>;
 
 export type UserPrivateData = {
-    uid: string;
     firstName: string;
     lastName: string;
     email: string;

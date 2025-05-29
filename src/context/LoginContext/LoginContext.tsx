@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState, useContext } from "react";
 import { authService } from "../../services/authService";
-import { userService } from "../../services/userService";
 import { EditableUserFields, RawUserData } from "../../api/types";
+import { userAggregateService } from "../../services/userAggregateService";
 
 interface Props {
   children: React.ReactNode;
@@ -40,7 +40,7 @@ export const LoginProvider = ({ children }: Props) => {
       return;
     }
 
-    const fetchedData = await userService.getUserData(user.uid);
+    const fetchedData = await userAggregateService.getUserData(user.uid);
 
     setUserData((prev) => {
       if (
@@ -62,9 +62,9 @@ export const LoginProvider = ({ children }: Props) => {
     const user = await authService.signInWithGoogle();
     if (!user) throw new Error("Google sign-in failed.");
 
-    const userDoc = await userService.getUserData(user.uid);
+    const userDoc = await userAggregateService.getUserData(user.uid);
     if (!userDoc) {
-      await userService.createUser({
+      await userAggregateService.createUser({
         uid: user.uid,
         firstName: "",
         lastName: "",
@@ -85,7 +85,7 @@ export const LoginProvider = ({ children }: Props) => {
     const user = authService.getCurrentUser();
     if (!user) throw new Error("User not logged in.");
 
-    await userService.updateUserData(user.uid, updates);
+    await userAggregateService.updateUserData(user.uid, updates);
     await refreshUserData();
   };
 

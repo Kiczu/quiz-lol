@@ -1,7 +1,46 @@
-import { doc, setDoc, collection, query, orderBy, getDocs, getDoc } from "firebase/firestore";
+import { doc, setDoc, collection, query, orderBy, getDocs, getDoc, updateDoc, where, deleteDoc } from "firebase/firestore";
 import { db } from "../api/firebase/db";
-import { ScoresMap } from "../api/types";
+import { EditableUserFields, ScoresMap, UserPublicData } from "../api/types";
+import { filterEmptyFields } from "../utils/object";
 
+const createUserPublic = async ({
+    uid,
+    username,
+    avatar = "/default-avatar.png",
+}: {
+    uid: string;
+    username: string;
+    avatar?: string;
+}) => {
+    await setDoc(doc(db, "scores", uid), {
+        username,
+        avatar,
+        scores: {},
+        totalScore: 0,
+    });
+};
+
+const getUserPublic = async (uid: string): Promise<UserPublicData | null> => {
+    const snap = await getDoc(doc(db, "scores", uid));
+    return snap.exists() ? (snap.data() as UserPublicData) : null;
+};
+
+const updateUserPublic = async (uid: string, updates: EditableUserFields) => {
+    const filtered = filterEmptyFields(updates);
+    if (Object.keys(filtered).length > 0) {
+        await updateDoc(doc(db, "scores", uid), filtered);
+    }
+};
+
+const updateUserAvatar = async (uid: string, avatarPath: string) => {
+    const userDoc = doc(db, "scores", uid);
+    await updateDoc(userDoc, { avatar: avatarPath });
+};
+const isUsernameTaken = async (username: string): Promise<boolean> => {
+    const q = query(collection(db, "scores"), where("username", "==", username));
+    const snapshot = await getDocs(q);
+    return !snapshot.empty;
+};
 const saveGameScore = async (userId: string, gameId: string, score: number) => {
     const scoreRef = doc(db, "scores", userId);
     const scoreSnap = await getDoc(scoreRef);
@@ -20,7 +59,6 @@ const saveGameScore = async (userId: string, gameId: string, score: number) => {
         totalScore,
     }, { merge: true });
 };
-
 
 const getUserScores = async (userId: string): Promise<{ scores: ScoresMap; totalScore: number }> => {
     const ref = doc(db, "scores", userId);
@@ -45,8 +83,18 @@ const getLeaderboard = async () => {
     }));
 };
 
+const deleteUserPublic = async (uid: string) => {
+    await deleteDoc(doc(db, "scores", uid));
+};
+
 export const scoreService = {
     saveGameScore,
+    createUserPublic,
+    getUserPublic,
+    updateUserPublic,
+    updateUserAvatar,
+    isUsernameTaken,
     getUserScores,
     getLeaderboard,
+    deleteUserPublic,
 };

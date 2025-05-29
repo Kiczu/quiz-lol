@@ -1,6 +1,6 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, reauthenticateWithPopup, updatePassword, sendPasswordResetEmail, EmailAuthProvider, linkWithCredential, reauthenticateWithCredential } from "firebase/auth";
-import { userService } from "./userService";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, EmailAuthProvider, linkWithCredential, reauthenticateWithCredential } from "firebase/auth";
 import { auth } from "../api/firebase/auth";
+import { userAggregateService } from "./userAggregateService";
 
 const getCurrentUser = () => {
     return auth.currentUser;
@@ -16,7 +16,7 @@ const registerUser = async (email: string, password: string, userData: { usernam
 
         const { user } = userCredential;
 
-        await userService.createUser({
+        await userAggregateService.createUser({
             uid: user.uid,
             username: userData.username,
             email: user.email!,
