@@ -16,6 +16,7 @@ import {
   dashboardViewContainer,
   dataFormsContainer,
 } from "./userDashboard.style";
+import { userAggregateService } from "../../services/userAggregateService";
 
 const UserDashboard = () => {
   const [modalShown, setModalShown] = useState(false);
@@ -49,7 +50,7 @@ const UserDashboard = () => {
       )
     ) {
       try {
-        await userService.deleteUser(userData.uid);
+        await userAggregateService.deleteUserData(userData.uid);
         alert("Account deleted successfully.");
         navigate(paths.LOGIN);
       } catch (error) {
