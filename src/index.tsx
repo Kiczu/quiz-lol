@@ -19,6 +19,7 @@ import ForgotPassword from "./views/AuthPage/ForgotPassword/ForgotPassword";
 import UserDashboard from "./views/UserDashboard/UserDashboard";
 import Ranking from "./views/Ranking/Ranking";
 import "./index.css";
+import FirebaseActionHandler from "./api/firebase/FirebaseActionHandler";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -31,6 +32,10 @@ root.render(
           <Router basename="/">
             <Routes>
               <Route path={paths.HOME} element={<Layout />}>
+                <Route
+                  path="/__/auth/action"
+                  element={<FirebaseActionHandler />}
+                />
                 <Route path={paths.HOME} element={<Home />} />
                 <Route path={paths.CHAMPION_DETAIL} element={<Champion />} />
                 <Route path={paths.RANKING} element={<Ranking />} />
