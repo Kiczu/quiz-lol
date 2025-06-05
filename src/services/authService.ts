@@ -25,8 +25,7 @@ const registerUser = async (email: string, password: string, userData: { usernam
         });
 
         return user;
-    } catch (error) {
-        console.error("Error during registration:", error);
+    } catch (error: any) {
         throw error;
     }
 }
@@ -47,9 +46,8 @@ const updateUserPassword = async (newPassword: string, currentPassword?: string)
     } catch (error: any) {
         if (error.code === "auth/requires-recent-login") {
             if (!currentPassword) {
-                throw new Error("Reauthentication required");
+                throw error;
             }
-
             const credential = EmailAuthProvider.credential(user.email, currentPassword);
             await reauthenticateWithCredential(user, credential);
             await updatePassword(user, newPassword);
@@ -63,9 +61,8 @@ const sendResetPassword = async (email: string) => {
     try {
         await sendPasswordResetEmail(auth, email);
         return "Password reset email sent.";
-    } catch (error) {
-        console.error("Error sending password reset email:", error);
-        return "Failed to send password reset email.";
+    } catch (error: any) {
+        throw error;
     }
 }
 
