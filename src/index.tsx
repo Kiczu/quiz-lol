@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ThemeProvider } from "@emotion/react";
+import FirebaseActionHandler from "./api/firebase/FirebaseActionHandler";
 import { LoginProvider } from "./context/LoginContext/LoginContext";
 import { GameProvider } from "./context/GameContext/GameContext";
 import { ModalProvider } from "./context/ModalContext/ModalContext";
@@ -19,16 +20,15 @@ import ForgotPassword from "./views/AuthPage/ForgotPassword/ForgotPassword";
 import UserDashboard from "./views/UserDashboard/UserDashboard";
 import Ranking from "./views/Ranking/Ranking";
 import "./index.css";
-import FirebaseActionHandler from "./api/firebase/FirebaseActionHandler";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <LoginProvider>
-      <ThemeProvider theme={theme}>
-        <ModalProvider>
+    <ThemeProvider theme={theme}>
+      <ModalProvider>
+        <LoginProvider>
           <Router basename="/">
             <Routes>
               <Route path={paths.HOME} element={<Layout />}>
@@ -61,8 +61,8 @@ root.render(
               </Route>
             </Routes>
           </Router>
-        </ModalProvider>
-      </ThemeProvider>
-    </LoginProvider>
+        </LoginProvider>
+      </ModalProvider>
+    </ThemeProvider>
   </React.StrictMode>
 );

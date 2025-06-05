@@ -24,4 +24,5 @@ export interface ModalContextType {
     showModal: (modal: Omit<ModalState, "open">) => void;
     closeModal: () => void;
     modalState: ModalState;
+    requestReauthentication: () => Promise<string>;
 }

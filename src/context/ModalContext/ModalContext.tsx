@@ -1,7 +1,8 @@
 import { createContext, useContext, useState, ReactNode } from "react";
-import AppModal from "../../components/AppModal/AppModal";
 import { Button } from "@mui/material";
 import { ModalContextType, ModalState } from "./modal.types";
+import AppModal from "../../components/AppModal/AppModal";
+import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
 
 const ModalContext = createContext<ModalContextType | undefined>(undefined);
 
@@ -32,8 +33,31 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     setModalState({ ...modalState, open: false });
   };
 
+  const requestReauthentication = () =>
+    new Promise<string>((resolve, reject) => {
+      showModal({
+        variant: "confirm",
+        title: "Reauthentication required",
+        content: (
+          <ReauthPasswordForm
+            onSubmit={async (password) => {
+              closeModal();
+              resolve(password);
+            }}
+            onCancel={() => {
+              closeModal();
+              reject(new Error("User cancelled reauthentication"));
+            }}
+          />
+        ),
+        disableClose: true,
+      });
+    });
+
   return (
-    <ModalContext.Provider value={{ showModal, closeModal, modalState }}>
+    <ModalContext.Provider
+      value={{ showModal, closeModal, modalState, requestReauthentication }}
+    >
       {children}
       <AppModal
         open={modalState.open}
