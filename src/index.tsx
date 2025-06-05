@@ -5,7 +5,7 @@ import { ThemeProvider } from "@emotion/react";
 import FirebaseActionHandler from "./api/firebase/FirebaseActionHandler";
 import { LoginProvider } from "./context/LoginContext/LoginContext";
 import { GameProvider } from "./context/GameContext/GameContext";
-import { ModalProvider } from "./context/ModalContext/ModalContext";
+import { ModalProvider } from "./context/ModalContext/ModalProvider";
 import { paths } from "./paths";
 import { theme } from "./theme/theme";
 import Layout from "./Layout/Layout";
