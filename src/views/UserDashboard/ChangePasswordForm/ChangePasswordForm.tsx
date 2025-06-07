@@ -1,9 +1,9 @@
 import * as yup from "yup";
 import { Box, TextField, Button } from "@mui/material";
 import { Formik, Form } from "formik";
-import { inputStyle } from "../userDashboard.style";
 import { authService } from "../../../services/authService";
-import { useState } from "react";
+import { useModal } from "../../../context/ModalContext/ModalContext";
+import { inputStyle } from "../userDashboard.style";
 
 const validationSchema = yup.object({
   newPassword: yup
@@ -13,7 +13,6 @@ const validationSchema = yup.object({
     .matches(/[A-Z]/, "Password must contain an uppercase letter")
     .matches(/[0-9]/, "Password must contain a number")
     .matches(/[^\w]/, "Password must contain a special character"),
-
   confirmPassword: yup
     .string()
     .oneOf([yup.ref("newPassword")], "Passwords must match")
@@ -21,20 +20,56 @@ const validationSchema = yup.object({
 });
 
 const ChangePasswordForm = () => {
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const { showModal, requestReauthentication } = useModal();
 
   const handlePasswordChange = async (values: {
     newPassword: string;
     confirmPassword: string;
   }) => {
+    const user = authService.getCurrentUser();
+    if (!user || !user.email) {
+      showModal({
+        variant: "error",
+        title: "Error",
+        content: "User not authenticated.",
+      });
+      return;
+    }
+
     try {
-      await authService.changePassword(values.newPassword);
-      setSuccess("Password changed successfully!");
-      setError(null);
-    } catch (error) {
-      setError("Failed to change password. Please try again.");
-      setSuccess(null);
+      await authService.updateUserPassword(values.newPassword);
+      showModal({
+        variant: "success",
+        title: "Success",
+        content: "Password updated successfully.",
+      });
+    } catch (error: any) {
+      if (error.code === "auth/requires-recent-login") {
+        try {
+          const currentPassword = await requestReauthentication();
+          await authService.updateUserPassword(
+            values.newPassword,
+            currentPassword
+          );
+          showModal({
+            variant: "success",
+            title: "Success",
+            content: "Password updated successfully.",
+          });
+        } catch (reauthError: any) {
+          showModal({
+            variant: "error",
+            title: "Reauthentication failed",
+            content: reauthError.message || "Failed to reauthenticate.",
+          });
+        }
+      } else {
+        showModal({
+          variant: "error",
+          title: "Error",
+          content: error.message || "Failed to change password.",
+        });
+      }
     }
   };
 

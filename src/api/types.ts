@@ -8,7 +8,6 @@ export type ApiResponse = {
 export type ApiData = Record<string, ChampionDetails>;
 
 export type UserPrivateData = {
-    uid: string;
     firstName: string;
     lastName: string;
     email: string;
@@ -18,6 +17,24 @@ export type UserPublicData = {
     avatar: string;
     username: string;
     totalScore: number;
+}
+
+export type RawUserData = {
+    uid: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+    avatar?: string;
+    totalScore?: number;
+    scores?: ScoresMap;
+}
+
+export type EditableUserFields = {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    username?: string;
 }
 
 export type ChampionDetails = {
@@ -59,9 +76,8 @@ export type ChampionDetails = {
     ];
 };
 
-export interface Scores {
-    gameId: string;
-    score: number;
+export interface ScoresMap {
+    [gameId: string]: number;
 }
 
 export enum GameState {

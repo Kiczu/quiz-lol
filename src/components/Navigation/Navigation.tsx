@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   AppBar,
   Box,
@@ -59,10 +59,6 @@ const Navigation = () => {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const { userData, handleSignOut } = useAuth();
-
-  useEffect(() => {
-    console.log("Updated userData in Navigation:", userData);
-  }, [userData]);
 
   const handleOpenUserMenu = (e: React.MouseEvent<HTMLElement>) =>
     setAnchorElUser(e.currentTarget);
