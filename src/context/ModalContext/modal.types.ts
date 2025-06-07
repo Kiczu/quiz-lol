@@ -18,6 +18,7 @@ export interface ModalState {
     onClose?: () => void;
     onConfirm?: () => void;
     onCancel?: () => void;
+    onlyConfirm?: boolean;
 }
 
 export interface ModalContextType {

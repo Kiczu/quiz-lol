@@ -42,11 +42,45 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         });
       });
 
-  const defaultActions = (
-    <Button onClick={closeModal} variant="contained" autoFocus>
-      Got it
-    </Button>
-  );
+  const getModalActions = () => {
+    if (modalState.actions === null) return null;
+
+    if (modalState.actions !== undefined) return modalState.actions;
+
+    const onlyConfirm =
+      modalState.onlyConfirm !== undefined
+        ? modalState.onlyConfirm
+        : !modalState.onCancel;
+
+    if (modalState.onConfirm || modalState.onCancel) {
+      return (
+        <ModalActions
+          onlyConfirm={onlyConfirm}
+          onCancel={
+            modalState.onCancel
+              ? () => {
+                  closeModal();
+                  setTimeout(() => modalState.onCancel?.(), 0);
+                }
+              : closeModal
+          }
+          onConfirm={
+            modalState.onConfirm
+              ? () => {
+                  closeModal();
+                  setTimeout(() => modalState.onConfirm?.(), 0);
+                }
+              : closeModal
+          }
+        />
+      );
+    }
+    return (
+      <Button onClick={closeModal} variant="contained" autoFocus>
+        Got it
+      </Button>
+    );
+  };
 
   return (
     <ModalContext.Provider
@@ -57,22 +91,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
         open={modalState.open}
         onClose={modalState.disableClose ? undefined : closeModal}
         title={modalState.title}
-        actions={
-          modalState.actions ??
-          (modalState.variant !== "confirm" ? defaultActions : undefined) ??
-          (modalState.onConfirm && (
-            <ModalActions
-              onCancel={() => {
-                modalState.onCancel?.();
-                closeModal();
-              }}
-              onConfirm={() => {
-                modalState.onConfirm?.();
-                closeModal();
-              }}
-            />
-          ))
-        }
+        actions={getModalActions()}
         disableClose={modalState.disableClose}
         variant={modalState.variant}
       >

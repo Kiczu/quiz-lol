@@ -13,7 +13,7 @@ const ModalActions = ({
   onConfirm,
   confirmLabel = "Got it",
   cancelLabel = "Cancel",
-  onlyConfirm = false,
+  onlyConfirm = true,
 }: ModalActionsProps) => (
   <Box display="flex" gap={2} justifyContent="flex-end">
     {!onlyConfirm && onCancel && (
