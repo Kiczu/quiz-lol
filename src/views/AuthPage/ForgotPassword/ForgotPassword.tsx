@@ -4,6 +4,7 @@ import { Form, Formik } from "formik";
 import { Link as RouterLink } from "react-router-dom";
 import { paths } from "../../../paths";
 import { authService } from "../../../services/authService";
+import { useModal } from "../../../context/ModalContext/ModalContext";
 
 const emailSchema = yup.object().shape({
   email: yup
@@ -21,8 +22,25 @@ const initValues: Values = {
 };
 
 const ForgotPassword = () => {
-  const handleSendResetPasswordEmail = ({ email }: Values) =>
-    authService.sendResetPassword(email);
+  const { showModal } = useModal();
+
+  const handleSendResetPasswordEmail = ({ email }: Values) => {
+    try {
+      authService.sendResetPassword(email);
+      showModal({
+        title: "Success",
+        content: "Reset password email sent successfully",
+        variant: "success",
+        onlyConfirm: true,
+      });
+    } catch (error: any) {
+      showModal({
+        title: "Error",
+        content: error.message,
+        variant: "error",
+      });
+    }
+  };
 
   return (
     <Box

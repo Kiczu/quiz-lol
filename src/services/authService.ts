@@ -60,7 +60,7 @@ const updateUserPassword = async (newPassword: string, currentPassword?: string)
 const sendResetPassword = async (email: string) => {
     try {
         await sendPasswordResetEmail(auth, email);
-        return "Password reset email sent.";
+        return true;
     } catch (error: any) {
         throw error;
     }

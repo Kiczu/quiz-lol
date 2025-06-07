@@ -27,9 +27,9 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
-      <ModalProvider>
+      <Router basename="/">
         <LoginProvider>
-          <Router basename="/">
+          <ModalProvider>
             <Routes>
               <Route path={paths.HOME} element={<Layout />}>
                 <Route
@@ -60,9 +60,9 @@ root.render(
                 <Route path={paths.DASHBOARD} element={<UserDashboard />} />
               </Route>
             </Routes>
-          </Router>
+          </ModalProvider>
         </LoginProvider>
-      </ModalProvider>
+      </Router>
     </ThemeProvider>
   </React.StrictMode>
 );
