@@ -7,6 +7,11 @@ export type ApiResponse = {
 
 export type ApiData = Record<string, ChampionDetails>;
 
+export type PrivateUserKeys = 'firstName' | 'lastName' | 'email';
+export type PublicUserKeys = 'avatar' | 'username' | 'totalScore' | 'scores';
+export type EditableUserFieldsPrivate = Partial<Record<PrivateUserKeys, string>>;
+export type EditableUserFieldsPublic = Partial<Record<PublicUserKeys, any>>;
+
 export type UserPrivateData = {
     firstName: string;
     lastName: string;
