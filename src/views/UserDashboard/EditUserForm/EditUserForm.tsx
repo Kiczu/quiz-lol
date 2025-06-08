@@ -50,12 +50,20 @@ const EditUserForm = () => {
         variant: "success",
       });
     } catch (error: any) {
-      showModal({
-        title: "Error",
-        content:
-          error.message || "Failed to update user data. Please try again.",
-        variant: "error",
-      });
+      if (error.code === "email-change") {
+        showModal({
+          title: "Email Change Required",
+          content: error.message,
+          variant: "info",
+        });
+      } else {
+        showModal({
+          title: "Error",
+          content:
+            error.message || "Failed to update user data. Please try again.",
+          variant: "error",
+        });
+      }
     }
   };
 

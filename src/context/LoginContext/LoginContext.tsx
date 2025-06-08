@@ -92,9 +92,11 @@ export const LoginProvider = ({ children }: Props) => {
         });
         await sendEmailVerification(user);
         await authService.logoutUser();
-        throw new Error(
-          "Your email address has been changed. Please check your new email inbox for a verification link, verify your new email and log in again. You have been signed out for security reasons."
+        const error = new Error(
+          "You are changing your e-mail address. Please confirm your new e-mail using the link sent to your new address and log in again. Other changes will not be saved for security reasons."
         );
+        (error as any).code = "email-change";
+        throw error;
       } catch (error: any) {
         if (error.code === "auth/requires-recent-login") {
           throw new Error("Please sign in again to change your email address.");
@@ -105,14 +107,11 @@ export const LoginProvider = ({ children }: Props) => {
         throw error;
       }
     }
-
-    const { email, ...rest } = updates;
-    if (Object.keys(rest).length > 0) {
-      await userAggregateService.updateUserData(user.uid, rest);
+    if (Object.keys(updates).length > 0) {
+      await userAggregateService.updateUserData(user.uid, updates);
     }
     await refreshUserData();
   };
-
   return (
     <LoginContext.Provider
       value={{
