@@ -1,6 +1,7 @@
 import { userService } from "./userService";
 import { scoreService } from "./scoreService";
 import { EditableUserFields, RawUserData } from "../api/types";
+import { splitUserUpdates } from "../utils/splitUserUpdates";
 
 const createUser = async ({
     uid,
@@ -35,9 +36,11 @@ const getUserData = async (uid: string): Promise<RawUserData | null> => {
 };
 
 const updateUserData = async (uid: string, updates: EditableUserFields) => {
+    const { privateData, publicData } = splitUserUpdates(updates);
+
     await Promise.all([
-        userService.updateUserPrivate(uid, updates),
-        scoreService.updateUserPublic(uid, updates),
+        userService.updateUserPrivate(uid, privateData),
+        scoreService.updateUserPublic(uid, publicData),
     ]);
 };
 
