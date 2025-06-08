@@ -38,6 +38,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
               }}
             />
           ),
+          actions: null,
           disableClose: true,
         });
       });
