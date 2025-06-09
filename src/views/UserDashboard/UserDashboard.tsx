@@ -10,16 +10,18 @@ import UserDataInfo from "./UserDataInfo/UserDataInfo";
 import DangerZone from "./DangerZone/DangerZone";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
-import { paths } from "../../paths";
 import { userAggregateService } from "../../services/userAggregateService";
+import { paths } from "../../paths";
 import {
   dashboardViewContainer,
   dataFormsContainer,
 } from "./userDashboard.style";
+import { authService } from "../../services/authService";
+import { deleteUser } from "firebase/auth";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { userData } = useAuth();
+  const { userData, handleSignOut } = useAuth();
   const { showModal } = useModal();
   const { scores, totalScore } = useScores(userData?.uid);
 
@@ -50,6 +52,11 @@ const UserDashboard = () => {
       onConfirm: async () => {
         try {
           await userAggregateService.deleteUserData(userData.uid);
+          const user = authService.getCurrentUser();
+          if (user) {
+            await deleteUser(user);
+          }
+          await handleSignOut();
           showModal({
             title: "Account deleted",
             content: "Your account has been deleted successfully.",

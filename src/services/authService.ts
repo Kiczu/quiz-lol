@@ -1,4 +1,4 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, EmailAuthProvider, linkWithCredential, reauthenticateWithCredential } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, EmailAuthProvider, linkWithCredential, reauthenticateWithCredential, reauthenticateWithPopup } from "firebase/auth";
 import { auth } from "../api/firebase/auth";
 import { userAggregateService } from "./userAggregateService";
 
@@ -81,6 +81,25 @@ const logoutUser = async () => {
     await signOut(auth);
 }
 
+const reauthenticateUser = async (password?: string) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("User not authenticated");
+
+    const providerId = user?.providerData[0]?.providerId;
+
+    if (providerId === "password") {
+        if (!password) throw new Error("Password is required for reauthentication.");
+        const credential = EmailAuthProvider.credential(user.email!, password);
+        return reauthenticateWithCredential(user, credential);
+    }
+
+    if (providerId === "google.com") {
+        const provider = new GoogleAuthProvider();
+        return reauthenticateWithPopup(user, provider);
+    }
+
+    throw new Error("Unsupported authentication method.");
+};
 
 export const authService = {
     getCurrentUser,
@@ -92,4 +111,5 @@ export const authService = {
     loginUser,
     signInWithGoogle,
     logoutUser,
+    reauthenticateUser,
 };
