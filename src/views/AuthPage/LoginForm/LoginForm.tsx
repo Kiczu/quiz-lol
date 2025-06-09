@@ -8,9 +8,10 @@ import {
   Grid,
   Link,
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { Form, Formik } from "formik";
 import { useAuth } from "../../../context/LoginContext/LoginContext";
+import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
 
 const loginSchema = yup.object().shape({
@@ -32,10 +33,26 @@ const initValues: Values = {
 };
 
 const LoginForm = () => {
+  const { showModal } = useModal();
   const { handleSignIn } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = ({ email, password }: Values) => {
-    handleSignIn(email, password);
+  const handleSubmit = async ({ email, password }: Values) => {
+    try {
+      await handleSignIn(email, password);
+      showModal({
+        title: "Welcome!",
+        content: "You have successfully logged in.",
+        variant: "success",
+        onConfirm: () => navigate(paths.DASHBOARD),
+      });
+    } catch (error: any) {
+      showModal({
+        title: "Error",
+        content: error.message || "Login failed. Please try again.",
+        variant: "error",
+      });
+    }
   };
 
   return (
