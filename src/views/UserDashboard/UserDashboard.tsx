@@ -10,8 +10,8 @@ import UserDataInfo from "./UserDataInfo/UserDataInfo";
 import DangerZone from "./DangerZone/DangerZone";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
-import { paths } from "../../paths";
 import { userAggregateService } from "../../services/userAggregateService";
+import { paths } from "../../paths";
 import {
   dashboardViewContainer,
   dataFormsContainer,
@@ -81,7 +81,7 @@ const UserDashboard = () => {
           </Grid>
           <Grid item sm={12} md={4}>
             <UserDataInfo />
-            <DangerZone />
+            <DangerZone handleDeleteAccount={handleDeleteAccount} />
           </Grid>
         </Grid>
       </Container>
