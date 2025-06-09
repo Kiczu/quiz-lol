@@ -47,11 +47,25 @@ const LoginForm = () => {
         onConfirm: () => navigate(paths.DASHBOARD),
       });
     } catch (error: any) {
-      showModal({
-        title: "Error",
-        content: error.message || "Login failed. Please try again.",
-        variant: "error",
-      });
+      if(error.code === "auth/user-not-found") {
+        showModal({
+          title: "User not found",
+          content: "The user with the provided email does not exist.",
+          variant: "error",
+        });
+      } else if (error.code === "auth/wrong-password") {
+        showModal({
+          title: "Wrong password",
+          content: "The password you entered is incorrect.",
+          variant: "error",
+        });
+      } else {
+        showModal({
+          title: "An error occurred",
+          content: "Please try again later.",
+          variant: "error",
+        });
+      }
     }
   };
 
