@@ -1,33 +1,26 @@
 import React, { createContext, useEffect, useState, useContext } from "react";
+import { sendEmailVerification, updateEmail } from "firebase/auth";
 import { authService } from "../../services/authService";
-import { userService } from "../../services/userService";
-import { UserPrivateData, UserPublicData } from "../../api/types";
+import { EditableUserFields, RawUserData } from "../../api/types";
+import { userAggregateService } from "../../services/userAggregateService";
 
 interface Props {
   children: React.ReactNode;
 }
 
 interface LoginContextType {
-  userData: (UserPrivateData & UserPublicData) | null;
-  handleCreateUser: (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string
-  ) => Promise<void>;
+  userData: RawUserData | null;
   handleSignIn: (email: string, password: string) => Promise<void>;
   handleSignInWithGoogle: () => Promise<void>;
   handleSignOut: () => Promise<void>;
   refreshUserData: () => Promise<void>;
-  updateUsername: (newUsername: string) => Promise<void>;
+  updateUserData: (updates: EditableUserFields) => Promise<void>;
 }
 
 const LoginContext = createContext<LoginContextType | null>(null);
 
 export const LoginProvider = ({ children }: Props) => {
-  const [userData, setUserData] = useState<
-    (UserPrivateData & UserPublicData) | null
-  >(null);
+  const [userData, setUserData] = useState<RawUserData | null>(null);
 
   useEffect(() => {
     const unsubscribe = authService.onAuthStateChanged(async (user) => {
@@ -37,7 +30,6 @@ export const LoginProvider = ({ children }: Props) => {
         setUserData(null);
       }
     });
-
     return () => unsubscribe();
   }, []);
 
@@ -47,34 +39,9 @@ export const LoginProvider = ({ children }: Props) => {
       setUserData(null);
       return;
     }
-
-    const userData = await userService.getUserData(user.uid);
-    setUserData(userData);
-  };
-
-  const handleCreateUser = async (
-    email: string,
-    password: string,
-    firstName: string,
-    lastName: string
-  ) => {
-    const user = await authService.registerUser(email, password, {
-      firstName,
-      lastName,
-      username: "",
-    });
-    if (!user) throw new Error("User creation failed.");
-
-    await userService.createUser({
-      uid: user.uid,
-      firstName,
-      lastName,
-      email: user.email || "",
-      // avatar: "/default-avatar.png",
-      username: "",
-    });
-
-    await refreshUserData();
+    await user.reload();
+    const fetchedData = await userAggregateService.getUserData(user.uid);
+    setUserData(fetchedData ?? null);
   };
 
   const handleSignIn = async (email: string, password: string) => {
@@ -86,43 +53,74 @@ export const LoginProvider = ({ children }: Props) => {
     const user = await authService.signInWithGoogle();
     if (!user) throw new Error("Google sign-in failed.");
 
-    const userDoc = await userService.getUserData(user.uid);
+    const userDoc = await userAggregateService.getUserData(user.uid);
     if (!userDoc) {
-      await userService.createUser({
+      await userAggregateService.createUser({
         uid: user.uid,
         firstName: "",
         lastName: "",
         email: user.email || "",
-        // avatar: "/default-avatar.png",
         username: "",
       });
     }
-
     await refreshUserData();
   };
 
   const handleSignOut = async () => {
     await authService.logoutUser();
     setUserData(null);
-  };
-
-  const updateUsername = async (newUsername: string) => {
-    if (!userData) throw new Error("No user data available.");
-
-    await userService.updateUsername(userData.uid, newUsername);
     await refreshUserData();
   };
 
+  const updateUserData = async (updates: EditableUserFields) => {
+    const user = authService.getCurrentUser();
+    if (!user) throw new Error("User not logged in.");
+
+    if (!user.emailVerified) {
+      await sendEmailVerification(user);
+      await authService.logoutUser();
+      throw new Error(
+        "Your current email address must be verified before you can change it. Please check your inbox and log in again."
+      );
+    }
+
+    if (updates.email && updates.email !== user.email) {
+      try {
+        await updateEmail(user, updates.email);
+        await userAggregateService.updateUserData(user.uid, {
+          email: updates.email,
+        });
+        await sendEmailVerification(user);
+        await authService.logoutUser();
+        const error = new Error(
+          "You are changing your e-mail address. Please confirm your new e-mail using the link sent to your new address and log in again. Other changes will not be saved for security reasons."
+        );
+        (error as any).code = "email-change";
+        throw error;
+      } catch (error: any) {
+        if (error.code === "auth/requires-recent-login") {
+          throw new Error("Please sign in again to change your email address.");
+        }
+        if (error.code === "auth/email-already-in-use") {
+          throw new Error("The provided email is already in use.");
+        }
+        throw error;
+      }
+    }
+    if (Object.keys(updates).length > 0) {
+      await userAggregateService.updateUserData(user.uid, updates);
+    }
+    await refreshUserData();
+  };
   return (
     <LoginContext.Provider
       value={{
         userData,
-        handleCreateUser,
         handleSignIn,
         handleSignInWithGoogle,
         handleSignOut,
         refreshUserData,
-        updateUsername,
+        updateUserData,
       }}
     >
       {children}
