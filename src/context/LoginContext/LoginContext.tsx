@@ -10,6 +10,7 @@ interface Props {
 
 interface LoginContextType {
   userData: RawUserData | null;
+  isLoading: boolean;
   handleSignIn: (email: string, password: string) => Promise<void>;
   handleSignInWithGoogle: () => Promise<void>;
   handleSignOut: () => Promise<void>;
@@ -21,27 +22,33 @@ const LoginContext = createContext<LoginContextType | null>(null);
 
 export const LoginProvider = ({ children }: Props) => {
   const [userData, setUserData] = useState<RawUserData | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    setIsLoading(true);
     const unsubscribe = authService.onAuthStateChanged(async (user) => {
       if (user) {
         await refreshUserData();
       } else {
         setUserData(null);
+        setIsLoading(false);
       }
     });
     return () => unsubscribe();
   }, []);
 
   const refreshUserData = async () => {
+    setIsLoading(true);
     const user = authService.getCurrentUser();
     if (!user) {
       setUserData(null);
+      setIsLoading(false);
       return;
     }
     await user.reload();
     const fetchedData = await userAggregateService.getUserData(user.uid);
     setUserData(fetchedData ?? null);
+    setIsLoading(false);
   };
 
   const handleSignIn = async (email: string, password: string) => {
@@ -69,7 +76,6 @@ export const LoginProvider = ({ children }: Props) => {
   const handleSignOut = async () => {
     await authService.logoutUser();
     setUserData(null);
-    await refreshUserData();
   };
 
   const updateUserData = async (updates: EditableUserFields) => {
@@ -116,6 +122,7 @@ export const LoginProvider = ({ children }: Props) => {
     <LoginContext.Provider
       value={{
         userData,
+        isLoading,
         handleSignIn,
         handleSignInWithGoogle,
         handleSignOut,

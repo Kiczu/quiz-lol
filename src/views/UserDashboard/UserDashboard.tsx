@@ -21,12 +21,12 @@ import { deleteUser } from "firebase/auth";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { userData, handleSignOut } = useAuth();
+  const { userData, handleSignOut, isLoading } = useAuth();
   const { showModal } = useModal();
   const { scores, totalScore } = useScores(userData?.uid);
 
   useEffect(() => {
-    if (!userData) {
+    if (!isLoading && !userData) {
       navigate(paths.LOGIN);
       return;
     }
@@ -40,7 +40,7 @@ const UserDashboard = () => {
         disableClose: true,
       });
     }
-  }, [userData, navigate, showModal]);
+  }, [userData, isLoading, navigate, showModal]);
 
   const handleDeleteAccount = async () => {
     if (!userData?.uid) return;
