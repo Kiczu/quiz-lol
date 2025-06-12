@@ -4,7 +4,6 @@ import { userDataInfoBox } from "./userDataInfo.style";
 
 const UserDataInfo = () => {
   const { userData } = useAuth();
-  console.log(userData);
 
   return (
     <Box>
