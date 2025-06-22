@@ -46,14 +46,14 @@ const LoginForm = () => {
         variant: "success",
         onConfirm: () => navigate(paths.DASHBOARD),
       });
-    } catch (error: any) {
-      if(error.code === "auth/user-not-found") {
+    } catch (error: unknown) {
+      if(error === "auth/user-not-found") {
         showModal({
           title: "User not found",
           content: "The user with the provided email does not exist.",
           variant: "error",
         });
-      } else if (error.code === "auth/wrong-password") {
+      } else if (error === "auth/wrong-password") {
         showModal({
           title: "Wrong password",
           content: "The password you entered is incorrect.",

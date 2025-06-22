@@ -5,6 +5,7 @@ import { Link as RouterLink } from "react-router-dom";
 import { paths } from "../../../paths";
 import { authService } from "../../../services/authService";
 import { useModal } from "../../../context/ModalContext/ModalContext";
+import { getErrorMessage } from "../../../utils/errorUtils";
 
 const emailSchema = yup.object().shape({
   email: yup
@@ -33,10 +34,10 @@ const ForgotPassword = () => {
         variant: "success",
         onlyConfirm: true,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       showModal({
         title: "Error",
-        content: error.message,
+        content: getErrorMessage(error),
         variant: "error",
       });
     }

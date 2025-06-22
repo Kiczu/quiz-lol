@@ -14,6 +14,7 @@ import type { UserPrivateData } from "../../../api/types";
 import { paths } from "../../../paths";
 import { authService } from "../../../services/authService";
 import { useModal } from "../../../context/ModalContext/ModalContext";
+import { getErrorMessage } from "../../../utils/errorUtils";
 
 const registerSchema = yup.object().shape({
   username: yup.string().required("Username is required"),
@@ -49,7 +50,7 @@ const initValues: RegistrationFormData = {
 };
 
 const RegisterForm = () => {
-  const { showModal } = useModal();
+  const { showModal, showErrorModal } = useModal();
   const navigate = useNavigate();
   const handleSubmit = async (values: RegistrationFormData) => {
     const { username, firstName, lastName, email, password } = values;
@@ -66,12 +67,8 @@ const RegisterForm = () => {
         variant: "success",
         onConfirm: () => navigate(paths.DASHBOARD),
       });
-    } catch (error: any) {
-      showModal({
-        title: "Error",
-        content: error.massage || "Registration failed. Please try again.",
-        variant: "error",
-      });
+    } catch (error: unknown) {
+      showErrorModal(getErrorMessage(error));
     }
   };
 

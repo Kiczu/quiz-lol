@@ -28,8 +28,8 @@ root.render(
   <React.StrictMode>
     <ThemeProvider theme={theme}>
       <Router basename="/">
-        <LoginProvider>
-          <ModalProvider>
+        <ModalProvider>
+          <LoginProvider>
             <Routes>
               <Route path={paths.HOME} element={<Layout />}>
                 <Route
@@ -60,8 +60,8 @@ root.render(
                 <Route path={paths.DASHBOARD} element={<UserDashboard />} />
               </Route>
             </Routes>
-          </ModalProvider>
-        </LoginProvider>
+          </LoginProvider>
+        </ModalProvider>
       </Router>
     </ThemeProvider>
   </React.StrictMode>

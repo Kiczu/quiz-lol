@@ -18,11 +18,12 @@ import {
 } from "./userDashboard.style";
 import { authService } from "../../services/authService";
 import { deleteUser } from "firebase/auth";
+import { getErrorMessage } from "../../utils/errorUtils";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
   const { userData, handleSignOut, isLoading } = useAuth();
-  const { showModal } = useModal();
+  const { showModal, showErrorModal } = useModal();
   const { scores, totalScore } = useScores(userData?.uid);
 
   useEffect(() => {
@@ -63,13 +64,8 @@ const UserDashboard = () => {
             variant: "success",
             onConfirm: () => navigate(paths.LOGIN),
           });
-        } catch (error: any) {
-          showModal({
-            title: "Error",
-            content:
-              error.message || "Failed to delete account. Please try again.",
-            variant: "error",
-          });
+        } catch (error: unknown) {
+          showErrorModal(getErrorMessage(error));
         }
       },
     });

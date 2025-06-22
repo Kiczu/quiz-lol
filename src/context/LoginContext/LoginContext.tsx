@@ -3,6 +3,8 @@ import { sendEmailVerification, updateEmail } from "firebase/auth";
 import { authService } from "../../services/authService";
 import { EditableUserFields, RawUserData } from "../../api/types";
 import { userAggregateService } from "../../services/userAggregateService";
+import { getErrorMessage } from "../../utils/errorUtils";
+import { useModal } from "../ModalContext/ModalContext";
 
 interface Props {
   children: React.ReactNode;
@@ -23,6 +25,7 @@ const LoginContext = createContext<LoginContextType | null>(null);
 export const LoginProvider = ({ children }: Props) => {
   const [userData, setUserData] = useState<RawUserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { showErrorModal } = useModal();
 
   useEffect(() => {
     setIsLoading(true);
@@ -103,13 +106,8 @@ export const LoginProvider = ({ children }: Props) => {
         );
         (error as any).code = "email-change";
         throw error;
-      } catch (error: any) {
-        if (error.code === "auth/requires-recent-login") {
-          throw new Error("Please sign in again to change your email address.");
-        }
-        if (error.code === "auth/email-already-in-use") {
-          throw new Error("The provided email is already in use.");
-        }
+      } catch (error: unknown) {
+        showErrorModal(getErrorMessage(error));
         throw error;
       }
     }

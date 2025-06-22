@@ -16,6 +16,16 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     setModalState({ ...modal, open: true });
   };
 
+  const showErrorModal: ModalContextType["showErrorModal"] = (message) => {
+    showModal({
+      variant: "error",
+      title: "Error",
+      content: message,
+      actions: undefined,
+      disableClose: false,
+    });
+  };
+
   const closeModal: ModalContextType["closeModal"] = () => {
     setModalState((prev) => ({ ...prev, open: false }));
   };
@@ -85,7 +95,13 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <ModalContext.Provider
-      value={{ showModal, closeModal, modalState, requestReauthentication }}
+      value={{
+        showModal,
+        showErrorModal,
+        closeModal,
+        modalState,
+        requestReauthentication,
+      }}
     >
       {children}
       <AppModal

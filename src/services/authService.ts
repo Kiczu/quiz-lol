@@ -1,6 +1,7 @@
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, EmailAuthProvider, linkWithCredential, reauthenticateWithCredential, reauthenticateWithPopup } from "firebase/auth";
 import { auth } from "../api/firebase/auth";
 import { userAggregateService } from "./userAggregateService";
+import { isFirebaseCode } from "../utils/errorUtils";
 
 const getCurrentUser = () => {
     return auth.currentUser;
@@ -25,7 +26,7 @@ const registerUser = async (email: string, password: string, userData: { usernam
         });
 
         return user;
-    } catch (error: any) {
+    } catch (error: unknown) {
         throw error;
     }
 }
@@ -43,8 +44,8 @@ const updateUserPassword = async (newPassword: string, currentPassword?: string)
 
     try {
         await updatePassword(user, newPassword);
-    } catch (error: any) {
-        if (error.code === "auth/requires-recent-login") {
+    } catch (error: unknown) {
+        if (isFirebaseCode(error, "auth/requires-recent-login")) {
             if (!currentPassword) {
                 throw error;
             }
@@ -61,7 +62,7 @@ const sendResetPassword = async (email: string) => {
     try {
         await sendPasswordResetEmail(auth, email);
         return true;
-    } catch (error: any) {
+    } catch (error: unknown) {
         throw error;
     }
 }

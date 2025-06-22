@@ -4,6 +4,8 @@ import { Formik, Form } from "formik";
 import { authService } from "../../../services/authService";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { inputStyle } from "../userDashboard.style";
+import { getErrorMessage, isFirebaseCode } from "../../../utils/errorUtils";
+import { get } from "http";
 
 const validationSchema = yup.object({
   newPassword: yup
@@ -43,8 +45,8 @@ const ChangePasswordForm = () => {
         title: "Success",
         content: "Password updated successfully.",
       });
-    } catch (error: any) {
-      if (error.code === "auth/requires-recent-login") {
+    } catch (error: unknown) {
+      if (isFirebaseCode(error, "auth/requires-recent-login")) {
         try {
           const currentPassword = await requestReauthentication();
           await authService.updateUserPassword(
@@ -56,18 +58,18 @@ const ChangePasswordForm = () => {
             title: "Success",
             content: "Password updated successfully.",
           });
-        } catch (reauthError: any) {
+        } catch (reautherror: unknown) {
           showModal({
             variant: "error",
             title: "Reauthentication failed",
-            content: reauthError.message || "Failed to reauthenticate.",
+            content: getErrorMessage(reautherror),
           });
         }
       } else {
         showModal({
           variant: "error",
           title: "Error",
-          content: error.message || "Failed to change password.",
+          content: getErrorMessage(error),
         });
       }
     }

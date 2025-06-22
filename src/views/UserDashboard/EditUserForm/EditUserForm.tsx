@@ -7,6 +7,8 @@ import { useAuth } from "../../../context/LoginContext/LoginContext";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { useUsernameValidation } from "../../../hooks/useUsernameValidation";
 import { inputStyle } from "../userDashboard.style";
+import { getErrorMessage, isFirebaseCode } from "../../../utils/errorUtils";
+import { get } from "http";
 
 const validationSchema = yup.object({
   firstName: yup.string(),
@@ -49,18 +51,17 @@ const EditUserForm = () => {
         content: "User data updated successfully",
         variant: "success",
       });
-    } catch (error: any) {
-      if (error.code === "email-change") {
+    } catch (error: unknown) {
+      if (isFirebaseCode(error, "email-change")) {
         showModal({
           title: "Email Change Required",
-          content: error.message,
+          content: getErrorMessage(error),
           variant: "info",
         });
       } else {
         showModal({
           title: "Error",
-          content:
-            error.message || "Failed to update user data. Please try again.",
+          content: getErrorMessage(error),
           variant: "error",
         });
       }
