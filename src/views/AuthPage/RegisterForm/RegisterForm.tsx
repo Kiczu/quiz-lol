@@ -130,7 +130,12 @@ const RegisterForm = () => {
           <Form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
               {formFields.map(({ name, label, type, autoComplete }) => (
-                <Grid item xs={12} sm={name === "email" ? 12 : 6} key={name}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={["username", "email"].includes(name) ? 12 : 6}
+                  key={name}
+                >
                   <TextField
                     fullWidth
                     label={label}
