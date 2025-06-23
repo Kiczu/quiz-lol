@@ -2,9 +2,10 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { ThemeProvider } from "@emotion/react";
+import FirebaseActionHandler from "./api/firebase/FirebaseActionHandler";
 import { LoginProvider } from "./context/LoginContext/LoginContext";
 import { GameProvider } from "./context/GameContext/GameContext";
-import { ModalProvider } from "./context/ModalContext/ModalContext";
+import { ModalProvider } from "./context/ModalContext/ModalProvider";
 import { paths } from "./paths";
 import { theme } from "./theme/theme";
 import Layout from "./Layout/Layout";
@@ -25,12 +26,16 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <LoginProvider>
-      <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <Router basename="/">
         <ModalProvider>
-          <Router basename="/">
+          <LoginProvider>
             <Routes>
               <Route path={paths.HOME} element={<Layout />}>
+                <Route
+                  path="/__/auth/action"
+                  element={<FirebaseActionHandler />}
+                />
                 <Route path={paths.HOME} element={<Home />} />
                 <Route path={paths.CHAMPION_DETAIL} element={<Champion />} />
                 <Route path={paths.RANKING} element={<Ranking />} />
@@ -55,9 +60,9 @@ root.render(
                 <Route path={paths.DASHBOARD} element={<UserDashboard />} />
               </Route>
             </Routes>
-          </Router>
+          </LoginProvider>
         </ModalProvider>
-      </ThemeProvider>
-    </LoginProvider>
+      </Router>
+    </ThemeProvider>
   </React.StrictMode>
 );

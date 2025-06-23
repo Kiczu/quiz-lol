@@ -1,7 +1,7 @@
-import { createContext, useEffect, useState } from "react";
-import { auth } from "../../api/firebase/auth";
+import { createContext, useState } from "react";
 import { GameState } from "../../api/types";
-import { scoreService } from "../../services/scoreService";
+import useSaveGameScore from "../../hooks/useSaveGameScore";
+import { useAuth } from "../LoginContext/LoginContext";
 
 interface Props {
   children: React.ReactNode;
@@ -12,7 +12,7 @@ interface GameContextType {
   gameScore: number;
   gameState: GameState;
   isWin: boolean;
-  setGameId: (gameId: string) => void;
+  startNewGame: (gameId: string) => void;
   handleEndGame: (points: number, isWin: boolean) => void;
   handleStartGame: () => void;
 }
@@ -22,42 +22,28 @@ export const GameContext = createContext<GameContextType>({
   gameScore: 0,
   gameState: GameState.NotStarted,
   isWin: false,
-  setGameId: () => {},
+  startNewGame: () => {},
   handleStartGame: () => {},
   handleEndGame: () => {},
 });
 
 export const GameProvider = ({ children }: Props) => {
   const [gameState, setGameState] = useState<GameState>(GameState.NotStarted);
-  const [gameScore, setgameScore] = useState<number>(0);
+  const [gameScore, setGameScore] = useState<number>(0);
   const [gameId, setGameId] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const [isWin, setIsWin] = useState<boolean>(false);
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      if (user) {
-        setUserId(user.uid);
-      } else {
-        setUserId(null);
-      }
-    });
+  const { userData } = useAuth();
+  const userId = userData?.uid ?? null;
 
-    return () => unsubscribe();
-  }, []);
+  useSaveGameScore(gameState, gameId, userId, gameScore);
 
-  useEffect(() => {
-    if (gameState === GameState.Finished && gameId && userId) {
-      const saveScore = async () => {
-        try {
-          await scoreService.saveGameScore(userId, gameId, gameScore);
-        } catch (error) {
-          console.error("Error saving score:", error);
-        }
-      };
-      saveScore();
-    }
-  });
+  const startNewGame = (gameId: string) => {
+    setGameId(gameId);
+    setGameState(GameState.NotStarted);
+    setGameScore(0);
+    setIsWin(false);
+  };
 
   const handleStartGame = () => {
     setGameState(GameState.InProgress);
@@ -65,7 +51,7 @@ export const GameProvider = ({ children }: Props) => {
 
   const handleEndGame = (points: number, isWin: boolean) => {
     setGameState(GameState.Finished);
-    setgameScore(points);
+    setGameScore(points);
     setIsWin(isWin);
   };
 
@@ -76,7 +62,7 @@ export const GameProvider = ({ children }: Props) => {
         gameScore,
         gameState,
         isWin,
-        setGameId,
+        startNewGame,
         handleStartGame,
         handleEndGame,
       }}

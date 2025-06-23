@@ -18,10 +18,13 @@ export interface ModalState {
     onClose?: () => void;
     onConfirm?: () => void;
     onCancel?: () => void;
+    onlyConfirm?: boolean;
 }
 
 export interface ModalContextType {
     showModal: (modal: Omit<ModalState, "open">) => void;
+    showErrorModal: (message: string) => void;
     closeModal: () => void;
     modalState: ModalState;
+    requestReauthentication: () => Promise<string>;
 }

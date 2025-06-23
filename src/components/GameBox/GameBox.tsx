@@ -11,11 +11,13 @@ type Props = {
 };
 
 const GameBox = ({ children, title }: Props) => {
-  const { gameState, setGameId } = useContext(GameContext);
+  const { gameState, gameId, startNewGame } = useContext(GameContext);
 
   useEffect(() => {
-    setGameId(title);
-  }, [title, setGameId]);
+    if (title && gameId !== title) {
+      startNewGame(title);
+    }
+  }, [title, gameId, startNewGame]);
 
   return (
     <Box>

@@ -56,22 +56,32 @@ const fetchGlobalLeaderboard = async (): Promise<ScoreData[]> => {
     return totalScores.sort((a, b) => b.score - a.score);
 };
 
-const processRankingData = (docs: QueryDocumentSnapshot[], selectedGameMode: string): ScoreData[] => {
-    const rankingData: Record<string, number> = {};
+const processRankingData = (
+    docs: QueryDocumentSnapshot[],
+    selectedGameMode: string
+): ScoreData[] => {
+    const ranking: ScoreData[] = [];
 
     docs.forEach((doc) => {
-        const [userId, gameMode] = doc.id.split("_");
-        const score = doc.data().score || 0;
+        const data = doc.data();
+        const userId = doc.id;
 
-        if (gameMode === selectedGameMode) {
-            rankingData[userId] = score;
+        if (!data.scores || typeof data.scores !== "object") return;
+
+        const score = data.scores[selectedGameMode] ?? 0;
+
+        if (score > 0) {
+            ranking.push({
+                userId,
+                score,
+                username: "",
+            });
         }
     });
 
-    return Object.entries(rankingData)
-        .map(([userId, score]) => ({ userId, score, username: "" }))
-        .sort((a, b) => b.score - a.score);
+    return ranking.sort((a, b) => b.score - a.score);
 };
+
 
 const fetchUsernames = async (userIds: string[]): Promise<Record<string, string>> => {
     const usernames: Record<string, string> = {};

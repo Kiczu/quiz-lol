@@ -8,9 +8,10 @@ import {
   Grid,
   Link,
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { Form, Formik } from "formik";
 import { useAuth } from "../../../context/LoginContext/LoginContext";
+import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
 
 const loginSchema = yup.object().shape({
@@ -32,10 +33,40 @@ const initValues: Values = {
 };
 
 const LoginForm = () => {
+  const { showModal } = useModal();
   const { handleSignIn } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = ({ email, password }: Values) => {
-    handleSignIn(email, password);
+  const handleSubmit = async ({ email, password }: Values) => {
+    try {
+      await handleSignIn(email, password);
+      showModal({
+        title: "Welcome!",
+        content: "You have successfully logged in.",
+        variant: "success",
+        onConfirm: () => navigate(paths.DASHBOARD),
+      });
+    } catch (error: unknown) {
+      if(error === "auth/user-not-found") {
+        showModal({
+          title: "User not found",
+          content: "The user with the provided email does not exist.",
+          variant: "error",
+        });
+      } else if (error === "auth/wrong-password") {
+        showModal({
+          title: "Wrong password",
+          content: "The password you entered is incorrect.",
+          variant: "error",
+        });
+      } else {
+        showModal({
+          title: "An error occurred",
+          content: "Please try again later.",
+          variant: "error",
+        });
+      }
+    }
   };
 
   return (

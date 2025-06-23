@@ -1,6 +1,7 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, reauthenticateWithPopup, updatePassword, sendPasswordResetEmail } from "firebase/auth";
-import { userService } from "./userService";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, EmailAuthProvider, linkWithCredential, reauthenticateWithCredential, reauthenticateWithPopup } from "firebase/auth";
 import { auth } from "../api/firebase/auth";
+import { userAggregateService } from "./userAggregateService";
+import { isFirebaseCode } from "../utils/errorUtils";
 
 const getCurrentUser = () => {
     return auth.currentUser;
@@ -16,7 +17,7 @@ const registerUser = async (email: string, password: string, userData: { usernam
 
         const { user } = userCredential;
 
-        await userService.createUser({
+        await userAggregateService.createUser({
             uid: user.uid,
             username: userData.username,
             email: user.email!,
@@ -25,38 +26,44 @@ const registerUser = async (email: string, password: string, userData: { usernam
         });
 
         return user;
-    } catch (error) {
-        console.error("Error during registration:", error);
+    } catch (error: unknown) {
         throw error;
     }
 }
+const setPasswordForGoogleUser = async (email: string, password: string) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("No user is currently logged in.");
 
-const changePassword = async (newPassword: string) => {
-    try {
-        const user = auth.currentUser;
-        if (!user) throw new Error("No user is currently logged in.");
-
-        const provider = new GoogleAuthProvider();
-        await reauthenticateWithPopup(user, provider);
-        await updatePassword(user, newPassword);
-
-        return "Password changed successfully.";
-    } catch (error: any) {
-        if (error.code === "auth/requires-recent-login") {
-            return "Reauthentication required. Please log in again.";
-        }
-        console.error("Error updating password:", error);
-        return "Failed to update password.";
-    }
+    const credential = EmailAuthProvider.credential(email, password);
+    await linkWithCredential(user, credential);
 }
+
+const updateUserPassword = async (newPassword: string, currentPassword?: string) => {
+    const user = auth.currentUser;
+    if (!user || !user.email) throw new Error("User not authenticated");
+
+    try {
+        await updatePassword(user, newPassword);
+    } catch (error: unknown) {
+        if (isFirebaseCode(error, "auth/requires-recent-login")) {
+            if (!currentPassword) {
+                throw error;
+            }
+            const credential = EmailAuthProvider.credential(user.email, currentPassword);
+            await reauthenticateWithCredential(user, credential);
+            await updatePassword(user, newPassword);
+        } else {
+            throw error;
+        }
+    }
+};
 
 const sendResetPassword = async (email: string) => {
     try {
         await sendPasswordResetEmail(auth, email);
-        return "Password reset email sent.";
-    } catch (error) {
-        console.error("Error sending password reset email:", error);
-        return "Failed to send password reset email.";
+        return true;
+    } catch (error: unknown) {
+        throw error;
     }
 }
 
@@ -75,14 +82,35 @@ const logoutUser = async () => {
     await signOut(auth);
 }
 
+const reauthenticateUser = async (password?: string) => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("User not authenticated");
+
+    const providerId = user?.providerData[0]?.providerId;
+
+    if (providerId === "password") {
+        if (!password) throw new Error("Password is required for reauthentication.");
+        const credential = EmailAuthProvider.credential(user.email!, password);
+        return reauthenticateWithCredential(user, credential);
+    }
+
+    if (providerId === "google.com") {
+        const provider = new GoogleAuthProvider();
+        return reauthenticateWithPopup(user, provider);
+    }
+
+    throw new Error("Unsupported authentication method.");
+};
 
 export const authService = {
     getCurrentUser,
     onAuthStateChanged,
     registerUser,
-    changePassword,
+    setPasswordForGoogleUser,
+    updateUserPassword,
     sendResetPassword,
     loginUser,
     signInWithGoogle,
     logoutUser,
+    reauthenticateUser,
 };
