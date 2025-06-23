@@ -25,7 +25,7 @@ const LoginContext = createContext<LoginContextType | null>(null);
 export const LoginProvider = ({ children }: Props) => {
   const [userData, setUserData] = useState<RawUserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { showErrorModal } = useModal();
+  const { showErrorModal, showModal } = useModal();
 
   useEffect(() => {
     setIsLoading(true);
@@ -79,6 +79,13 @@ export const LoginProvider = ({ children }: Props) => {
   const handleSignOut = async () => {
     await authService.logoutUser();
     setUserData(null);
+    showModal({
+      variant: "success",
+      title: "Logout",
+      content: "You have been logged out successfully.",
+      actions: undefined,
+      disableClose: false,
+    });
   };
 
   const updateUserData = async (updates: EditableUserFields) => {
