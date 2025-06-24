@@ -1,5 +1,9 @@
 @import "./styles/font.css";
 
+html {
+  font-size: 20px;
+}
+
 body {
   margin: 0;
   font-family: "Spiegel", Arial, sans-serif;

@@ -2,7 +2,6 @@ import { colors } from "./colors";
 
 export const typography = {
     fontFamily: "'Spiegel', sans-serif",
-    fontSize: 18,
     h1: {
         fontFamily: "'BeaufortforLOL', sans-serif",
         fontSize: "2.5rem",
