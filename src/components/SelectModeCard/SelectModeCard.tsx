@@ -1,4 +1,11 @@
 import { Box, Typography, Link } from "@mui/material";
+import {
+  modeCard,
+  modeImg,
+  modeTitle,
+  modeDesc,
+  linkCardContainer,
+} from "./selectModeCardStyle";
 
 type Props = {
   title: string;
@@ -8,32 +15,14 @@ type Props = {
 };
 
 const SelectModeCard = ({ title, desc, link, img }: Props) => {
-  
   return (
-    <Link href={link} style={{ textDecoration: "none" }}>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "10px",
-          border: "2px solid #af9767",
-          background: "#1e2328",
-          padding: "15px",
-        }}
-      >
-        <Typography
-          component={"h3"}
-          variant="h3"
-          sx={{
-            fontSize: "1.3rem",
-            color: "white",
-            textTransform: "uppercase",
-          }}
-        >
+    <Link href={link} underline="none" sx={linkCardContainer}>
+      <Box sx={modeCard}>
+        <Box component="img" src={img} alt={title} sx={modeImg} />
+        <Typography component="h3" sx={modeTitle}>
           {title}
         </Typography>
+        <Typography sx={modeDesc}>{desc}</Typography>
       </Box>
     </Link>
   );
