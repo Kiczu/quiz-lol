@@ -2,13 +2,17 @@ import * as yup from "yup";
 import { Box, TextField, Button, Typography } from "@mui/material";
 import { Formik, Form } from "formik";
 import { colors } from "../../../theme/colors";
-import { EditableUserFields } from "../../../api/types";
-import { useAuth } from "../../../context/LoginContext/LoginContext";
+import { EditableUserFields, RawUserData } from "../../../api/types";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { useUsernameValidation } from "../../../hooks/useUsernameValidation";
-import { inputStyle } from "../userDashboard.style";
 import { getErrorMessage, isFirebaseCode } from "../../../utils/errorUtils";
-import { get } from "http";
+import { inputStyle } from "../userDashboard.style";
+
+type EditUserFormProps = {
+  userData: RawUserData;
+  updateUserData: (values: EditableUserFields) => Promise<void>;
+  refreshUserData: () => Promise<void>;
+};
 
 const validationSchema = yup.object({
   firstName: yup.string(),
@@ -21,9 +25,13 @@ const validationSchema = yup.object({
     }),
 });
 
-const EditUserForm = () => {
+const EditUserForm = ({
+  userData,
+  updateUserData,
+  refreshUserData,
+}: EditUserFormProps) => {
   const { showModal } = useModal();
-  const { userData, updateUserData, refreshUserData } = useAuth();
+
   const { usernameError, validateUsername } = useUsernameValidation(
     userData?.username
   );

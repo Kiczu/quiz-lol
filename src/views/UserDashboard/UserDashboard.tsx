@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Grid, Typography, Container } from "@mui/material";
+import { deleteUser } from "firebase/auth";
 import { useScores } from "./ScoresSection/useScores";
 import AvatarSection from "./AvatarSection/AvatarSection";
 import ScoresSection from "./ScoresSection/ScoresSection";
@@ -11,18 +12,23 @@ import DangerZone from "./DangerZone/DangerZone";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
 import { userAggregateService } from "../../services/userAggregateService";
+import { authService } from "../../services/authService";
+import { getErrorMessage } from "../../utils/errorUtils";
 import { paths } from "../../paths";
 import {
   dashboardViewContainer,
   dataFormsContainer,
 } from "./userDashboard.style";
-import { authService } from "../../services/authService";
-import { deleteUser } from "firebase/auth";
-import { getErrorMessage } from "../../utils/errorUtils";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { userData, handleSignOut, isLoading } = useAuth();
+  const {
+    userData,
+    handleSignOut,
+    isLoading,
+    refreshUserData,
+    updateUserData,
+  } = useAuth();
   const { showModal, showErrorModal } = useModal();
   const { scores, totalScore } = useScores(userData?.uid);
 
@@ -31,17 +37,30 @@ const UserDashboard = () => {
       navigate(paths.LOGIN);
       return;
     }
-    if (userData && !userData.username) {
+    if (!isLoading && userData && !userData.username) {
       showModal({
         title: "Username Required",
-        content: <EditUserForm />,
+        content: (
+          <EditUserForm
+            userData={userData}
+            updateUserData={updateUserData}
+            refreshUserData={refreshUserData}
+          />
+        ),
         actions: null,
         variant: "warning",
         onlyConfirm: false,
         disableClose: true,
       });
     }
-  }, [userData, isLoading, navigate, showModal]);
+  }, [
+    userData,
+    isLoading,
+    navigate,
+    showModal,
+    updateUserData,
+    refreshUserData,
+  ]);
 
   const handleDeleteAccount = async () => {
     if (!userData?.uid) return;
@@ -79,7 +98,13 @@ const UserDashboard = () => {
         <Grid container spacing={10} mt={0}>
           <Grid item sm={12} md={8} sx={dataFormsContainer}>
             <Typography variant="h5">Edit Your Data</Typography>
-            {userData?.username && <EditUserForm />}
+            {userData?.username && (
+              <EditUserForm
+                userData={userData}
+                refreshUserData={refreshUserData}
+                updateUserData={updateUserData}
+              />
+            )}
             <ChangePasswordForm />
           </Grid>
           <Grid item sm={12} md={4}>

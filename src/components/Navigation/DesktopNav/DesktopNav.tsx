@@ -29,9 +29,23 @@ const DesktopNav = ({ pages, handleCloseNavMenu }: DesktopNavProps) => {
           <Button
             key={page.name}
             onClick={handleCloseNavMenu}
-            sx={{ my: 2, color: "white", display: "block" }}
+            sx={{
+              color: "white",
+              fontFamily: "'BeaufortforLOL', Arial, sans-serif",
+              fontWeight: 700,
+              px: 3,
+              letterSpacing: 2,
+              fontSize: "1rem",
+              borderBottom: "2px solid transparent",
+              transition: "color 0.15s, border-bottom 0.17s",
+              "&:hover": {
+                color: "#C8AA6E",
+                borderBottom: "2.5px solid #C8AA6E",
+                background: "none",
+              },
+            }}
           >
-            <Link component={ReactRouter} to={page.href}>
+            <Link component={ReactRouter} to={page.href} underline="none" >
               {page.name}
             </Link>
           </Button>

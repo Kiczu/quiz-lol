@@ -19,10 +19,6 @@ import { paths } from "../../paths";
 
 const pages = [
   {
-    name: "Quiz",
-    href: paths.HANGMAN,
-  },
-  {
     name: "Home",
     href: paths.HOME,
   },
@@ -76,7 +72,7 @@ const Navigation = () => {
     <AppBar
       position="sticky"
       className="app-bar"
-      sx={{ backgroundColor: "#0A1428" }}
+      sx={{ backgroundColor: "#0A1428", borderBottom: "1.5px solid #C8AA6E" }}
     >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
