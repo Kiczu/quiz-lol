@@ -5,7 +5,7 @@ export const homeHeroContainer = {
     backgroundImage: `url(${heroImage})`,
     backgroundPosition: "top center",
     backgroundSize: "cover",
-    height: "100vh",
+    minHeight: "90vh",
 }
 
 export const heroOverlay = {
@@ -15,16 +15,18 @@ export const heroOverlay = {
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    height: "100%",
+    minHeight: "90vh",
     background: "linear-gradient(180deg, rgba(0,0,0,0), black);",
 }
 export const headline = {
     color: "primary.main",
     textShadow: "0 2px 16px #000",
     mb: 2,
+    mt: 5,
+    p: 1,
     fontWeight: 700,
     textAlign: "center",
-    fontSize: { xs: "2.2rem", sm: "3rem", md: "3.5rem" },
+    fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
     lineHeight: 1.1,
     letterSpacing: 1,
 }
@@ -35,7 +37,7 @@ export const subtitle = {
     mb: 5,
     fontWeight: 400,
     textAlign: "center",
-    fontSize: { xs: "1.2rem", sm: "1.6rem", md: "2rem" },
+    fontSize: { xs: "1.5rem", md: "1.8rem" },
 }
 
 export const modesContainer = {

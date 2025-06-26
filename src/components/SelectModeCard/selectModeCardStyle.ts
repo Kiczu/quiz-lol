@@ -22,6 +22,7 @@ export const modeCard = {
     backdropFilter: "blur(8px)",
     position: "relative",
     transition: "border 0.22s, box-shadow 0.18s",
+    zIndex: 2,
     "&:hover": {
         border: `2px solid ${colors.gold3}`,
         boxShadow: "0 8px 46px 6px #C8AA6E44, 0 1px 8px #0004",
@@ -30,13 +31,14 @@ export const modeCard = {
 }
 
 export const modeImg = {
-    width: { xs: 52, sm: 70 },
-    height: { xs: 52, sm: 70 },
+    width: { xs: 60, sm: 70, md: 80, lg: 90 },
+    height: { xs: 60, sm: 70, md: 80, lg: 90 },
     borderRadius: "50%",
     boxShadow: "0 0 0 2px #C8AA6E99",
     objectFit: "cover",
     mb: 2,
     transition: "box-shadow 0.2s",
+    zIndex: 2,
 }
 
 export const modeTitle = {
@@ -49,6 +51,7 @@ export const modeTitle = {
     textAlign: "center",
     mb: 1,
     lineHeight: 1.16,
+    zIndex: 2,
 }
 
 export const modeDesc = {
@@ -57,4 +60,5 @@ export const modeDesc = {
     textAlign: "center",
     fontFamily: "'Spiegel', Arial, sans-serif",
     maxWidth: "240px",
+    zIndex: 2,
 }
