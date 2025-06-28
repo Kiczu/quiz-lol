@@ -1,7 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Box, Grid, Typography, Container } from "@mui/material";
-import { deleteUser } from "firebase/auth";
 import { useScores } from "./ScoresSection/useScores";
 import AvatarSection from "./AvatarSection/AvatarSection";
 import ScoresSection from "./ScoresSection/ScoresSection";
@@ -9,11 +8,12 @@ import EditUserForm from "./EditUserForm/EditUserForm";
 import ChangePasswordForm from "./ChangePasswordForm/ChangePasswordForm";
 import UserDataInfo from "./UserDataInfo/UserDataInfo";
 import DangerZone from "./DangerZone/DangerZone";
+import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
-import { userAggregateService } from "../../services/userAggregateService";
 import { authService } from "../../services/authService";
-import { getErrorMessage } from "../../utils/errorUtils";
+import { deleteAccountWithAuth } from "../../helpers/deleteAccountWithAuth";
+import { getErrorMessage, isFirebaseCode } from "../../utils/errorUtils";
 import { paths } from "../../paths";
 import {
   dashboardViewContainer,
@@ -29,12 +29,12 @@ const UserDashboard = () => {
     refreshUserData,
     updateUserData,
   } = useAuth();
-  const { showModal, showErrorModal } = useModal();
+  const { showModal } = useModal();
   const { scores, totalScore } = useScores(userData?.uid);
 
   useEffect(() => {
     if (!isLoading && !userData) {
-      navigate(paths.LOGIN);
+      navigate(paths.LOGIN); 
       return;
     }
     if (!isLoading && userData && !userData.username) {
@@ -70,12 +70,11 @@ const UserDashboard = () => {
       variant: "warning",
       onlyConfirm: false,
       onConfirm: async () => {
+        const user = authService.getCurrentUser();
+        if (!user) return;
+
         try {
-          await userAggregateService.deleteUserData(userData.uid);
-          const user = authService.getCurrentUser();
-          if (user) {
-            await deleteUser(user);
-          }
+          await deleteAccountWithAuth();
           await handleSignOut();
           showModal({
             title: "Account deleted",
@@ -83,8 +82,64 @@ const UserDashboard = () => {
             variant: "success",
             onConfirm: () => navigate(paths.LOGIN),
           });
-        } catch (error: unknown) {
-          showErrorModal(getErrorMessage(error));
+        } catch (error) {
+          if (isFirebaseCode(error, "auth/requires-recent-login")) {
+            const providerId = user?.providerData[0]?.providerId;
+            if (providerId === "password") {
+              showModal({
+                title: "Reauthenticate",
+                content: (
+                  <ReauthPasswordForm
+                    onSubmit={async (password) => {
+                      try {
+                        await deleteAccountWithAuth(password);
+                        await handleSignOut();
+                        showModal({
+                          title: "Account deleted",
+                          content:
+                            "Your account has been deleted successfully.",
+                          variant: "success",
+                          onConfirm: () => navigate(paths.LOGIN),
+                        });
+                      } catch (reauthError) {
+                        showModal({
+                          title: "Error",
+                          content: getErrorMessage(reauthError),
+                          variant: "error",
+                        });
+                      }
+                    }}
+                  />
+                ),
+                variant: "warning",
+                disableClose: true,
+              });
+            } else if (providerId === "google.com") {
+              try {
+                await authService.reauthenticateUser();
+                await deleteAccountWithAuth();
+                await handleSignOut();
+                showModal({
+                  title: "Account deleted",
+                  content: "Your account has been deleted successfully.",
+                  variant: "success",
+                  onConfirm: () => navigate(paths.LOGIN),
+                });
+              } catch (reauthError) {
+                showModal({
+                  title: "Error",
+                  content: getErrorMessage(reauthError),
+                  variant: "error",
+                });
+              }
+            }
+          } else {
+            showModal({
+              title: "Error",
+              content: getErrorMessage(error),
+              variant: "error",
+            });
+          }
         }
       },
     });
