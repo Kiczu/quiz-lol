@@ -1,13 +1,15 @@
+import { Box, Button, TextField } from "@mui/material";
+import { Form, Formik } from "formik";
 import * as yup from "yup";
-import { Box, TextField, Button } from "@mui/material";
-import { Formik, Form } from "formik";
-import { authService } from "../../../services/authService";
-import { useModal } from "../../../context/ModalContext/ModalContext";
-import { inputStyle } from "../userDashboard.style";
-import { getErrorMessage, isFirebaseCode } from "../../../utils/errorUtils";
-import { get } from "http";
+
+import { useModal } from "../../../../context/ModalContext/ModalContext";
+import { authService } from "../../../../services/authService";
+import { getErrorMessage } from "../../../../utils/errorUtils";
+
+import { inputStyle } from "../../userDashboard.style";
 
 const validationSchema = yup.object({
+  currentPassword: yup.string().required("Current password is required"),
   newPassword: yup
     .string()
     .required("New password is required")
@@ -22,68 +24,63 @@ const validationSchema = yup.object({
 });
 
 const ChangePasswordForm = () => {
-  const { showModal, requestReauthentication } = useModal();
+  const { showModal } = useModal();
 
   const handlePasswordChange = async (values: {
+    currentPassword: string;
     newPassword: string;
     confirmPassword: string;
   }) => {
-    const user = authService.getCurrentUser();
-    if (!user || !user.email) {
-      showModal({
-        variant: "error",
-        title: "Error",
-        content: "User not authenticated.",
-      });
-      return;
-    }
-
     try {
-      await authService.updateUserPassword(values.newPassword);
+      await authService.updateUserPassword(
+        values.newPassword,
+        values.currentPassword
+      );
       showModal({
         variant: "success",
         title: "Success",
-        content: "Password updated successfully.",
+        content: "Password changed successfully!",
       });
     } catch (error: unknown) {
-      if (isFirebaseCode(error, "auth/requires-recent-login")) {
-        try {
-          const currentPassword = await requestReauthentication();
-          await authService.updateUserPassword(
-            values.newPassword,
-            currentPassword
-          );
-          showModal({
-            variant: "success",
-            title: "Success",
-            content: "Password updated successfully.",
-          });
-        } catch (reautherror: unknown) {
-          showModal({
-            variant: "error",
-            title: "Reauthentication failed",
-            content: getErrorMessage(reautherror),
-          });
-        }
-      } else {
-        showModal({
-          variant: "error",
-          title: "Error",
-          content: getErrorMessage(error),
-        });
-      }
+      showModal({
+        variant: "error",
+        title: "Error",
+        content: getErrorMessage(error),
+      });
     }
   };
 
   return (
     <Formik
-      initialValues={{ newPassword: "", confirmPassword: "" }}
+      initialValues={{
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      }}
       validationSchema={validationSchema}
       onSubmit={handlePasswordChange}
     >
       {({ values, handleChange, handleBlur, errors, touched }) => (
         <Form>
           <Box>
+            <TextField
+              name="currentPassword"
+              label="Current Password"
+              type="password"
+              value={values.currentPassword}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              fullWidth
+              variant="outlined"
+              sx={inputStyle}
+              error={touched.currentPassword && Boolean(errors.currentPassword)}
+              helperText={
+                touched.currentPassword && errors.currentPassword
+                  ? errors.currentPassword
+                  : " "
+              }
+              autoComplete="current-password"
+            />
             <TextField
               name="newPassword"
               label="New Password"

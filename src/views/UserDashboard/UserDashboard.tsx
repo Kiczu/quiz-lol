@@ -5,7 +5,6 @@ import { useScores } from "./ScoresSection/useScores";
 import AvatarSection from "./AvatarSection/AvatarSection";
 import ScoresSection from "./ScoresSection/ScoresSection";
 import EditUserForm from "./EditUserForm/EditUserForm";
-import ChangePasswordForm from "./ChangePasswordForm/ChangePasswordForm";
 import UserDataInfo from "./UserDataInfo/UserDataInfo";
 import DangerZone from "./DangerZone/DangerZone";
 import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
@@ -19,6 +18,7 @@ import {
   dashboardViewContainer,
   dataFormsContainer,
 } from "./userDashboard.style";
+import PasswordSection from "./PasswordSection/PasswordSection";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ const UserDashboard = () => {
 
   useEffect(() => {
     if (!isLoading && !userData) {
-      navigate(paths.LOGIN); 
+      navigate(paths.LOGIN);
       return;
     }
     if (!isLoading && userData && !userData.username) {
@@ -160,7 +160,7 @@ const UserDashboard = () => {
                 updateUserData={updateUserData}
               />
             )}
-            <ChangePasswordForm />
+            <PasswordSection />
           </Grid>
           <Grid item sm={12} md={4}>
             <UserDataInfo />
