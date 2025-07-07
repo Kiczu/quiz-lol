@@ -18,9 +18,30 @@ export const typography = {
     },
     h3: {
         fontFamily: "'BeaufortforLOL', sans-serif",
+        fontSize: "1.75rem",
+        fontWeight: 500,
+        lineHeight: 1.35,
+        color: `${colors.textPrimary}`,
+    },
+    h4: {
+        fontFamily: "'BeaufortforLOL', sans-serif",
         fontSize: "1.5rem",
         fontWeight: 500,
         lineHeight: 1.35,
+        color: `${colors.textPrimary}`,
+    },
+    h5: {
+        fontFamily: "'BeaufortforLOL', sans-serif",
+        fontSize: "1.25rem",
+        fontWeight: 500,
+        lineHeight: 1.2,
+        color: `${colors.textPrimary}`,
+    },
+    h6: {
+        fontFamily: "'BeaufortforLOL', sans-serif",
+        fontSize: "1rem",
+        fontWeight: 500,
+        lineHeight: 1.2,
         color: `${colors.textPrimary}`,
     },
     body1: {

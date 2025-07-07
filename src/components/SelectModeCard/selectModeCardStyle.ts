@@ -1,4 +1,5 @@
 import { colors } from "../../theme/colors";
+import { typography } from "../../theme/typography";
 
 export const linkCardContainer = {
     display: "block",
@@ -42,7 +43,7 @@ export const modeImg = {
 }
 
 export const modeTitle = {
-    fontFamily: "'BeaufortforLOL', sans-serif",
+    fontFamily: `${typography.h3.fontFamily}, sans-serif`,
     fontSize: { xs: "1.15rem", sm: "1.25rem", md: "1.45rem" },
     fontWeight: 700,
     color: colors.gold2,
@@ -58,7 +59,7 @@ export const modeDesc = {
     color: colors.textSecondary,
     fontSize: { xs: "0.95rem", sm: "1.05rem" },
     textAlign: "center",
-    fontFamily: "'Spiegel', Arial, sans-serif",
+    fontFamily: `${typography.fontFamily}, sans-serif`,
     maxWidth: "240px",
     zIndex: 2,
 }

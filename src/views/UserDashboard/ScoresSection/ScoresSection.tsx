@@ -14,8 +14,8 @@ const ScoresSection = ({ scores, totalScore }: Props) => {
         <Grid item xs={12} sm={6} md={3} key={index}>
           <Card sx={scoreCard}>
             <CardContent>
-              <Typography variant="h5">{gameId}</Typography>
-              <Typography component="p" variant="h5" mt={1}>
+              <Typography variant="h4">{gameId}</Typography>
+              <Typography component="p" variant="h3" mt={1}>
                 {score}
               </Typography>
             </CardContent>
@@ -25,8 +25,8 @@ const ScoresSection = ({ scores, totalScore }: Props) => {
       <Grid item xs={12} sm={6} md={3}>
         <Card sx={totalScoreCard}>
           <CardContent>
-            <Typography variant="h5">Total Score</Typography>
-            <Typography component="p" variant="h5" mt={1}>
+            <Typography variant="h4">Total Score</Typography>
+            <Typography component="p" variant="h3" mt={1}>
               {totalScore > 0 ? totalScore : "No scores yet"}
             </Typography>
           </CardContent>

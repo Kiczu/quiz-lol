@@ -167,9 +167,9 @@ const EditUserForm = ({
                 variant="outlined"
                 sx={inputStyle}
                 error={touched.email && Boolean(errors.email)}
-                helperText={touched.email && errors.email ? errors.email : " "}
+                helperText={touched.email && errors.email ? errors.email : null}
               />
-              <Button type="submit" variant="contained">
+              <Button type="submit" variant="contained" sx={{ mt: 3 }}>
                 Save Changes
               </Button>
             </Box>

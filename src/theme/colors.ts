@@ -9,6 +9,7 @@ export const colors = {
     textSecondary: "#A09B8C",
 
     error: "#FF5733",
+    error2: "#990000",
     warning: "#FFC300",
 
     blue1: "#CDFAFA",

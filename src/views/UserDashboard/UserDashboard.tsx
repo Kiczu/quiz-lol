@@ -7,16 +7,19 @@ import ScoresSection from "./ScoresSection/ScoresSection";
 import EditUserForm from "./EditUserForm/EditUserForm";
 import UserDataInfo from "./UserDataInfo/UserDataInfo";
 import DangerZone from "./DangerZone/DangerZone";
-import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
 import { authService } from "../../services/authService";
 import { deleteAccountWithAuth } from "../../helpers/deleteAccountWithAuth";
 import { getErrorMessage, isFirebaseCode } from "../../utils/errorUtils";
+import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
 import { paths } from "../../paths";
 import {
+  dashboardOverlay,
   dashboardViewContainer,
   dataFormsContainer,
+  glassPanel,
+  scoresContainer,
 } from "./userDashboard.style";
 import PasswordSection from "./PasswordSection/PasswordSection";
 
@@ -147,27 +150,41 @@ const UserDashboard = () => {
 
   return (
     <Box sx={dashboardViewContainer}>
-      <Container maxWidth="xl">
-        <AvatarSection />
-        <ScoresSection scores={scores} totalScore={totalScore} />
-        <Grid container spacing={10} mt={0}>
-          <Grid item sm={12} md={8} sx={dataFormsContainer}>
-            <Typography variant="h5">Edit Your Data</Typography>
-            {userData?.username && (
-              <EditUserForm
-                userData={userData}
-                refreshUserData={refreshUserData}
-                updateUserData={updateUserData}
-              />
-            )}
-            <PasswordSection />
+      <Box sx={dashboardOverlay}>
+        <Container maxWidth="xl" sx={{ p: 4 }}>
+          <Box mt={2}>
+            <AvatarSection />
+          </Box>
+          <Box mt={10} sx={scoresContainer}>
+            <ScoresSection scores={scores} totalScore={totalScore} />
+          </Box>
+          <Grid container spacing={10} mt={0}>
+            <Grid item sm={12} md={8} sx={dataFormsContainer}>
+              <Typography variant="h3">Edit Your Data</Typography>
+              {userData?.username && (
+                <EditUserForm
+                  userData={userData}
+                  refreshUserData={refreshUserData}
+                  updateUserData={updateUserData}
+                />
+              )}
+              <PasswordSection />
+            </Grid>
+            <Grid item sm={12} md={4}>
+              <Typography variant="h3">Your Data:</Typography>
+              <Box sx={glassPanel} mt={4}>
+                <UserDataInfo />
+              </Box>
+              <Typography variant="h3" mb={2} mt={2}>
+                Danger Zone
+              </Typography>
+              <Box sx={glassPanel} mt={4}>
+                <DangerZone handleDeleteAccount={handleDeleteAccount} />
+              </Box>
+            </Grid>
           </Grid>
-          <Grid item sm={12} md={4}>
-            <UserDataInfo />
-            <DangerZone handleDeleteAccount={handleDeleteAccount} />
-          </Grid>
-        </Grid>
-      </Container>
+        </Container>
+      </Box>
     </Box>
   );
 };

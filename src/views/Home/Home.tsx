@@ -6,7 +6,7 @@ import {
   modesContainer,
   subtitle,
   headline,
-} from "./homeStyles";
+} from "./home.style";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import SelectModeCard from "../../components/SelectModeCard/SelectModeCard";
 import pvpImg from "../../assets/images/modes/pvp.jpg";
@@ -22,7 +22,7 @@ const Home = () => {
       <Box sx={homeHeroContainer}>
         <Box sx={heroOverlay}>
           <Typography component="h1" sx={headline}>
-            Welcome to the Quiz League of Legends!
+            Welcome to the Queue Quiz!
           </Typography>
           <Typography component="h2" sx={subtitle}>
             Select mode below to start playing!

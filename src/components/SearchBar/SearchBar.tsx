@@ -24,7 +24,7 @@ const SearchBar = ({ initSearch, handleSearchChange, delay }: IUseDebounce) => {
         id="standard-search"
         label="Search field"
         type="search"
-        variant="standard"
+        variant="outlined"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />

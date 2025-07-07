@@ -7,9 +7,6 @@ const UserDataInfo = () => {
 
   return (
     <Box>
-      <Typography mb={2} variant="h5">
-        Your Data
-      </Typography>
       <Box sx={userDataInfoBox}>
         <Typography variant="body1">Username: {userData?.username}</Typography>
         <Typography variant="body1">E-mail: {userData?.email}</Typography>

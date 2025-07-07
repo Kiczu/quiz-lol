@@ -10,12 +10,18 @@ import {
   Avatar,
   Tooltip,
   MenuItem,
+  Button,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import MobileNav from "./MobileNav/MobileNav";
 import DesktopNav from "./DesktopNav/DesktopNav";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { paths } from "../../paths";
+import {
+  userMenuContainer,
+  userMenuItemSx,
+  navigationContainer,
+} from "./navigation.style";
 
 const pages = [
   {
@@ -72,7 +78,8 @@ const Navigation = () => {
     <AppBar
       position="sticky"
       className="app-bar"
-      sx={{ backgroundColor: "#0A1428", borderBottom: "1.5px solid #C8AA6E" }}
+      elevation={0}
+      sx={navigationContainer}
     >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
@@ -94,7 +101,7 @@ const Navigation = () => {
               </IconButton>
             </Tooltip>
             <Menu
-              sx={{ mt: "45px" }}
+              sx={userMenuContainer}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
@@ -111,15 +118,15 @@ const Navigation = () => {
             >
               {visibleSetting.map((setting) => (
                 <Link to={setting.href} key={setting.name}>
-                  <MenuItem onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center">{setting.name}</Typography>
+                  <MenuItem onClick={handleCloseUserMenu} sx={userMenuItemSx}>
+                    <Button>{setting.name}</Button>
                   </MenuItem>
                 </Link>
               ))}
 
               {userData && (
-                <MenuItem onClick={handleSignOut}>
-                  <Typography textAlign="center">Wyloguj się</Typography>
+                <MenuItem onClick={handleSignOut} sx={userMenuItemSx}>
+                  <Button>Wyloguj się</Button>
                 </MenuItem>
               )}
             </Menu>
