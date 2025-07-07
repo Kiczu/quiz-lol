@@ -1,4 +1,5 @@
 import { colors } from "../../theme/colors";
+import { getMultiColumnGradientSx } from "../../utils/gradient";
 
 export const championCard = {
     position: "relative",
@@ -7,7 +8,7 @@ export const championCard = {
     boxShadow: "0 4px 24px 2px #C8AA6E22, 0 1px 8px #0008",
     overflow: "hidden",
     border: "none",
-    transition: "transform 0.s cubic-bezier(.34,1.56,.64,1)",
+    transition: "transform 0.5s cubic-bezier(.34,1.56,.64,1)",
     "&:hover": {
         boxShadow: "0 8px 32px 4px #C8AA6E55, 0 4px 24px #0397AB88",
         background: "rgba(28,34,48, 0.97)",
@@ -38,3 +39,8 @@ export const championNameBanner = {
     borderRadius: 0,
     zIndex: 9,
 };
+
+export const getBannerSx = (columns: number, idx: number) => ({
+    ...championNameBanner,
+    ...getMultiColumnGradientSx(columns, idx, colors.accentGradient),
+});

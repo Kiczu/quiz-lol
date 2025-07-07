@@ -2,9 +2,7 @@ import { Grid, Link, Box, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as ReactRouter } from "react-router-dom";
 import { ChampionDetails } from "../../../api/types";
-import { championCard, championImage, championNameBanner } from "../lore.style";
-
-const gradient = "linear-gradient(90deg, #C8AA6E 45%, #0AC8B9 100%)";
+import { championCard, championImage, getBannerSx } from "../lore.style";
 
 const ChampionList = ({ champions }: { champions: ChampionDetails[] }) => {
   const theme = useTheme();
@@ -35,17 +33,7 @@ const ChampionList = ({ champions }: { champions: ChampionDetails[] }) => {
                 sx={championImage}
                 loading="lazy"
               />
-              <Box
-                sx={{
-                  ...championNameBanner,
-                  background: gradient,
-                  backgroundSize: `${COLUMNS * 100}% 100%`,
-                  backgroundPositionX: `${(100 / COLUMNS) * (idx % COLUMNS)}%`,
-                  backgroundRepeat: "no-repeat",
-                }}
-              >
-                {champion.name}
-              </Box>
+              <Box sx={getBannerSx(COLUMNS, idx)}>{champion.name}</Box>
             </Box>
           </Link>
         </Grid>

@@ -25,4 +25,6 @@ export const colors = {
     grey1: "#A09B8C",
     grey2: "#3C3C41",
     grey3: "#1E2328",
+
+    accentGradient: "linear-gradient(90deg, #C8AA6E 45%, #0AC8B9 100%)",
 };
