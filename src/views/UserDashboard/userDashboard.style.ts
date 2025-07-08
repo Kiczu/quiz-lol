@@ -1,5 +1,4 @@
 import { colors } from "../../theme/colors";
-import backgroundMap from "../../assets/images/backgroundMap.jpg"
 
 export const inputStyle = {
     backgroundColor: "transparent",
@@ -21,11 +20,6 @@ export const dashboardViewContainer = {
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
-    // backgroundImage: `url(${backgroundMap})`,
-    // backgroundSize: "cover",
-    // backgroundPosition: "center",
-    // backgroundRepeat: "no-repeat",
-    // backgroundAttachment: "fixed",
 }
 
 export const dashboardOverlay = {
