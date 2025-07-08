@@ -20,6 +20,8 @@ import ForgotPassword from "./views/AuthPage/ForgotPassword/ForgotPassword";
 import UserDashboard from "./views/UserDashboard/UserDashboard";
 import Ranking from "./views/Ranking/Ranking";
 import "./index.css";
+import { BackgroundProvider } from "./context/BackgroundContext/BackgroundContext";
+import GlobalBackground from "./components/GlobalBackground/GlobalBackground";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -30,36 +32,39 @@ root.render(
       <Router basename="/">
         <ModalProvider>
           <LoginProvider>
-            <Routes>
-              <Route path={paths.HOME} element={<Layout />}>
-                <Route
-                  path="/__/auth/action"
-                  element={<FirebaseActionHandler />}
-                />
-                <Route path={paths.HOME} element={<Home />} />
-                <Route path={paths.CHAMPION_DETAIL} element={<Champion />} />
-                <Route path={paths.RANKING} element={<Ranking />} />
-                <Route
-                  path={paths.HANGMAN}
-                  element={
-                    <GameProvider>
-                      <Hangman />
-                    </GameProvider>
-                  }
-                />
-                <Route path={paths.AUTH} element={<AuthPage />}>
-                  <Route path={paths.LOGIN} element={<LoginForm />} />
-                  <Route path={paths.REGISTER} element={<RegisterForm />} />
+            <BackgroundProvider>
+              <GlobalBackground />
+              <Routes>
+                <Route path={paths.HOME} element={<Layout />}>
                   <Route
-                    path={paths.RESET_PASSWORD}
-                    element={<ForgotPassword />}
+                    path="/__/auth/action"
+                    element={<FirebaseActionHandler />}
                   />
-                </Route>
+                  <Route path={paths.HOME} element={<Home />} />
+                  <Route path={paths.CHAMPION_DETAIL} element={<Champion />} />
+                  <Route path={paths.RANKING} element={<Ranking />} />
+                  <Route
+                    path={paths.HANGMAN}
+                    element={
+                      <GameProvider>
+                        <Hangman />
+                      </GameProvider>
+                    }
+                  />
+                  <Route path={paths.AUTH} element={<AuthPage />}>
+                    <Route path={paths.LOGIN} element={<LoginForm />} />
+                    <Route path={paths.REGISTER} element={<RegisterForm />} />
+                    <Route
+                      path={paths.RESET_PASSWORD}
+                      element={<ForgotPassword />}
+                    />
+                  </Route>
 
-                <Route path={paths.LORE} element={<Lore />} />
-                <Route path={paths.DASHBOARD} element={<UserDashboard />} />
-              </Route>
-            </Routes>
+                  <Route path={paths.LORE} element={<Lore />} />
+                  <Route path={paths.DASHBOARD} element={<UserDashboard />} />
+                </Route>
+              </Routes>
+            </BackgroundProvider>
           </LoginProvider>
         </ModalProvider>
       </Router>
