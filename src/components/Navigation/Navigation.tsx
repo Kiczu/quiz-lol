@@ -4,7 +4,6 @@ import {
   Box,
   Toolbar,
   IconButton,
-  Typography,
   Menu,
   Container,
   Avatar,
@@ -18,9 +17,9 @@ import DesktopNav from "./DesktopNav/DesktopNav";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { paths } from "../../paths";
 import {
-  userMenuContainer,
-  userMenuItemSx,
+  userSettingsContainer,
   navigationContainer,
+  menuItem,
 } from "./navigation.style";
 
 const pages = [
@@ -95,13 +94,13 @@ const Navigation = () => {
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar
-                  alt={userData?.firstName}
+                  alt="avatar"
                   src={userData?.avatar || "/default-avatar.png"}
                 />
               </IconButton>
             </Tooltip>
             <Menu
-              sx={userMenuContainer}
+              sx={userSettingsContainer}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
@@ -118,14 +117,14 @@ const Navigation = () => {
             >
               {visibleSetting.map((setting) => (
                 <Link to={setting.href} key={setting.name}>
-                  <MenuItem onClick={handleCloseUserMenu} sx={userMenuItemSx}>
+                  <MenuItem onClick={handleCloseUserMenu} sx={menuItem}>
                     <Button>{setting.name}</Button>
                   </MenuItem>
                 </Link>
               ))}
 
               {userData && (
-                <MenuItem onClick={handleSignOut} sx={userMenuItemSx}>
+                <MenuItem onClick={handleSignOut} sx={menuItem}>
                   <Button>Wyloguj się</Button>
                 </MenuItem>
               )}
