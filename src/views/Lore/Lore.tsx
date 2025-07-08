@@ -1,41 +1,35 @@
+import { useEffect } from "react";
 import { Box, Container, Typography } from "@mui/material";
 import { useLoreData } from "./useLoreData";
 import ChampionList from "./ChampionList/ChampionList";
 import SearchBar from "../../components/SearchBar/SearchBar";
+import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import { loreViewHeader, loreViewOverlay, loreViewWrapper } from "./lore.style";
 
 const Lore = () => {
   const { champions, search, handleSearchChange } = useLoreData();
+  const { setImage } = useBackground();
+
+  useEffect(() => {
+    setImage(backgroundMap);
+    return () => setImage(undefined);
+  }, [setImage]);
 
   return (
-    <Box
-      sx={{
-        backgroundImage: `url(${backgroundMap})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        backgroundAttachment: "fixed",
-        minHeight: "100vh",
-        width: "100%",
-      }}
-    >
-      <Box
-        sx={{
-          minHeight: "100vh",
-          backdropFilter: "blur(4px)",
-          backgroundColor: "rgba(10, 20, 40 ,0.6)",
-          padding: "20px 80px",
-        }}
-      >
+    <Box sx={loreViewWrapper}>
+      <Box sx={loreViewOverlay}>
         <Container maxWidth="xl">
-          <Typography variant="h1" component="h1">
-            LORE
-          </Typography>
-          <SearchBar
-            initSearch={search}
-            handleSearchChange={handleSearchChange}
-            delay={500}
-          />
+          <Box sx={loreViewHeader}>
+            <Typography variant="h1" component="h1">
+              League of Legends Lore
+            </Typography>
+            <SearchBar
+              initSearch={search}
+              handleSearchChange={handleSearchChange}
+              delay={500}
+            />
+          </Box>
           <ChampionList champions={champions} />
         </Container>
       </Box>

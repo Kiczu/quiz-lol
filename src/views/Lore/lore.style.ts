@@ -1,6 +1,31 @@
 import { colors } from "../../theme/colors";
 import { getMultiColumnGradientSx } from "../../utils/gradient";
 
+export const loreViewWrapper = {
+    minHeight: "100vh",
+    width: "100%",
+}
+
+export const loreViewOverlay = {
+    minHeight: "100vh",
+    backdropFilter: "blur(4px)",
+    backgroundColor: "rgba(10, 20, 40 ,0.6)",
+    padding: {
+        xs: "20px 0",
+        sm: "20px 24px",
+        md: "20px 60px",
+        lg: "20px 80px"
+    },
+}
+
+export const loreViewHeader = {
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    textAlign: "center",
+    m: 4,
+}
+
 export const championCard = {
     position: "relative",
     background: "rgba(28,34,48, 0.92)",

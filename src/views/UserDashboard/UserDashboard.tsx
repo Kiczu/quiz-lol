@@ -9,6 +9,7 @@ import UserDataInfo from "./UserDataInfo/UserDataInfo";
 import DangerZone from "./DangerZone/DangerZone";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
+import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { authService } from "../../services/authService";
 import { deleteAccountWithAuth } from "../../helpers/deleteAccountWithAuth";
 import { getErrorMessage, isFirebaseCode } from "../../utils/errorUtils";
@@ -22,6 +23,7 @@ import {
   scoresContainer,
 } from "./userDashboard.style";
 import PasswordSection from "./PasswordSection/PasswordSection";
+import backgroundMap from "../../assets/images/backgroundMap.jpg";
 
 const UserDashboard = () => {
   const navigate = useNavigate();
@@ -34,6 +36,12 @@ const UserDashboard = () => {
   } = useAuth();
   const { showModal } = useModal();
   const { scores, totalScore } = useScores(userData?.uid);
+  const { setImage } = useBackground();
+
+  useEffect(() => {
+    setImage(backgroundMap);
+    return () => setImage(undefined);
+  }, [setImage]);
 
   useEffect(() => {
     if (!isLoading && !userData) {
