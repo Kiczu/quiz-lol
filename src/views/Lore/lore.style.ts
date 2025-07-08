@@ -9,7 +9,7 @@ export const loreViewWrapper = {
 export const loreViewOverlay = {
     minHeight: "100vh",
     backdropFilter: "blur(4px)",
-    backgroundColor: "rgba(10, 20, 40 ,0.6)",
+    backgroundColor: colors.overlayBackground,
     padding: {
         xs: "20px 0",
         sm: "20px 24px",

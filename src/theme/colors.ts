@@ -27,4 +27,5 @@ export const colors = {
     grey3: "#1E2328",
 
     accentGradient: "linear-gradient(90deg, #C8AA6E 45%, #0AC8B9 100%)",
+    overlayBackground: "rgba(1, 10, 19, 0.8)",
 };

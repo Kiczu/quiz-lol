@@ -1,7 +1,7 @@
 import { colors } from "../../theme/colors"
 
 export const navigationContainer = {
-    backgroundColor: "#0A1428",
+    backgroundColor: colors.background,
     border: 0,
     borderBottom: "3px solid",
     borderImage: "linear-gradient(90deg, #C8AA6E 60%, #0AC8B9 100%) 1",

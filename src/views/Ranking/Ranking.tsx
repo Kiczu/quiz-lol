@@ -1,8 +1,15 @@
-import React, { useState } from "react";
-import { Box, Typography, Tabs, Tab } from "@mui/material";
+import { useEffect, useState } from "react";
+import { Box, Typography, Tabs, Tab, Container } from "@mui/material";
 import { colors } from "../../theme/colors";
+import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import useRanking from "./useRanking";
 import RankingTable from "./RankingTable";
+import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import {
+  rankignOverlay,
+  rankingContainer,
+  rankingHeader,
+} from "./ranking.style";
 
 const gameModes = ["Hangman", "Champions", "Skills", "Quote", "TotalScore"];
 
@@ -10,43 +17,45 @@ const Ranking = () => {
   const [activeTab, setActiveTab] = useState(0);
   const selectedMode = gameModes[activeTab];
   const { ranking } = useRanking(selectedMode);
+  const { setImage } = useBackground();
+
+  useEffect(() => {
+    setImage(backgroundMap);
+    return () => setImage(undefined);
+  }, [setImage]);
 
   return (
-    <Box
-      sx={{
-        backgroundColor: colors.background,
-        color: colors.textPrimary,
-        minHeight: "100vh",
-        p: 4,
-      }}
-    >
-      <Typography variant="h4" sx={{ mb: 4, color: colors.gold1 }}>
-        User Rankings
-      </Typography>
-
-      <Tabs
-        value={activeTab}
-        onChange={(_, newValue) => setActiveTab(newValue)}
-        sx={{ mb: 4, borderBottom: 1, borderColor: colors.grey2 }}
-      >
-        {gameModes.map((mode, index) => (
-          <Tab
-            key={mode}
-            label={mode}
-            sx={{
-              color:
-                index === gameModes.length - 1
-                  ? colors.gold3
-                  : colors.textPrimary,
-            }}
-          />
-        ))}
-      </Tabs>
-      {ranking.length > 0 ? (
-        <RankingTable ranking={ranking} />
-      ) : (
-        <EmptyRankingMessage />
-      )}
+    <Box sx={rankingContainer}>
+      <Box sx={rankignOverlay}>
+        <Container maxWidth="xl">
+          <Typography variant="h1" component="h1" sx={rankingHeader}>
+            User Rankings
+          </Typography>
+          <Tabs
+            value={activeTab}
+            onChange={(_, newValue) => setActiveTab(newValue)}
+            sx={{ mb: 4, borderBottom: 1, borderColor: colors.grey2 }}
+          >
+            {gameModes.map((mode, index) => (
+              <Tab
+                key={mode}
+                label={mode}
+                sx={{
+                  color:
+                    index === gameModes.length - 1
+                      ? colors.gold3
+                      : colors.textPrimary,
+                }}
+              />
+            ))}
+          </Tabs>
+          {ranking.length > 0 ? (
+            <RankingTable ranking={ranking} />
+          ) : (
+            <EmptyRankingMessage />
+          )}
+        </Container>
+      </Box>
     </Box>
   );
 };
