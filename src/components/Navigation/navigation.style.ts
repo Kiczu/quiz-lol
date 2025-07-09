@@ -4,8 +4,7 @@ export const navigationContainer = {
     backgroundColor: colors.background,
     border: 0,
     borderBottom: "3px solid",
-    borderImage: "linear-gradient(90deg, #C8AA6E 60%, #0AC8B9 100%) 1",
-    boxShadow: "0 4px 16px 0 #C8AA6E22",
+    borderImage: `${colors.accentGradient} 1`,
     zIndex: 1201,
 }
 
