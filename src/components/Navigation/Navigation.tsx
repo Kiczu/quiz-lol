@@ -11,11 +11,13 @@ import {
   MenuItem,
   Button,
 } from "@mui/material";
+import { Person } from "@mui/icons-material";
 import { Link } from "react-router-dom";
-import MobileNav from "./MobileNav/MobileNav";
-import DesktopNav from "./DesktopNav/DesktopNav";
+import { colors } from "../../theme/colors";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { paths } from "../../paths";
+import MobileNav from "./MobileNav/MobileNav";
+import DesktopNav from "./DesktopNav/DesktopNav";
 import {
   userSettingsContainer,
   navigationContainer,
@@ -96,9 +98,15 @@ const Navigation = () => {
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar
                   alt="avatar"
-                  src={userData?.avatar || "/default-avatar.png"}
-                  sx={avatarIcon}
-                />
+                  src={userData?.avatar || undefined}
+                  sx={{
+                    ...avatarIcon,
+                    background: userData?.avatar ? undefined : `#0ac8b9`,
+                    color: colors.backgroundSecondary,
+                  }}
+                >
+                  {!userData?.avatar && <Person sx={{ fontSize: 36 }} />}
+                </Avatar>
               </IconButton>
             </Tooltip>
             <Menu
