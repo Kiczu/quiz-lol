@@ -25,7 +25,7 @@ const AvatarSection = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const gridColumns = isMobile ? 2 : 4;
+  const gridColumns = isMobile ? 3 : 4;
   const columns = gridColumns + 1;
 
   return (
