@@ -74,6 +74,7 @@ const loginUser = async (email: string, password: string) => {
 
 const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' });
     const userCredential = await signInWithPopup(auth, provider);
     return userCredential.user;
 }
@@ -96,6 +97,7 @@ const reauthenticateUser = async (password?: string) => {
 
     if (providerId === "google.com") {
         const provider = new GoogleAuthProvider();
+        provider.setCustomParameters({ prompt: 'select_account' });
         return reauthenticateWithPopup(user, provider);
     }
 
