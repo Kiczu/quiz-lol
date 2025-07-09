@@ -1,60 +1,84 @@
-import { Avatar, Grid, Input } from "@mui/material";
-import {
-  smallAvatarItem,
-  smallAvatarsGrid,
-  smallAvatarStyle,
-} from "../avatarSection.style";
+import { Avatar, Box, Grid } from "@mui/material";
+import { Delete } from "@mui/icons-material";
 import { useAvatar } from "../useAvatar";
 import { colors } from "../../../../theme/colors";
-import { Add } from "@mui/icons-material";
+import { getMultiColumnGradientSx } from "../../../../utils/gradient";
+import {
+  deleteAvatarImg,
+  smallAvatarImg,
+  smallAvatarItem,
+  smallAvatarsGrid,
+  smallAvatarWrapper,
+} from "../avatarSection.style";
 
-const predefinedAvatars = [
-  "/avatars/avatar1.webp",
-  "/avatars/avatar2.webp",
-  "/avatars/avatar3.webp",
-  "/avatars/avatar4.webp",
-  "/avatars/avatar5.webp",
-  "/avatars/avatar6.webp",
-  "/avatars/avatar7.webp",
-];
-
-const AvatarSelection = () => {
+type Props = {
+  selectedAvatar: string | undefined;
+  predefinedAvatars: string[];
+  gridColumns: number;
+  columns: number;
+};
+const AvatarSelection = ({
+  selectedAvatar,
+  predefinedAvatars,
+  gridColumns,
+  columns,
+}: Props) => {
   const { updateAvatar } = useAvatar();
 
   const handleDeleteAvatar = () => {
-    console.log('usun avatar');
+    console.log("usun avatar");
+    updateAvatar("");
   };
 
   return (
     <Grid container spacing={2} sx={smallAvatarsGrid}>
-      {predefinedAvatars.map((avatar, index) => (
-        <Grid item xs={3} key={index} sx={smallAvatarItem}>
-          <Avatar
-            src={avatar}
-            sx={smallAvatarStyle}
-            onClick={() => updateAvatar(avatar)}
-          />
-        </Grid>
-      ))}
-      <Grid item xs={3} sx={smallAvatarItem}>
-        <Input
-          type="file"
-          id="upload-avatar"
-          sx={{ display: "none" }}
-          inputProps={{ accept: "image/*" }}
-          onChange={handleDeleteAvatar}
-        />
-        <label htmlFor="upload-avatar">
-          <Avatar
-            sx={{
-              ...smallAvatarStyle,
-              backgroundColor: colors.gold2,
-              cursor: "pointer",
-            }}
-          >
-            <Add sx={{ color: colors.textPrimary }} />
-          </Avatar>
-        </label>
+      {predefinedAvatars.map((avatar, index) => {
+        const colIdx = (index % gridColumns) + 1;
+        return (
+          <Grid item xs={12 / gridColumns} key={avatar} sx={smallAvatarItem}>
+            <Box
+              sx={{
+                ...smallAvatarWrapper,
+                ...getMultiColumnGradientSx(
+                  columns,
+                  colIdx,
+                  colors.accentGradient
+                ),
+                filter:
+                  selectedAvatar === avatar
+                    ? "grayscale(0.7) brightness(0.92)"
+                    : "none",
+                opacity: selectedAvatar === avatar ? 0.68 : 1,
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+              onClick={() => updateAvatar(avatar)}
+            >
+              <Avatar
+                src={avatar}
+                sx={smallAvatarImg}
+                onClick={() => handleDeleteAvatar}
+              />
+            </Box>
+          </Grid>
+        );
+      })}
+      <Grid item xs={12 / gridColumns} sx={smallAvatarItem}>
+        <Box
+          sx={{
+            ...smallAvatarWrapper,
+            ...deleteAvatarImg,
+            ...getMultiColumnGradientSx(
+              columns,
+              columns - 1,
+              colors.accentGradient
+            ),
+          }}
+          onClick={() => updateAvatar(undefined)}
+          title="Usuń avatar (domyślny)"
+        >
+          <Delete />
+        </Box>
       </Grid>
     </Grid>
   );
