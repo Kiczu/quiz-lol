@@ -26,8 +26,13 @@ const DesktopNav = ({ pages, handleCloseNavMenu }: DesktopNavProps) => {
         }}
       />
       <Box sx={desktopNavPagesContainer}>
-        {pages.map((page) => (
-          <Link component={ReactRouter} to={page.href} underline="none">
+        {pages.map((page, index) => (
+          <Link
+            component={ReactRouter}
+            to={page.href}
+            key={index}
+            underline="none"
+          >
             <Button
               key={page.name}
               onClick={handleCloseNavMenu}
