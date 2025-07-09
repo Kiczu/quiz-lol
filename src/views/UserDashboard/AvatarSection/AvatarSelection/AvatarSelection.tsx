@@ -4,7 +4,9 @@ import { useAvatar } from "../useAvatar";
 import { colors } from "../../../../theme/colors";
 import { getMultiColumnGradientSx } from "../../../../utils/gradient";
 import {
+  afterSX,
   deleteAvatarImg,
+  hoverSX,
   smallAvatarImg,
   smallAvatarItem,
   smallAvatarsGrid,
@@ -52,19 +54,8 @@ const AvatarSelection = ({
                     : "none",
                 transition: "all 0.2s",
                 zIndex: 1,
-                "&::after": {
-                  content: '""',
-                  position: "absolute",
-                  top: "-7px",
-                  left: "-7px",
-                  width: "calc(100% + 14px)",
-                  height: "calc(100% + 14px)",
-                  borderRadius: "50%",
-                  ...gradientFragmentSx,
-                  filter: "blur(8px)",
-                  opacity: 0.6,
-                  zIndex: 0,
-                },
+                "&::after": { ...afterSX, ...gradientFragmentSx },
+                "&:hover": hoverSX,
               }}
               onClick={() => updateAvatar(avatar)}
             >
@@ -76,6 +67,7 @@ const AvatarSelection = ({
       <Grid item xs={12 / gridColumns} sx={smallAvatarItem}>
         <Box
           sx={{
+            position: "relative",
             ...smallAvatarWrapper,
             ...deleteAvatarImg,
             ...getMultiColumnGradientSx(
@@ -83,6 +75,8 @@ const AvatarSelection = ({
               columns - 1,
               colors.accentGradient
             ),
+            transition: "all 0.2s",
+            "&:hover": hoverSX,
           }}
           onClick={handleDeleteAvatar}
         >

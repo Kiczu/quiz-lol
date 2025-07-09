@@ -71,6 +71,30 @@ export const smallAvatarWrapper = {
     },
 };
 
+export const afterSX = {
+    content: '""',
+    position: "absolute",
+    top: "-6px",
+    left: "-6px",
+    width: "calc(100% + 12px)",
+    height: "calc(100% + 12px)",
+    borderRadius: "50%",
+    filter: "blur(5px)",
+    opacity: 0.6,
+    zIndex: 0,
+    transition: "opacity .18s, filter .18s",
+};
+
+export const hoverSX = {
+    filter: "brightness(1.12)",
+    transform: "scale(1.045)",
+    zIndex: 3,
+    "&::after": {
+        opacity: 0.82,
+        filter: "blur(7px)",
+    },
+};
+
 export const smallAvatarImg = {
     width: "100%",
     height: "100%",
