@@ -1,3 +1,4 @@
+import zIndex from "@mui/material/styles/zIndex";
 import { colors } from "../../../theme/colors";
 
 export const avatarGridContainer = {
@@ -61,6 +62,8 @@ export const smallAvatarWrapper = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    cursor: "pointer",
+    overflow: "visible",
     "@media (max-width: 600px)": {
         width: 70,
         height: 70,
@@ -73,7 +76,7 @@ export const smallAvatarImg = {
     height: "100%",
     borderRadius: "50%",
     objectFit: "cover",
-    background: "rgba(0,0,0,0.82)",
+    zIndex: 1,
 };
 
 export const deleteAvatarImg = {

@@ -17,6 +17,7 @@ type Props = {
   gridColumns: number;
   columns: number;
 };
+
 const AvatarSelection = ({
   selectedAvatar,
   predefinedAvatars,
@@ -26,39 +27,48 @@ const AvatarSelection = ({
   const { updateAvatar } = useAvatar();
 
   const handleDeleteAvatar = () => {
-    console.log("usun avatar");
-    updateAvatar("");
+    updateAvatar(undefined);
   };
 
   return (
-    <Grid container spacing={2} sx={smallAvatarsGrid}>
+    <Grid container spacing={4} sx={smallAvatarsGrid}>
       {predefinedAvatars.map((avatar, index) => {
         const colIdx = (index % gridColumns) + 1;
+        const gradientFragmentSx = getMultiColumnGradientSx(
+          columns,
+          colIdx,
+          colors.accentGradient
+        );
         return (
           <Grid item xs={12 / gridColumns} key={avatar} sx={smallAvatarItem}>
             <Box
               sx={{
+                position: "relative",
                 ...smallAvatarWrapper,
-                ...getMultiColumnGradientSx(
-                  columns,
-                  colIdx,
-                  colors.accentGradient
-                ),
+                ...gradientFragmentSx,
                 filter:
                   selectedAvatar === avatar
                     ? "grayscale(0.7) brightness(0.92)"
                     : "none",
-                opacity: selectedAvatar === avatar ? 0.68 : 1,
-                cursor: "pointer",
                 transition: "all 0.2s",
+                zIndex: 1,
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  top: "-7px",
+                  left: "-7px",
+                  width: "calc(100% + 14px)",
+                  height: "calc(100% + 14px)",
+                  borderRadius: "50%",
+                  ...gradientFragmentSx,
+                  filter: "blur(8px)",
+                  opacity: 0.6,
+                  zIndex: 0,
+                },
               }}
               onClick={() => updateAvatar(avatar)}
             >
-              <Avatar
-                src={avatar}
-                sx={smallAvatarImg}
-                onClick={() => handleDeleteAvatar}
-              />
+              <Avatar src={avatar} sx={smallAvatarImg} />
             </Box>
           </Grid>
         );
@@ -74,8 +84,7 @@ const AvatarSelection = ({
               colors.accentGradient
             ),
           }}
-          onClick={() => updateAvatar(undefined)}
-          title="Usuń avatar (domyślny)"
+          onClick={handleDeleteAvatar}
         >
           <Delete />
         </Box>
