@@ -9,14 +9,14 @@ const createUser = async ({
     firstName,
     lastName,
     username,
-    avatar = "/default-avatar.png",
+    avatar = null,
 }: {
     uid: string;
     email: string;
     firstName: string;
     lastName: string;
     username: string;
-    avatar?: string;
+    avatar?: string | null;
 }) => {
     await userService.createUserPrivate({ uid, email, firstName, lastName });
     await scoreService.createUserPublic({ uid, username, avatar });

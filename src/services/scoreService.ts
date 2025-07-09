@@ -6,11 +6,11 @@ import { filterEmptyFields } from "../utils/object";
 const createUserPublic = async ({
     uid,
     username,
-    avatar = "/default-avatar.png",
+    avatar = null,
 }: {
     uid: string;
     username: string;
-    avatar?: string;
+    avatar?: string | null;
 }) => {
     await setDoc(doc(db, "scores", uid), {
         username,
