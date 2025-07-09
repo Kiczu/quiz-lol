@@ -20,6 +20,7 @@ import {
   userSettingsContainer,
   navigationContainer,
   menuItem,
+  avatarIcon,
 } from "./navigation.style";
 
 const pages = [
@@ -96,6 +97,7 @@ const Navigation = () => {
                 <Avatar
                   alt="avatar"
                   src={userData?.avatar || "/default-avatar.png"}
+                  sx={avatarIcon}
                 />
               </IconButton>
             </Tooltip>

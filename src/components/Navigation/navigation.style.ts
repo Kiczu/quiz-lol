@@ -33,7 +33,7 @@ export const logoNav = {
 }
 
 export const userSettingsContainer = {
-    mt: 6,
+    mt: { xs: 6, md: 9 },
     "& .MuiList-root": {
         paddingTop: 0,
         paddingBottom: 0,
@@ -45,7 +45,6 @@ export const userSettingsContainer = {
 }
 
 export const mobileNavPagesContainer = {
-    border: 'none',
     display: { xs: "block", md: "none" },
     "& .MuiList-root": {
         paddingTop: 0,
@@ -102,3 +101,9 @@ export const desktopNavPages = {
         },
     },
 };
+
+export const avatarIcon = {
+    width: { xs: "40px", md: "55px" },
+    height: { xs: "40px", md: "55px" },
+    ml: 2,
+}
