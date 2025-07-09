@@ -45,7 +45,6 @@ const modes = [
 
 const Home = () => {
   const { userData } = useAuth();
-
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
   const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
@@ -57,9 +56,15 @@ const Home = () => {
   return (
     <Box sx={homeHeroContainer}>
       <Box sx={heroOverlay}>
-        <Typography component="h1" sx={headline}>
-          Welcome to the Queue Quiz!
-        </Typography>
+        {userData ? (
+          <Typography component="h1" sx={headline}>
+            Nice to see you again, {userData?.username}!
+          </Typography>
+        ) : (
+          <Typography component="h1" sx={headline}>
+            Welcome to the Queue Quiz!
+          </Typography>
+        )}
         <Typography component="h2" sx={subtitle}>
           Select mode below to start playing!
         </Typography>
