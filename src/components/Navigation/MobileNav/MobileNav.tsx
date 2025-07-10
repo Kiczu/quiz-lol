@@ -7,7 +7,7 @@ import {
   menuItem,
   mobileNavPagesContainer,
 } from "../navigation.style";
-import logoQuiz from "../../../assets/images/logo-quiz2.png";
+import logoQuiz from "../../../assets/images/QueueQuizLogo.svg";
 
 interface MobileNavProps {
   pages: {
