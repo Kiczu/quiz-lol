@@ -72,6 +72,18 @@ export const LoginProvider = ({ children }: Props) => {
         email: user.email || "",
         username: "",
       });
+      showModal({
+        title: "Welcome!",
+        content:
+          "You have registered with Google. Complete your profile to start playing!",
+        onlyConfirm: true,
+      });
+    } else {
+      showModal({
+        title: "Welcome back!",
+        content: "You have logged in with Google.",
+        onlyConfirm: true,
+      });
     }
     await refreshUserData();
   };

@@ -1,12 +1,21 @@
-import { useLocation, Outlet } from "react-router-dom";
+import { useEffect } from "react";
+import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { Button, Grid, Paper, Typography } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/LoginContext/LoginContext";
+import { paths } from "../../paths";
 import { animationConfig, authPageStyles } from "./authPage.style";
 
 const AuthPage = () => {
   const location = useLocation();
-  const { handleSignInWithGoogle } = useAuth();
+  const navigate = useNavigate();
+  const { userData, handleSignInWithGoogle } = useAuth();
+
+  useEffect(() => {
+    if (userData && location.pathname === paths.LOGIN) {
+      navigate("/dashboard", { replace: true });
+    }
+  }, [userData, location.pathname, navigate]);
 
   return (
     <Grid container component="main" sx={authPageStyles.container}>
