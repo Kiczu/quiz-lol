@@ -10,7 +10,7 @@ import { paths } from "./paths";
 import { theme } from "./theme/theme";
 import Layout from "./Layout/Layout";
 import Home from "./views/Home/Home";
-import Champion from "./components/Champion/Champion";
+import Champion from "./views/Champion/Champion";
 import AuthPage from "./views/AuthPage/AuthPage";
 import Lore from "./views/Lore/Lore";
 import Hangman from "./views/Hangman/Hangman";
