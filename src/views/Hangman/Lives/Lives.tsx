@@ -1,7 +1,12 @@
-import { ImageList, ImageListItem } from "@mui/material";
+import { Box } from "@mui/material";
 import minion from "../../../assets/images/minion.webp";
 import ImpactGif from "../../../assets/animations/impact.gif";
-import { ImpactAnimation, MinionImg } from "../hangmanStyles";
+import {
+  ImpactAnimation,
+  livesGrid,
+  liveWrapper,
+  MinionImg,
+} from "./lives.style";
 
 type Props = {
   maxAttempts: number;
@@ -10,20 +15,14 @@ type Props = {
 
 const Lives = ({ maxAttempts, wrongGuesses }: Props) => {
   return (
-    <ImageList cols={3} gap={16}>
+    <Box sx={livesGrid}>
       {Array.from({ length: maxAttempts }, (_, i) => (
-        <ImageListItem
-          key={minion}
-          sx={{
-            position: "relative",
-          }}
-        >
+        <Box key={`minion${i}`} sx={liveWrapper}>
           <MinionImg
             className="MuiImageListItem-img"
             isActive={wrongGuesses > i}
             src={minion}
-            alt=""
-            key={i}
+            alt="life"
           />
           {wrongGuesses > i && (
             <ImpactAnimation
@@ -32,9 +31,10 @@ const Lives = ({ maxAttempts, wrongGuesses }: Props) => {
               alt=""
             />
           )}
-        </ImageListItem>
+        </Box>
       ))}
-    </ImageList>
+    </Box>
   );
 };
+
 export default Lives;
