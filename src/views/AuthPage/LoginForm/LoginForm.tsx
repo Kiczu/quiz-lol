@@ -14,6 +14,7 @@ import * as yup from "yup";
 import { useAuth } from "../../../context/LoginContext/LoginContext";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
+import { getErrorMessage } from "../../../utils/errorUtils";
 
 const loginSchema = yup.object().shape({
   email: yup
@@ -34,7 +35,7 @@ const initValues: Values = {
 };
 
 const LoginForm = () => {
-  const { showModal } = useModal();
+  const { showModal, showErrorModal } = useModal();
   const { handleSignIn } = useAuth();
   const navigate = useNavigate();
 
@@ -48,25 +49,7 @@ const LoginForm = () => {
         onConfirm: () => navigate(paths.DASHBOARD),
       });
     } catch (error: unknown) {
-      if(error === "auth/user-not-found") {
-        showModal({
-          title: "User not found",
-          content: "The user with the provided email does not exist.",
-          variant: "error",
-        });
-      } else if (error === "auth/wrong-password") {
-        showModal({
-          title: "Wrong password",
-          content: "The password you entered is incorrect.",
-          variant: "error",
-        });
-      } else {
-        showModal({
-          title: "An error occurred",
-          content: "Please try again later.",
-          variant: "error",
-        });
-      }
+      showErrorModal(getErrorMessage(error));
     }
   };
 

@@ -4,7 +4,7 @@ import React, { createContext, useEffect, useState, useContext } from "react";
 import { EditableUserFields, RawUserData } from "../../api/types";
 import { authService } from "../../services/authService";
 import { userAggregateService } from "../../services/userAggregateService";
-import { getErrorMessage } from "../../utils/errorUtils";
+import { getErrorMessage, isPopupClosedError } from "../../utils/errorUtils";
 import { useModal } from "../ModalContext/ModalContext";
 
 interface Props {
@@ -61,32 +61,45 @@ export const LoginProvider = ({ children }: Props) => {
   };
 
   const handleSignInWithGoogle = async () => {
-    const user = await authService.signInWithGoogle();
-    if (!user) throw new Error("Google sign-in failed.");
+    try {
+      const user = await authService.signInWithGoogle();
+      if (!user) throw new Error("Google sign-in failed.");
 
-    const userDoc = await userAggregateService.getUserData(user.uid);
-    if (!userDoc) {
-      await userAggregateService.createUser({
-        uid: user.uid,
-        firstName: "",
-        lastName: "",
-        email: user.email || "",
-        username: "",
-      });
-      showModal({
-        title: "Welcome!",
-        content:
-          "You have registered with Google. Complete your profile to start playing!",
-        onlyConfirm: true,
-      });
-    } else {
-      showModal({
-        title: "Welcome back!",
-        content: "You have logged in with Google.",
-        onlyConfirm: true,
-      });
+      const userDoc = await userAggregateService.getUserData(user.uid);
+      if (!userDoc) {
+        await userAggregateService.createUser({
+          uid: user.uid,
+          firstName: "",
+          lastName: "",
+          email: user.email || "",
+          username: "",
+        });
+        showModal({
+          title: "Welcome!",
+          content:
+            "You have registered with Google. Complete your profile to start playing!",
+          onlyConfirm: true,
+        });
+      } else {
+        showModal({
+          title: "Welcome back!",
+          content: "You have logged in with Google.",
+          onlyConfirm: true,
+        });
+      }
+      await refreshUserData();
+    } catch (error) {
+      if (isPopupClosedError(error)) {
+        showModal({
+          title: "Cancelled",
+          content: getErrorMessage(error),
+          variant: "warning",
+        });
+        return;
+      }
+      showErrorModal(getErrorMessage(error));
+      throw error;
     }
-    await refreshUserData();
   };
 
   const handleSignOut = async () => {
