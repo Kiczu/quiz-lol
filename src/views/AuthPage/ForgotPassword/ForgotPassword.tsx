@@ -1,10 +1,11 @@
-import * as yup from "yup";
 import { Box, Button, Grid, TextField, Typography, Link } from "@mui/material";
 import { Form, Formik } from "formik";
 import { Link as RouterLink } from "react-router-dom";
+import * as yup from "yup";
+
+import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
 import { authService } from "../../../services/authService";
-import { useModal } from "../../../context/ModalContext/ModalContext";
 import { getErrorMessage } from "../../../utils/errorUtils";
 
 const emailSchema = yup.object().shape({

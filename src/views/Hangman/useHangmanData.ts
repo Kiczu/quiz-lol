@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from "react";
+
 import { ChampionDetails } from "../../api/types";
-import { characterService } from '../../services/characterService';
 import { GameContext } from '../../context/GameContext/GameContext';
+import { characterService } from '../../services/characterService';
 
 const maxAttempts = 6;
 const winBonus = 10;

@@ -1,5 +1,6 @@
-import { useState } from "react";
 import { Box, Tab, Tabs, Typography } from "@mui/material";
+import { useState } from "react";
+
 import CustomTabPanel from "../../../components/CustomTabPanel/CustomTabPanel";
 import { spellName } from "../champion.style";
 

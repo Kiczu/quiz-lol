@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import { ScoresMap } from "../../../api/types";
 import { scoreService } from "../../../services/scoreService";
 

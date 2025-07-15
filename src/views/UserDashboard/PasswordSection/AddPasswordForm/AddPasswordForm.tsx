@@ -5,7 +5,6 @@ import * as yup from "yup";
 import { useModal } from "../../../../context/ModalContext/ModalContext";
 import { authService } from "../../../../services/authService";
 import { getErrorMessage } from "../../../../utils/errorUtils";
-
 import { inputStyle } from "../../userDashboard.style";
 
 const validationSchema = yup.object({

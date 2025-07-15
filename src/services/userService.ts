@@ -1,6 +1,7 @@
 import { doc, getDoc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
-import { EditableUserFields, UserPrivateData, } from "../api/types";
+
 import { db } from "../api/firebase/db";
+import { EditableUserFields, UserPrivateData, } from "../api/types";
 import { filterEmptyFields } from "../utils/object";
 
 const createUserPrivate = async ({

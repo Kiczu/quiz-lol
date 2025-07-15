@@ -1,10 +1,11 @@
-import * as yup from "yup";
 import { Box, TextField, Button, Typography } from "@mui/material";
 import { Formik, Form } from "formik";
-import { colors } from "../../../theme/colors";
+import * as yup from "yup";
+
 import { EditableUserFields, RawUserData } from "../../../api/types";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { useUsernameValidation } from "../../../hooks/useUsernameValidation";
+import { colors } from "../../../theme/colors";
 import { getErrorMessage, isFirebaseCode } from "../../../utils/errorUtils";
 import { inputStyle } from "../userDashboard.style";
 

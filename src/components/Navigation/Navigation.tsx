@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Person } from "@mui/icons-material";
 import {
   AppBar,
   Box,
@@ -11,13 +11,15 @@ import {
   MenuItem,
   Button,
 } from "@mui/material";
-import { Person } from "@mui/icons-material";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { colors } from "../../theme/colors";
+
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { paths } from "../../paths";
-import MobileNav from "./MobileNav/MobileNav";
+import { colors } from "../../theme/colors";
+
 import DesktopNav from "./DesktopNav/DesktopNav";
+import MobileNav from "./MobileNav/MobileNav";
 import {
   userSettingsContainer,
   navigationContainer,

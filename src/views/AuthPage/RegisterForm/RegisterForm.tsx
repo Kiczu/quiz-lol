@@ -1,4 +1,3 @@
-import * as yup from "yup";
 import {
   Avatar,
   Button,
@@ -8,13 +7,17 @@ import {
   Box,
   Link,
 } from "@mui/material";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { Form, Formik } from "formik";
-import type { UserPrivateData } from "../../../api/types";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import * as yup from "yup";
+
+
+import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
 import { authService } from "../../../services/authService";
-import { useModal } from "../../../context/ModalContext/ModalContext";
 import { getErrorMessage } from "../../../utils/errorUtils";
+
+import type { UserPrivateData } from "../../../api/types";
 
 const registerSchema = yup.object().shape({
   username: yup.string().required("Username is required"),

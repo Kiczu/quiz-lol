@@ -1,6 +1,7 @@
-import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
+import styled from "@emotion/styled";
 import { Button, Card } from "@mui/material";
+
 import { colors } from "./theme/colors";
 
 export const shadowWave = keyframes`

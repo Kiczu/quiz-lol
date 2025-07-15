@@ -1,9 +1,8 @@
 import { Box, Container, Grid, Typography } from "@mui/material";
-import useHangmanData from "./useHangmanData";
-import Answer from "./Answer/Answer";
-import Keyboard from "./Keyboard/Keyboard";
-import Lives from "./Lives/Lives";
+
 import GameBox from "../../components/GameBox/GameBox";
+
+import Answer from "./Answer/Answer";
 import {
   hangmanViewWrapper,
   hangmanViewOverlay,
@@ -13,6 +12,9 @@ import {
   leftGrid,
   rightGrid,
 } from "./hangman.style";
+import Keyboard from "./Keyboard/Keyboard";
+import Lives from "./Lives/Lives";
+import useHangmanData from "./useHangmanData";
 
 const Hangman = () => {
   const { letters, wrongGuesses, maxAttempts, usedLetters, userGuess } =

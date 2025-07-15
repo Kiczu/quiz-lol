@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { characterService } from "../../services/characterService";
+
 import { ChampionDetails } from "../../api/types";
+import { characterService } from "../../services/characterService";
 
 export const useLoreData = () => {
   const [champions, setChampions] = useState<ChampionDetails[]>([]);

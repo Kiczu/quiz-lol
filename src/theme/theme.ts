@@ -1,7 +1,8 @@
 import { createTheme } from '@mui/material/styles';
+
 import { colors } from './colors';
-import { typography } from './typography';
 import { spacing } from './spacing';
+import { typography } from './typography';
 
 export const theme = createTheme({
     palette: {

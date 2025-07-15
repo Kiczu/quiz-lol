@@ -1,7 +1,8 @@
 import { Box, Button, Link } from "@mui/material";
 import { Link as ReactRouter } from "react-router-dom";
-import { desktopNavPages, desktopNavPagesContainer } from "../navigation.style";
+
 import logoQuiz from "../../../assets/images/QueueQuizLogo.svg";
+import { desktopNavPages, desktopNavPagesContainer } from "../navigation.style";
 
 interface DesktopNavProps {
   pages: {

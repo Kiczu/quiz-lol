@@ -1,7 +1,8 @@
-import React, { createContext, useEffect, useState, useContext } from "react";
 import { sendEmailVerification, updateEmail } from "firebase/auth";
-import { authService } from "../../services/authService";
+import React, { createContext, useEffect, useState, useContext } from "react";
+
 import { EditableUserFields, RawUserData } from "../../api/types";
+import { authService } from "../../services/authService";
 import { userAggregateService } from "../../services/userAggregateService";
 import { getErrorMessage } from "../../utils/errorUtils";
 import { useModal } from "../ModalContext/ModalContext";

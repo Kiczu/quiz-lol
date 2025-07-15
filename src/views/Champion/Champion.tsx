@@ -1,11 +1,13 @@
 import { Box, Button, Container, Grid, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { characterService } from "../../services/characterService";
-import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
+
 import { ChampionDetails } from "../../api/types";
+import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { paths } from "../../paths";
-import SkillsTabs from "./SkillsTabs/SkillsTabs";
+import { characterService } from "../../services/characterService";
+
 import {
   backgroundWrapper,
   overlay,
@@ -13,7 +15,8 @@ import {
   title,
   backToLoreButton,
 } from "./champion.style";
-import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import SkillsTabs from "./SkillsTabs/SkillsTabs";
+
 
 const Champion = () => {
   const { id } = useParams<{ id: string }>();

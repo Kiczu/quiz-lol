@@ -1,9 +1,11 @@
-import { useContext, useEffect } from "react";
 import { Box } from "@mui/material";
+import { useContext, useEffect } from "react";
+
 import { GameState } from "../../api/types";
 import { GameContext } from "../../context/GameContext/GameContext";
-import StartGame from "./StartGame";
+
 import EndGame from "./EndGame";
+import StartGame from "./StartGame";
 
 type Props = {
   title: string;

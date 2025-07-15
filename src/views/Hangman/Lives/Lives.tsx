@@ -1,6 +1,8 @@
 import { Box } from "@mui/material";
-import minion from "../../../assets/images/minion.webp";
+
 import ImpactGif from "../../../assets/animations/impact.gif";
+import minion from "../../../assets/images/minion.webp";
+
 import {
   ImpactAnimation,
   livesGrid,

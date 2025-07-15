@@ -1,5 +1,7 @@
 import { Grid, Card, CardContent, Typography } from "@mui/material";
+
 import { ScoresMap } from "../../../api/types";
+
 import { scoreCard, totalScoreCard } from "./scoreSection.style";
 
 interface Props {

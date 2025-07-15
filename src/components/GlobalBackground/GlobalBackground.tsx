@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 
 export const GlobalBackground = () => {

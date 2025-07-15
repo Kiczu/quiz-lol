@@ -1,4 +1,5 @@
 import { doc, setDoc, collection, query, orderBy, getDocs, getDoc, updateDoc, where, deleteDoc } from "firebase/firestore";
+
 import { db } from "../api/firebase/db";
 import { EditableUserFields, ScoresMap, UserPublicData } from "../api/types";
 import { filterEmptyFields } from "../utils/object";

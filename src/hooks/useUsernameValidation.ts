@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { scoreService } from "../services/scoreService";
 
 export const useUsernameValidation = (currentUsername?: string) => {

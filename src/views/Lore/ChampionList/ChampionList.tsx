@@ -1,6 +1,7 @@
 import { Grid, Link, Box, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { Link as ReactRouter } from "react-router-dom";
+
 import { ChampionDetails } from "../../../api/types";
 import { championCard, championImage, getBannerSx } from "../lore.style";
 
