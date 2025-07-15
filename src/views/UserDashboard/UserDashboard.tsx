@@ -8,13 +8,16 @@ import { useBackground } from "../../context/BackgroundContext/BackgroundContext
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
 import { deleteAccountWithAuth } from "../../helpers/deleteAccountWithAuth";
+import { paths } from "../../paths";
 import { authService } from "../../services/authService";
-
 import { getErrorMessage, isFirebaseCode } from "../../utils/errorUtils";
+
 import AvatarSection from "./AvatarSection/AvatarSection";
-import { useScores } from "./ScoresSection/useScores";
-import ScoresSection from "./ScoresSection/ScoresSection";
+import DangerZone from "./DangerZone/DangerZone";
 import EditUserForm from "./EditUserForm/EditUserForm";
+import PasswordSection from "./PasswordSection/PasswordSection";
+import ScoresSection from "./ScoresSection/ScoresSection";
+import { useScores } from "./ScoresSection/useScores";
 import {
   dashboardOverlay,
   dashboardViewContainer,
@@ -23,11 +26,6 @@ import {
   scoresContainer,
 } from "./userDashboard.style";
 import UserDataInfo from "./UserDataInfo/UserDataInfo";
-import DangerZone from "./DangerZone/DangerZone";
-
-import { paths } from "../../paths";
-
-import PasswordSection from "./PasswordSection/PasswordSection";
 
 
 const UserDashboard = () => {
