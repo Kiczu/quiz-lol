@@ -1,6 +1,8 @@
-import { DialogTitle, IconButton, Typography, Box } from "@mui/material";
 import { Close as CloseIcon } from "@mui/icons-material";
+import { DialogTitle, IconButton, Typography, Box } from "@mui/material";
+
 import { AppModalVariant } from "../../context/ModalContext/modal.types";
+
 import { variantColorMap, variantIconMap } from "./modal.config";
 
 interface Props {

@@ -1,6 +1,6 @@
-import { Avatar, Box, Grid } from "@mui/material";
 import { Delete } from "@mui/icons-material";
-import { useAvatar } from "../useAvatar";
+import { Avatar, Box, Grid } from "@mui/material";
+
 import { colors } from "../../../../theme/colors";
 import { getMultiColumnGradientSx } from "../../../../utils/gradient";
 import {
@@ -12,6 +12,7 @@ import {
   smallAvatarsGrid,
   smallAvatarWrapper,
 } from "../avatarSection.style";
+import { useAvatar } from "../useAvatar";
 
 type Props = {
   selectedAvatar: string | undefined;

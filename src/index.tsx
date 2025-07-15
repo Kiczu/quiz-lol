@@ -1,27 +1,28 @@
+import { ThemeProvider } from "@emotion/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { ThemeProvider } from "@emotion/react";
+
 import FirebaseActionHandler from "./api/firebase/FirebaseActionHandler";
-import { LoginProvider } from "./context/LoginContext/LoginContext";
+import GlobalBackground from "./components/GlobalBackground/GlobalBackground";
+import { BackgroundProvider } from "./context/BackgroundContext/BackgroundContext";
 import { GameProvider } from "./context/GameContext/GameContext";
+import { LoginProvider } from "./context/LoginContext/LoginContext";
 import { ModalProvider } from "./context/ModalContext/ModalProvider";
+import Layout from "./Layout/Layout";
 import { paths } from "./paths";
 import { theme } from "./theme/theme";
-import Layout from "./Layout/Layout";
-import Home from "./views/Home/Home";
-import Champion from "./views/Champion/Champion";
 import AuthPage from "./views/AuthPage/AuthPage";
-import Lore from "./views/Lore/Lore";
-import Hangman from "./views/Hangman/Hangman";
+import ForgotPassword from "./views/AuthPage/ForgotPassword/ForgotPassword";
 import LoginForm from "./views/AuthPage/LoginForm/LoginForm";
 import RegisterForm from "./views/AuthPage/RegisterForm/RegisterForm";
-import ForgotPassword from "./views/AuthPage/ForgotPassword/ForgotPassword";
-import UserDashboard from "./views/UserDashboard/UserDashboard";
+import Champion from "./views/Champion/Champion";
+import Hangman from "./views/Hangman/Hangman";
+import Home from "./views/Home/Home";
+import Lore from "./views/Lore/Lore";
 import Ranking from "./views/Ranking/Ranking";
+import UserDashboard from "./views/UserDashboard/UserDashboard";
 import "./index.css";
-import { BackgroundProvider } from "./context/BackgroundContext/BackgroundContext";
-import GlobalBackground from "./components/GlobalBackground/GlobalBackground";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

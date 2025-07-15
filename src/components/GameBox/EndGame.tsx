@@ -1,11 +1,14 @@
+import { Box, Typography } from "@mui/material";
 import { useContext } from "react";
 import { Link } from "react-router-dom";
-import { Box, Typography } from "@mui/material";
-import { endGameContainer, victoryGame, deafetGame } from "./gameBoxStyles";
-import { GameContext } from "../../context/GameContext/GameContext";
-import { paths } from "../../paths";
+
+
 import Deafet from "../../assets/images/deafet.png";
 import Victory from "../../assets/images/victory.png";
+import { GameContext } from "../../context/GameContext/GameContext";
+import { paths } from "../../paths";
+
+import { endGameContainer, victoryGame, deafetGame } from "./gameBoxStyles";
 
 const EndGame = () => {
   const { isWin, gameScore } = useContext(GameContext);

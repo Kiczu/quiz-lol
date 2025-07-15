@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
 import { collection, doc, getDoc, getDocs, QueryDocumentSnapshot } from "firebase/firestore";
+import { useEffect, useState } from "react";
+
 import { db } from "../../api/firebase/db";
 
 interface ScoreData {

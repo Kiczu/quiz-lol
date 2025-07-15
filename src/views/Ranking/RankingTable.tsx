@@ -7,7 +7,9 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+
 import { colors } from "../../theme/colors";
+
 import { getRankingWrapperSx, rankingTable } from "./ranking.style";
 
 interface RankingTableProps {

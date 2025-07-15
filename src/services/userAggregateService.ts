@@ -1,7 +1,8 @@
-import { userService } from "./userService";
-import { scoreService } from "./scoreService";
 import { EditableUserFields, RawUserData } from "../api/types";
 import { splitUserUpdates } from "../utils/splitUserUpdates";
+
+import { scoreService } from "./scoreService";
+import { userService } from "./userService";
 
 const createUser = async ({
     uid,

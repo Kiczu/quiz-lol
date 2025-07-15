@@ -1,5 +1,5 @@
-import { colors } from "../../theme/colors";
 import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import { colors } from "../../theme/colors";
 
 export const hangmanViewWrapper = {
   minHeight: "100vh",

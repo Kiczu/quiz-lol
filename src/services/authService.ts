@@ -1,7 +1,9 @@
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, EmailAuthProvider, linkWithCredential, reauthenticateWithCredential, reauthenticateWithPopup } from "firebase/auth";
+
 import { auth } from "../api/firebase/auth";
-import { userAggregateService } from "./userAggregateService";
 import { isFirebaseCode } from "../utils/errorUtils";
+
+import { userAggregateService } from "./userAggregateService";
 
 const getCurrentUser = () => {
     return auth.currentUser;

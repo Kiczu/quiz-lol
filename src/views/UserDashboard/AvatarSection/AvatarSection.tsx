@@ -1,13 +1,15 @@
 import { Box, Avatar, useMediaQuery, useTheme } from "@mui/material";
-import AvatarSelection from "./AvatarSelection/AvatarSelection";
+
+import { useAuth } from "../../../context/LoginContext/LoginContext";
+import { colors } from "../../../theme/colors";
+import { getMultiColumnGradientSx } from "../../../utils/gradient";
+
 import {
   avatarGridContainer,
   bigAvatarImg,
   bigAvatarWrapper,
 } from "./avatarSection.style";
-import { useAuth } from "../../../context/LoginContext/LoginContext";
-import { getMultiColumnGradientSx } from "../../../utils/gradient";
-import { colors } from "../../../theme/colors";
+import AvatarSelection from "./AvatarSelection/AvatarSelection";
 
 const predefinedAvatars = [
   "/avatars/avatar1.webp",

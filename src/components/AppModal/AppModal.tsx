@@ -1,7 +1,9 @@
 import { Dialog, DialogContent, DialogActions } from "@mui/material";
-import { forwardRef, ReactNode } from "react";
 import { motion } from "framer-motion";
+import { forwardRef, ReactNode } from "react";
+
 import { AppModalVariant } from "../../context/ModalContext/modal.types";
+
 import ModalHeader from "./ModalHeader";
 
 interface AppModalProps {

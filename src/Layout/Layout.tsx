@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
+
 import Navigation from "../components/Navigation/Navigation";
 import { useAuth } from "../context/LoginContext/LoginContext";
 import { paths } from "../paths";

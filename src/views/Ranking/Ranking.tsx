@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
 import { Box, Typography, Tabs, Tab, Container } from "@mui/material";
-import { colors } from "../../theme/colors";
-import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
-import useRanking from "./useRanking";
-import RankingTable from "./RankingTable";
+import { useEffect, useState } from "react";
+
 import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
+import { colors } from "../../theme/colors";
+
 import {
   rankignOverlay,
   rankingContainer,
   rankingHeader,
 } from "./ranking.style";
+import RankingTable from "./RankingTable";
+import useRanking from "./useRanking";
+
 
 const gameModes = ["Hangman", "Champions", "Skills", "Quote", "TotalScore"];
 

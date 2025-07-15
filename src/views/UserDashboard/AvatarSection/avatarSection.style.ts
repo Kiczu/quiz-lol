@@ -1,4 +1,5 @@
 import zIndex from "@mui/material/styles/zIndex";
+
 import { colors } from "../../../theme/colors";
 
 export const avatarGridContainer = {

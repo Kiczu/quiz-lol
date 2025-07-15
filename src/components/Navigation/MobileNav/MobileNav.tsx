@@ -1,13 +1,14 @@
 import { Box, IconButton, Menu, MenuItem, Button } from "@mui/material";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { Link } from "react-router-dom";
+
+import logoQuiz from "../../../assets/images/QueueQuizLogo.svg";
 import { colors } from "../../../theme/colors";
 import {
   logoNav,
   menuItem,
   mobileNavPagesContainer,
 } from "../navigation.style";
-import logoQuiz from "../../../assets/images/QueueQuizLogo.svg";
 
 interface MobileNavProps {
   pages: {

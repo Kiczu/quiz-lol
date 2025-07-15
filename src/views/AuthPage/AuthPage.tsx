@@ -1,9 +1,11 @@
-import { useEffect } from "react";
-import { useLocation, useNavigate, Outlet } from "react-router-dom";
 import { Button, Grid, Paper, Typography } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
+import { useEffect } from "react";
+import { useLocation, useNavigate, Outlet } from "react-router-dom";
+
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { paths } from "../../paths";
+
 import { animationConfig, authPageStyles } from "./authPage.style";
 
 const AuthPage = () => {

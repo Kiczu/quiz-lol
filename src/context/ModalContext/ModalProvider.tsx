@@ -1,10 +1,12 @@
-import { useState, ReactNode } from "react";
 import { Button } from "@mui/material";
-import { ModalContext } from "./ModalContext";
-import { ModalContextType, ModalState } from "./modal.types";
-import ModalActions from "./ModalActions";
+import { useState, ReactNode } from "react";
+
 import AppModal from "../../components/AppModal/AppModal";
 import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
+
+import { ModalContextType, ModalState } from "./modal.types";
+import ModalActions from "./ModalActions";
+import { ModalContext } from "./ModalContext";
 
 export const ModalProvider = ({ children }: { children: ReactNode }) => {
   const [modalState, setModalState] = useState<ModalState>({

@@ -1,11 +1,13 @@
-import { useEffect } from "react";
 import { Box, Container, Typography } from "@mui/material";
-import { useLoreData } from "./useLoreData";
-import ChampionList from "./ChampionList/ChampionList";
+import { useEffect } from "react";
+
+import backgroundMap from "../../assets/images/backgroundMap.jpg";
 import SearchBar from "../../components/SearchBar/SearchBar";
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
-import backgroundMap from "../../assets/images/backgroundMap.jpg";
+
+import ChampionList from "./ChampionList/ChampionList";
 import { loreViewHeader, loreViewOverlay, loreViewWrapper } from "./lore.style";
+import { useLoreData } from "./useLoreData";
 
 const Lore = () => {
   const { champions, search, handleSearchChange } = useLoreData();

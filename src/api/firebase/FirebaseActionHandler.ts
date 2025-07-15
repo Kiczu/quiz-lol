@@ -1,6 +1,6 @@
+import { getAuth, applyActionCode } from "firebase/auth";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { getAuth, applyActionCode } from "firebase/auth";
 
 const FirebaseActionHandler = () => {
     const location = useLocation();

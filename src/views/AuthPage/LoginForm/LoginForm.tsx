@@ -1,4 +1,3 @@
-import * as yup from "yup";
 import {
   Avatar,
   Button,
@@ -8,8 +7,10 @@ import {
   Grid,
   Link,
 } from "@mui/material";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { Form, Formik } from "formik";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import * as yup from "yup";
+
 import { useAuth } from "../../../context/LoginContext/LoginContext";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";

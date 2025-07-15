@@ -1,20 +1,23 @@
+import { Box, Grid, Typography, Container } from "@mui/material";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, Grid, Typography, Container } from "@mui/material";
-import { useScores } from "./ScoresSection/useScores";
-import AvatarSection from "./AvatarSection/AvatarSection";
-import ScoresSection from "./ScoresSection/ScoresSection";
-import EditUserForm from "./EditUserForm/EditUserForm";
-import UserDataInfo from "./UserDataInfo/UserDataInfo";
-import DangerZone from "./DangerZone/DangerZone";
+
+import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
+import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
-import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
-import { authService } from "../../services/authService";
 import { deleteAccountWithAuth } from "../../helpers/deleteAccountWithAuth";
-import { getErrorMessage, isFirebaseCode } from "../../utils/errorUtils";
-import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
 import { paths } from "../../paths";
+import { authService } from "../../services/authService";
+import { getErrorMessage, isFirebaseCode } from "../../utils/errorUtils";
+
+import AvatarSection from "./AvatarSection/AvatarSection";
+import DangerZone from "./DangerZone/DangerZone";
+import EditUserForm from "./EditUserForm/EditUserForm";
+import PasswordSection from "./PasswordSection/PasswordSection";
+import ScoresSection from "./ScoresSection/ScoresSection";
+import { useScores } from "./ScoresSection/useScores";
 import {
   dashboardOverlay,
   dashboardViewContainer,
@@ -22,8 +25,8 @@ import {
   glassPanel,
   scoresContainer,
 } from "./userDashboard.style";
-import PasswordSection from "./PasswordSection/PasswordSection";
-import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import UserDataInfo from "./UserDataInfo/UserDataInfo";
+
 
 const UserDashboard = () => {
   const navigate = useNavigate();

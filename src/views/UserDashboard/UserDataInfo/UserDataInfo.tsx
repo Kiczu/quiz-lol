@@ -1,5 +1,7 @@
 import { Box, Typography } from "@mui/material";
+
 import { useAuth } from "../../../context/LoginContext/LoginContext";
+
 import { userDataInfoBox } from "./userDataInfo.style";
 
 const UserDataInfo = () => {
