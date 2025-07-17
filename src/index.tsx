@@ -3,7 +3,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
-import FirebaseActionHandler from "./api/firebase/FirebaseActionHandler";
+import FirebaseActionHandler from "./components/FirebaseActionHandler/FirebaseActionHandler";
 import GlobalBackground from "./components/GlobalBackground/GlobalBackground";
 import { BackgroundProvider } from "./context/BackgroundContext/BackgroundContext";
 import { GameProvider } from "./context/GameContext/GameContext";
