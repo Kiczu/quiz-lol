@@ -5,7 +5,7 @@ export const navigationContainer = {
     border: 0,
     borderBottom: "3px solid",
     borderImage: `${colors.accentGradient} 1`,
-    zIndex: 1201,
+    zIndex: 10,
 }
 
 export const menuItem = {

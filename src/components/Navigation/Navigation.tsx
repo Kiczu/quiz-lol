@@ -103,7 +103,9 @@ const Navigation = () => {
                   src={userData?.avatar || undefined}
                   sx={{
                     ...avatarIcon,
-                    background: userData?.avatar ? undefined : `#0ac8b9`,
+                    background: userData?.avatar
+                      ? undefined
+                      : colors.gradientBlue,
                     color: colors.backgroundSecondary,
                   }}
                 >

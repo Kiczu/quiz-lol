@@ -15,6 +15,7 @@ export const colors = {
     blue1: "#CDFAFA",
     blue2: "#0397AB",
     blue3: "#005A82",
+    gradientBlue: "#0AC8B9",
 
     gold1: "#F0E6D2",
     gold2: "#C8AA6E",
