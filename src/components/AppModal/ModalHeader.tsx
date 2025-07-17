@@ -2,8 +2,15 @@ import { Close as CloseIcon } from "@mui/icons-material";
 import { DialogTitle, IconButton, Typography, Box } from "@mui/material";
 
 import { AppModalVariant } from "../../context/ModalContext/modal.types";
+import { colors } from "../../theme/colors";
 
-import { variantColorMap, variantIconMap } from "./modal.config";
+import { variantIconMap } from "./modal.config";
+import {
+  modalTitleBox,
+  modalTitleTypography,
+  modalTitleColor,
+  modalTitleContainer,
+} from "./modal.style";
 
 interface Props {
   title?: string;
@@ -18,20 +25,23 @@ const ModalHeader = ({ title, variant, disableClose, onClose }: Props) => {
   if (!title && !Icon) return null;
 
   return (
-    <DialogTitle
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-      }}
-    >
-      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        {Icon && <Icon sx={{ color: variantColorMap[variant] }} />}
-        <Typography variant="h6">{title}</Typography>
+    <DialogTitle sx={modalTitleContainer}>
+      <Box sx={modalTitleBox}>
+        {Icon && (
+          <Icon
+            sx={{ mr: 1, fontSize: "1.5rem", color: modalTitleColor(variant) }}
+          />
+        )}
+        <Typography
+          component="span"
+          sx={{ ...modalTitleTypography, color: modalTitleColor(variant) }}
+        >
+          {title}
+        </Typography>
       </Box>
       {!disableClose && onClose && (
         <IconButton onClick={onClose}>
-          <CloseIcon />
+          <CloseIcon sx={{ color: colors.error }} />
         </IconButton>
       )}
     </DialogTitle>

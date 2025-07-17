@@ -4,6 +4,7 @@ import { forwardRef, ReactNode } from "react";
 
 import { AppModalVariant } from "../../context/ModalContext/modal.types";
 
+import { modalContent, modalDialogPaper } from "./modal.style";
 import ModalHeader from "./ModalHeader";
 
 interface AppModalProps {
@@ -37,7 +38,15 @@ const AppModal = ({
       onClose={disableClose ? undefined : onClose}
       disableEscapeKeyDown={disableClose}
       hideBackdrop={false}
-      PaperProps={{ sx: { borderRadius: 2, p: 2, minWidth: 400 } }}
+      slotProps={{
+        backdrop: {
+          sx: {
+            background: `linear-gradient(90deg, rgba(200,155,60,0.16) 0%, rgba(0,90,130,0.13) 100%), rgba(10,20,40,0.45)`,
+            filter: "blur(4px)",
+          },
+        },
+      }}
+      PaperProps={{ sx: modalDialogPaper }}
     >
       <ModalHeader
         title={title}
@@ -50,6 +59,7 @@ const AppModal = ({
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -20 }}
         transition={{ duration: 0.25 }}
+        sx={modalContent}
       >
         {children}
       </MotionDialogContent>
