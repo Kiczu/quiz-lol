@@ -12,12 +12,13 @@ import {
 } from "./ranking.style";
 import RankingTable from "./RankingTable";
 import useRanking from "./useRanking";
+import { AnimatePresence, motion } from "framer-motion";
 
-
-const gameModes = ["Hangman", "Champions", "Skills", "Quote", "TotalScore"];
+const gameModes = ["Hangman", "Regions", "Skills", "PVP", "TotalScore"];
 
 const Ranking = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const [direction, setDirection] = useState(0);
   const selectedMode = gameModes[activeTab];
   const { ranking } = useRanking(selectedMode);
   const { setImage } = useBackground();
@@ -26,6 +27,11 @@ const Ranking = () => {
     setImage(backgroundMap);
     return () => setImage(undefined);
   }, [setImage]);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setDirection(newValue > activeTab ? 1 : -1);
+    setActiveTab(newValue);
+  };
 
   return (
     <Box sx={rankingContainer}>
@@ -36,7 +42,7 @@ const Ranking = () => {
           </Typography>
           <Tabs
             value={activeTab}
-            onChange={(_, newValue) => setActiveTab(newValue)}
+            onChange={handleTabChange}
             sx={{ mb: 4, borderBottom: 1, borderColor: colors.grey2 }}
           >
             {gameModes.map((mode, index) => (
@@ -52,11 +58,25 @@ const Ranking = () => {
               />
             ))}
           </Tabs>
-          {ranking.length > 0 ? (
-            <RankingTable ranking={ranking} />
-          ) : (
-            <EmptyRankingMessage />
-          )}
+          <AnimatePresence mode="wait" initial={false}>
+            {ranking.length > 0 ? (
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, x: direction > 0 ? 120 : -120 }}
+                animate={{ opacity: 1, x: 0, transition: { duration: 0.36 } }}
+                exit={{
+                  opacity: 0,
+                  x: direction > 0 ? -120 : 120,
+                  transition: { duration: 0.32 },
+                }}
+                style={{ width: "100%" }}
+              >
+                <RankingTable ranking={ranking} />
+              </motion.div>
+            ) : (
+              <EmptyRankingMessage key={"empty-" + activeTab} />
+            )}
+          </AnimatePresence>
         </Container>
       </Box>
     </Box>

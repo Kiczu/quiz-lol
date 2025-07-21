@@ -27,13 +27,81 @@ export const rankingHeader = {
     m: 4,
 }
 
-export const rankingTable = {
-    background: "rgba(10, 20, 40, 0.95)"
-}
-
 export const getRankingWrapperSx = (columns: number, idx: number, border = 2) => ({
     ...getMultiColumnGradientSx(columns, idx, colors.accentGradient),
     borderRadius: 0,
     p: `${border}px`,
     boxSizing: "border-box",
+});
+
+export const rankingTable = {
+    minWidth: 380,
+    background: colors.backgroundSecondary,
+    borderRadius: 5,
+    overflowX: "auto",
+    overflowY: "visible",
+};
+
+export const rankingTableCell = {
+    color: "#F0E6D2",
+    fontWeight: "bold",
+    fontSize: 18,
+}
+
+export const rankingTableRow = {
+    border: "none",
+}
+
+export const getRankCellSx = (index: number) => ({
+    color:
+        index === 0
+            ? colors.gold3
+            : index === 1
+                ? colors.textPrimary
+                : index === 2
+                    ? colors.blue2
+                    : colors.textSecondary,
+    fontWeight: index < 3 ? "bold" : "normal",
+});
+
+export const getUsernameCellSx = {
+    color: colors.textSecondary,
+    display: "flex",
+    alignItems: "center",
+};
+
+export const getAvatarSx = (index: number) => ({
+    width: 46,
+    height: 46,
+    border:
+        index === 0
+            ? `2px solid ${colors.gold3}`
+            : index === 1
+                ? `2px solid ${colors.textPrimary}`
+                : index === 2
+                    ? `2px solid ${colors.blue2}`
+                    : `2px solid ${colors.grey2}`,
+    mr: 2,
+    bgcolor: colors.gradientBlue,
+});
+
+export const getScoreCellSx = (index: number) => ({
+    color: colors.gold2,
+    fontWeight: index < 3 ? "bold" : "normal",
+    fontSize: 19,
+});
+
+export const getRowMotionProps = (index: number) => ({
+    initial: { opacity: 0, y: 16 },
+    animate: { opacity: 1, y: 0 },
+    transition: { delay: index * 0.08 },
+    style: { display: "table-row" },
+});
+
+export const getTableRowSx = (isLast: boolean) => ({
+    borderBottom: isLast ? "none" : "1.5px solid #32281E",
+    transition: "background 0.2s",
+    "&:hover": {
+        background: "rgba(200,170,62,0.10)",
+    },
 });
