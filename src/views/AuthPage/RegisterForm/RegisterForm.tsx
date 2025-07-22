@@ -1,4 +1,3 @@
-import * as yup from "yup";
 import {
   Avatar,
   Button,
@@ -8,11 +7,17 @@ import {
   Box,
   Link,
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
 import { Form, Formik } from "formik";
-import type { UserPrivateData } from "../../../api/types";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import * as yup from "yup";
+
+
+import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
 import { authService } from "../../../services/authService";
+import { getErrorMessage } from "../../../utils/errorUtils";
+
+import type { UserPrivateData } from "../../../api/types";
 
 const registerSchema = yup.object().shape({
   username: yup.string().required("Username is required"),
@@ -48,6 +53,8 @@ const initValues: RegistrationFormData = {
 };
 
 const RegisterForm = () => {
+  const { showModal, showErrorModal } = useModal();
+  const navigate = useNavigate();
   const handleSubmit = async (values: RegistrationFormData) => {
     const { username, firstName, lastName, email, password } = values;
 
@@ -57,9 +64,14 @@ const RegisterForm = () => {
         firstName,
         lastName,
       });
-      // location to dashboard
-    } catch (error) {
-      console.error("Error during registration:", error);
+      showModal({
+        title: "Success",
+        content: "Registration successful!",
+        variant: "success",
+        onConfirm: () => navigate(paths.DASHBOARD),
+      });
+    } catch (error: unknown) {
+      showErrorModal(getErrorMessage(error));
     }
   };
 
@@ -121,7 +133,12 @@ const RegisterForm = () => {
           <Form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
               {formFields.map(({ name, label, type, autoComplete }) => (
-                <Grid item xs={12} sm={name === "email" ? 12 : 6} key={name}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={["username", "email"].includes(name) ? 12 : 6}
+                  key={name}
+                >
                   <TextField
                     fullWidth
                     label={label}

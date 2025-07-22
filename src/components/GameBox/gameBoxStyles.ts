@@ -7,6 +7,7 @@ export const startGameContainer = {
     backgroundSize: "cover",
     minHeight: "90vh",
 }
+
 export const endGameContainer = {
     display: "flex",
     flexDirection: "column",
@@ -17,12 +18,15 @@ export const endGameContainer = {
     background: "#010A13",
     color: "#F0E6D2",
 }
+
 export const deafetGame = {
     maxWidth: "350px",
 }
+
 export const victoryGame = {
     maxWidth: "550px",
 }
+
 export const overlayGameBox = {
     display: "flex",
     flexDirection: "column",
@@ -31,7 +35,5 @@ export const overlayGameBox = {
     justifyContent: "center",
     width: "100%",
     minHeight: "90vh",
-    background: "rgba(1, 10, 19, 0.7)",
+    background: "rgba(8, 10, 18, 0.8)"
 }
-
-

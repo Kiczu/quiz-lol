@@ -9,11 +9,13 @@ export const colors = {
     textSecondary: "#A09B8C",
 
     error: "#FF5733",
+    error2: "#990000",
     warning: "#FFC300",
 
     blue1: "#CDFAFA",
     blue2: "#0397AB",
     blue3: "#005A82",
+    gradientBlue: "#0AC8B9",
 
     gold1: "#F0E6D2",
     gold2: "#C8AA6E",
@@ -24,4 +26,7 @@ export const colors = {
     grey1: "#A09B8C",
     grey2: "#3C3C41",
     grey3: "#1E2328",
+
+    accentGradient: "linear-gradient(90deg, #C8AA6E 45%, #0AC8B9 100%)",
+    overlayBackground: "rgba(1, 10, 19, 0.7)",
 };

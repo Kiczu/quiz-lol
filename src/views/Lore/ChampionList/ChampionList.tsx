@@ -1,43 +1,41 @@
+import { Grid, Link, Box, useMediaQuery } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import { Link as ReactRouter } from "react-router-dom";
-import { CardContent, Grid, Typography, Link } from "@mui/material";
+
 import { ChampionDetails } from "../../../api/types";
-import { ChampionCard } from "../../../muiComponentsStyles";
+import { championCard, championImage, getBannerSx } from "../lore.style";
 
 const ChampionList = ({ champions }: { champions: ChampionDetails[] }) => {
-  const championImage = {
-    width: "100%",
-  };
+  const theme = useTheme();
+
+  const isLgUp = useMediaQuery(theme.breakpoints.up("lg"));
+  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
+  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
+
+  let COLUMNS = 1;
+  if (isLgUp) COLUMNS = 4;
+  else if (isMdUp) COLUMNS = 3;
+  else if (isSmUp) COLUMNS = 2;
 
   return (
-    <Grid container spacing={{ xs: 6, sm: 3, lg: 10 }}>
-      {champions.map((champion) => (
+    <Grid container spacing={{ xs: 4, sm: 3, lg: 6 }}>
+      {champions.map((champion, idx) => (
         <Grid item xs={12} sm={6} md={4} lg={3} key={champion.id}>
-          <Link component={ReactRouter} to={`/champions/${champion.id}`}>
-            <ChampionCard>
-              <img
-                style={championImage}
+          <Link
+            component={ReactRouter}
+            to={`/champions/${champion.id}`}
+            underline="none"
+          >
+            <Box sx={championCard}>
+              <Box
+                component="img"
                 src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champion.id}_0.jpg`}
                 alt={champion.name}
+                sx={championImage}
                 loading="lazy"
               />
-              <CardContent sx={{ padding: 0, position: "relative" }}>
-                <Typography
-                  textAlign="center"
-                  variant="h5"
-                  component="p"
-                  sx={{
-                    position: "absolute",
-                    bottom: -2,
-                    bgcolor: "rgba(200, 155, 60, 0.8)",
-                    backdropFilter: "blur(2px)",
-                    padding: "10px 0",
-                    width: "100%",
-                  }}
-                >
-                  {champion.name}
-                </Typography>
-              </CardContent>
-            </ChampionCard>
+              <Box sx={getBannerSx(COLUMNS, idx)}>{champion.name}</Box>
+            </Box>
           </Link>
         </Grid>
       ))}

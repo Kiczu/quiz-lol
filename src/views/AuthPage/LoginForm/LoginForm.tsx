@@ -1,4 +1,3 @@
-import * as yup from "yup";
 import {
   Avatar,
   Button,
@@ -8,10 +7,14 @@ import {
   Grid,
   Link,
 } from "@mui/material";
-import { Link as RouterLink } from "react-router-dom";
 import { Form, Formik } from "formik";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import * as yup from "yup";
+
 import { useAuth } from "../../../context/LoginContext/LoginContext";
+import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
+import { getErrorMessage } from "../../../utils/errorUtils";
 
 const loginSchema = yup.object().shape({
   email: yup
@@ -32,10 +35,22 @@ const initValues: Values = {
 };
 
 const LoginForm = () => {
+  const { showModal, showErrorModal } = useModal();
   const { handleSignIn } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = ({ email, password }: Values) => {
-    handleSignIn(email, password);
+  const handleSubmit = async ({ email, password }: Values) => {
+    try {
+      await handleSignIn(email, password);
+      showModal({
+        title: "Welcome!",
+        content: "You have successfully logged in.",
+        variant: "success",
+        onConfirm: () => navigate(paths.DASHBOARD),
+      });
+    } catch (error: unknown) {
+      showErrorModal(getErrorMessage(error));
+    }
   };
 
   return (

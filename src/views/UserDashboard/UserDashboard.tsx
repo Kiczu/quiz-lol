@@ -1,67 +1,201 @@
 import { Box, Grid, Typography, Container } from "@mui/material";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useUserProfile } from "./useUserProfile";
-import { useScores } from "./ScoresSection/useScores";
-import AvatarSection from "./AvatarSection/AvatarSection";
-import ScoresSection from "./ScoresSection/ScoresSection";
-import EditUserForm from "./EditUserForm/EditUserForm";
-import ChangePasswordForm from "./ChangePasswordForm/ChangePasswordForm";
-import UserDataInfo from "./UserDataInfo/UserDataInfo";
-import DangerZone from "./DangerZone/DangerZone";
+
+import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
+import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { useAuth } from "../../context/LoginContext/LoginContext";
-import { userService } from "../../services/userService";
+import { useModal } from "../../context/ModalContext/ModalContext";
+import { deleteAccountWithAuth } from "../../helpers/deleteAccountWithAuth";
 import { paths } from "../../paths";
+import { authService } from "../../services/authService";
+import { getErrorMessage, isFirebaseCode } from "../../utils/errorUtils";
+
+import AvatarSection from "./AvatarSection/AvatarSection";
+import DangerZone from "./DangerZone/DangerZone";
+import EditUserForm from "./EditUserForm/EditUserForm";
+import PasswordSection from "./PasswordSection/PasswordSection";
+import ScoresSection from "./ScoresSection/ScoresSection";
+import { useScores } from "./ScoresSection/useScores";
 import {
+  dashboardOverlay,
   dashboardViewContainer,
   dataFormsContainer,
+  glassPanel,
+  scoresContainer,
 } from "./userDashboard.style";
+import UserDataInfo from "./UserDataInfo/UserDataInfo";
+
 
 const UserDashboard = () => {
   const navigate = useNavigate();
-  const { userData } = useAuth();
-  const { formData, updateUserProfile, isUsernameEditable } = useUserProfile();
-  const { scores } = useScores(userData?.uid);
+  const {
+    userData,
+    handleSignOut,
+    isLoading,
+    refreshUserData,
+    updateUserData,
+  } = useAuth();
+  const { showModal } = useModal();
+  const { scores, totalScore } = useScores(userData?.uid);
+  const { setImage } = useBackground();
+
+  useEffect(() => {
+    setImage(backgroundMap);
+    return () => setImage(undefined);
+  }, [setImage]);
+
+  useEffect(() => {
+    if (!isLoading && !userData) {
+      navigate(paths.LOGIN);
+      return;
+    }
+    if (!isLoading && userData && !userData.username) {
+      showModal({
+        title: "Username Required",
+        content: (
+          <EditUserForm
+            userData={userData}
+            updateUserData={updateUserData}
+            refreshUserData={refreshUserData}
+          />
+        ),
+        actions: null,
+        variant: "warning",
+        onlyConfirm: false,
+        disableClose: true,
+      });
+    }
+  }, [
+    userData,
+    isLoading,
+    navigate,
+    showModal,
+    updateUserData,
+    refreshUserData,
+  ]);
 
   const handleDeleteAccount = async () => {
     if (!userData?.uid) return;
+    showModal({
+      title: "Are you sure?",
+      content: "This action cannot be undone. Do you want to proceed?",
+      variant: "warning",
+      onlyConfirm: false,
+      onConfirm: async () => {
+        const user = authService.getCurrentUser();
+        if (!user) return;
 
-    if (
-      window.confirm(
-        "Are you sure you want to delete your account? This action cannot be undone."
-      )
-    ) {
-      try {
-        await userService.deleteUser(userData.uid);
-        alert("Account deleted successfully.");
-        navigate(paths.LOGIN);
-      } catch (error) {
-        console.error("Error deleting account:", error);
-        alert("Failed to delete account.");
-      }
-    }
+        try {
+          await deleteAccountWithAuth();
+          await handleSignOut();
+          showModal({
+            title: "Account deleted",
+            content: "Your account has been deleted successfully.",
+            variant: "success",
+            onConfirm: () => navigate(paths.LOGIN),
+          });
+        } catch (error) {
+          if (isFirebaseCode(error, "auth/requires-recent-login")) {
+            const providerId = user?.providerData[0]?.providerId;
+            if (providerId === "password") {
+              showModal({
+                title: "Reauthenticate",
+                content: (
+                  <ReauthPasswordForm
+                    onSubmit={async (password) => {
+                      try {
+                        await deleteAccountWithAuth(password);
+                        await handleSignOut();
+                        showModal({
+                          title: "Account deleted",
+                          content:
+                            "Your account has been deleted successfully.",
+                          variant: "success",
+                          onConfirm: () => navigate(paths.LOGIN),
+                        });
+                      } catch (reauthError) {
+                        showModal({
+                          title: "Error",
+                          content: getErrorMessage(reauthError),
+                          variant: "error",
+                        });
+                      }
+                    }}
+                  />
+                ),
+                variant: "warning",
+                disableClose: true,
+              });
+            } else if (providerId === "google.com") {
+              try {
+                await authService.reauthenticateUser();
+                await deleteAccountWithAuth();
+                await handleSignOut();
+                showModal({
+                  title: "Account deleted",
+                  content: "Your account has been deleted successfully.",
+                  variant: "success",
+                  onConfirm: () => navigate(paths.LOGIN),
+                });
+              } catch (reauthError) {
+                showModal({
+                  title: "Error",
+                  content: getErrorMessage(reauthError),
+                  variant: "error",
+                });
+              }
+            }
+          } else {
+            showModal({
+              title: "Error",
+              content: getErrorMessage(error),
+              variant: "error",
+            });
+          }
+        }
+      },
+    });
   };
 
   return (
     <Box sx={dashboardViewContainer}>
-      <Container maxWidth="xl">
-        <AvatarSection />
-        <ScoresSection scores={scores} />
-        <Grid container spacing={10} mt={0}>
-          <Grid item sm={12} md={8} sx={dataFormsContainer}>
-            <Typography variant="h5">Edit Your Data</Typography>
-            <EditUserForm
-              formData={formData}
-              isUsernameEditable={isUsernameEditable}
-              onSubmit={updateUserProfile}
-            />
-            <ChangePasswordForm />
+      <Box sx={dashboardOverlay}>
+        <Container maxWidth="xl" sx={{ p: 4 }}>
+          <Box mt={2}>
+            <AvatarSection />
+          </Box>
+          <Box mt={10} sx={scoresContainer}>
+            <ScoresSection scores={scores} totalScore={totalScore} />
+          </Box>
+          <Grid container spacing={10} mt={0}>
+            <Grid item sm={12} md={8} sx={dataFormsContainer}>
+              <Typography variant="h3">Edit Your Data</Typography>
+              {userData?.username && (
+                <EditUserForm
+                  userData={userData}
+                  refreshUserData={refreshUserData}
+                  updateUserData={updateUserData}
+                />
+              )}
+              <PasswordSection />
+            </Grid>
+            <Grid item sm={12} md={4}>
+              <Typography variant="h3">Your Data:</Typography>
+              <Box sx={glassPanel} mt={4}>
+                <UserDataInfo />
+              </Box>
+              <Typography variant="h3" mb={2} mt={2}>
+                Danger Zone
+              </Typography>
+              <Box sx={glassPanel} mt={4}>
+                <DangerZone handleDeleteAccount={handleDeleteAccount} />
+              </Box>
+            </Grid>
           </Grid>
-          <Grid item sm={12} md={4}>
-            <UserDataInfo />
-            <DangerZone handleDeleteAccount={handleDeleteAccount} />
-          </Grid>
-        </Grid>
-      </Container>
+        </Container>
+      </Box>
     </Box>
   );
 };

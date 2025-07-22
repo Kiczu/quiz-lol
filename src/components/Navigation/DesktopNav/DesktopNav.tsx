@@ -1,6 +1,8 @@
 import { Box, Button, Link } from "@mui/material";
 import { Link as ReactRouter } from "react-router-dom";
-import logoQuiz from "../../../assets/images/logo-quiz2.png";
+
+import logoQuiz from "../../../assets/images/QueueQuizLogo.svg";
+import { desktopNavPages, desktopNavPagesContainer } from "../navigation.style";
 
 interface DesktopNavProps {
   pages: {
@@ -24,17 +26,22 @@ const DesktopNav = ({ pages, handleCloseNavMenu }: DesktopNavProps) => {
           display: { xs: "none", md: "flex" },
         }}
       />
-      <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-        {pages.map((page) => (
-          <Button
-            key={page.name}
-            onClick={handleCloseNavMenu}
-            sx={{ my: 2, color: "white", display: "block" }}
+      <Box sx={desktopNavPagesContainer}>
+        {pages.map((page, index) => (
+          <Link
+            component={ReactRouter}
+            to={page.href}
+            key={index}
+            underline="none"
           >
-            <Link component={ReactRouter} to={page.href}>
+            <Button
+              key={page.name}
+              onClick={handleCloseNavMenu}
+              sx={desktopNavPages}
+            >
               {page.name}
-            </Link>
-          </Button>
+            </Button>
+          </Link>
         ))}
       </Box>
     </>

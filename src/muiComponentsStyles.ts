@@ -1,9 +1,10 @@
-import styled from "@emotion/styled";
 import { keyframes } from "@emotion/react";
+import styled from "@emotion/styled";
 import { Button, Card } from "@mui/material";
+
 import { colors } from "./theme/colors";
 
-const shadowWave = keyframes`
+export const shadowWave = keyframes`
 0% {
       background-position: 0;
   }
@@ -23,7 +24,8 @@ export const WavingButton = styled(Button)({
     textTransform: "uppercase",
     fontWeight: "bold",
     background: "#0A1428",
-    border: "2px solid #0AC8B9",
+    border: `2px solid ${colors.gold2}`,
+    borderRadius: 0,
     margin: "0 auto",
     padding: "15px 50px",
     transition: "box-shadow 2s",
@@ -42,7 +44,7 @@ export const WavingButton = styled(Button)({
         left: "-2px",
         top: "-2px",
         background:
-            "linear-gradient(45deg, #0AC8B9, #005A82, #0AC8B9,#005A82, #0AC8B9, #005A82, #0AC8B9, #005A82,#0AC8B9, #005A82)",
+            "linear-gradient(45deg, #C8AA6E, #C89B3C, #785A28, #C8AA6E, #C89B3C, #785A28, #C8AA6E, #C89B3C, #785A28, #C8AA6E)",
         backgroundSize: "400%",
         width: "calc(100% + 4px)",
         height: "calc(100% + 4px)",

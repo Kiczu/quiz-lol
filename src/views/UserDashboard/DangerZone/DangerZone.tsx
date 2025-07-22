@@ -1,5 +1,4 @@
 import { Box, Button, Typography } from "@mui/material";
-import { colors } from "../../../theme/colors";
 
 interface Props {
   handleDeleteAccount: () => void;
@@ -7,9 +6,6 @@ interface Props {
 
 const DangerZone = ({ handleDeleteAccount }: Props) => (
   <Box>
-    <Typography variant="h5" mb={2} mt={2} sx={{ color: colors.gold2 }}>
-      Danger Zone
-    </Typography>
     <Typography variant="body1" mb={2}>
       Once you delete your account, there is no going back. Please be certain.
     </Typography>

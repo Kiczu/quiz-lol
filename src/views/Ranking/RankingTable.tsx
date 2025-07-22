@@ -1,46 +1,88 @@
 import {
+  Box,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
+  Avatar,
+  Typography,
 } from "@mui/material";
-import { colors } from "../../theme/colors";
+import { motion } from "framer-motion";
+import {
+  getRankingWrapperSx,
+  rankingTable,
+  getRankCellSx,
+  getUsernameCellSx,
+  getAvatarSx,
+  getScoreCellSx,
+  getRowMotionProps,
+  rankingTableCell,
+  rankingTableRow,
+  getTableRowSx,
+} from "./ranking.style";
 
 interface RankingTableProps {
-  ranking: { userId: string; username: string; score: number }[];
+  ranking: {
+    userId: string;
+    username: string;
+    score: number;
+    avatar?: string;
+  }[];
 }
 const RankingTable = ({ ranking }: RankingTableProps) => {
-  console.log(ranking);
   return (
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell sx={{ color: colors.textPrimary }}>Rank</TableCell>
-            <TableCell sx={{ color: colors.textPrimary }}>Username</TableCell>
-            <TableCell sx={{ color: colors.textPrimary }}>Score</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {ranking.map((user, index) => (
-            <TableRow key={index}>
-              <TableCell sx={{ color: colors.textSecondary }}>
-                {index + 1}
-              </TableCell>
-              <TableCell sx={{ color: colors.textSecondary }}>
-                {user.username}
-              </TableCell>
-              <TableCell sx={{ color: colors.textSecondary }}>
-                {user.score}
+    <Box sx={getRankingWrapperSx(1, 0, 2)}>
+      <TableContainer sx={rankingTable}>
+        <Table>
+          <TableHead>
+            <TableRow sx={rankingTableRow}>
+              <TableCell sx={rankingTableCell}>Rank</TableCell>
+              <TableCell sx={rankingTableCell}>Username</TableCell>
+              <TableCell sx={rankingTableCell} align="right">
+                Score
               </TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+          </TableHead>
+          <TableBody>
+            {ranking.map((user, index) => {
+              const isLast = index === ranking.length - 1;
+              return (
+                <TableRow
+                  component={motion.tr}
+                  {...getRowMotionProps(index)}
+                  sx={getTableRowSx(isLast)}
+                  key={user.userId}
+                >
+                  <TableCell
+                    sx={{ ...getRankCellSx(index), borderBottom: "none" }}
+                  >
+                    {index + 1}
+                  </TableCell>
+                  <TableCell
+                    sx={{ ...getUsernameCellSx, borderBottom: "none" }}
+                  >
+                    <Avatar
+                      src={user.avatar}
+                      sx={getAvatarSx(index)}
+                      alt={user.username}
+                    />
+                    <Typography fontSize={18}>{user.username}</Typography>
+                  </TableCell>
+                  <TableCell
+                    align="right"
+                    sx={{ ...getScoreCellSx(index), borderBottom: "none" }}
+                  >
+                    {user.score}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 

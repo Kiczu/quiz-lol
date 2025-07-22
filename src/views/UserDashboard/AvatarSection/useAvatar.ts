@@ -1,12 +1,12 @@
-import { userService } from "../../../services/userService";
 import { useAuth } from "../../../context/LoginContext/LoginContext";
+import { scoreService } from "../../../services/scoreService";
 
 export const useAvatar = () => {
     const { userData, refreshUserData } = useAuth();
 
-    const updateAvatar = async (avatarPath: string) => {
+    const updateAvatar = async (avatarPath: string | undefined) => {
         if (userData?.uid) {
-            await userService.updateUserAvatar(userData.uid, avatarPath);
+            await scoreService.updateUserAvatar(userData.uid, avatarPath || "");
             await refreshUserData();
         }
     };

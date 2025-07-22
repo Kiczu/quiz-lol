@@ -1,8 +1,10 @@
 import { Box } from "@mui/material";
 import { useContext } from "react";
+
 import { GameContext } from "../../context/GameContext/GameContext";
-import { startGameContainer, overlayGameBox } from "./gameBoxStyles";
 import { WavingButton } from "../../muiComponentsStyles";
+
+import { startGameContainer, overlayGameBox } from "./gameBoxStyles";
 
 const StartGame = () => {
   const gameContext = useContext(GameContext);

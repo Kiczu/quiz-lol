@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
 import { collection, doc, getDoc, getDocs, QueryDocumentSnapshot } from "firebase/firestore";
+import { useEffect, useState } from "react";
+
 import { db } from "../../api/firebase/db";
 
 interface ScoreData {
     userId: string;
     username: string;
     score: number;
+    avatar?: string;
 }
 
 const useRanking = (selectedGameMode: string) => {
@@ -31,12 +33,30 @@ const fetchRanking = async (selectedGameMode: string): Promise<ScoreData[]> => {
     const rankingData = processRankingData(querySnapshot.docs, selectedGameMode);
 
     const userIds = Array.from(new Set(rankingData.map(item => item.userId)));
-    const usernames = await fetchUsernames(userIds);
+    const userInfos = await fetchUserInfos(userIds);
 
     return rankingData.map(item => ({
         ...item,
-        username: usernames[item.userId] || "Unknown"
+        username: userInfos[item.userId]?.username || "Unknown",
+        avatar: userInfos[item.userId]?.avatar || "",
     }));
+};
+
+const fetchUserInfos = async (userIds: string[]): Promise<Record<string, { username: string; avatar?: string }>> => {
+    const userInfos: Record<string, { username: string; avatar?: string }> = {};
+
+    await Promise.all(userIds.map(async (userId) => {
+        const userDoc = await getDoc(doc(db, "scores", userId));
+        if (userDoc.exists()) {
+            const data = userDoc.data();
+            userInfos[userId] = {
+                username: data.username || "Unknown",
+                avatar: data.avatar || data.avatar || "",
+            };
+        }
+    }));
+
+    return userInfos;
 };
 
 const fetchGlobalLeaderboard = async (): Promise<ScoreData[]> => {
@@ -49,41 +69,38 @@ const fetchGlobalLeaderboard = async (): Promise<ScoreData[]> => {
         totalScores.push({
             userId: docSnap.id,
             score: data.totalScore || 0,
-            username: data.username || "Unknown"
+            username: data.username || "Unknown",
+            avatar: data.avatar || "",
         });
     }
 
     return totalScores.sort((a, b) => b.score - a.score);
 };
 
-const processRankingData = (docs: QueryDocumentSnapshot[], selectedGameMode: string): ScoreData[] => {
-    const rankingData: Record<string, number> = {};
+const processRankingData = (
+    docs: QueryDocumentSnapshot[],
+    selectedGameMode: string
+): ScoreData[] => {
+    const ranking: ScoreData[] = [];
 
     docs.forEach((doc) => {
-        const [userId, gameMode] = doc.id.split("_");
-        const score = doc.data().score || 0;
+        const data = doc.data();
+        const userId = doc.id;
 
-        if (gameMode === selectedGameMode) {
-            rankingData[userId] = score;
+        if (!data.scores || typeof data.scores !== "object") return;
+
+        const score = data.scores[selectedGameMode] ?? 0;
+
+        if (score > 0) {
+            ranking.push({
+                userId,
+                score,
+                username: "",
+            });
         }
     });
 
-    return Object.entries(rankingData)
-        .map(([userId, score]) => ({ userId, score, username: "" }))
-        .sort((a, b) => b.score - a.score);
-};
-
-const fetchUsernames = async (userIds: string[]): Promise<Record<string, string>> => {
-    const usernames: Record<string, string> = {};
-
-    await Promise.all(userIds.map(async (userId) => {
-        const userDoc = await getDoc(doc(db, "scores", userId));
-        if (userDoc.exists()) {
-            usernames[userId] = userDoc.data().username || "Unknown";
-        }
-    }));
-
-    return usernames;
+    return ranking.sort((a, b) => b.score - a.score);
 };
 
 export default useRanking;

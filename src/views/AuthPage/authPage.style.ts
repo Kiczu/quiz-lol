@@ -15,6 +15,7 @@ export const authPageStyles = {
         justifyContent: "center",
         backdropFilter: "blur(4px)",
         backgroundColor: "rgba(10, 20, 40 ,0.6)",
+        border: "none",
         p: 8,
     },
 };

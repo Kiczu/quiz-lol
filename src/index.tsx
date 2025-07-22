@@ -1,23 +1,27 @@
+import { ThemeProvider } from "@emotion/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
-import { ThemeProvider } from "@emotion/react";
-import { LoginProvider } from "./context/LoginContext/LoginContext";
+
+import FirebaseActionHandler from "./components/FirebaseActionHandler/FirebaseActionHandler";
+import GlobalBackground from "./components/GlobalBackground/GlobalBackground";
+import { BackgroundProvider } from "./context/BackgroundContext/BackgroundContext";
 import { GameProvider } from "./context/GameContext/GameContext";
-import { ModalProvider } from "./context/ModalContext/ModalContext";
+import { LoginProvider } from "./context/LoginContext/LoginContext";
+import { ModalProvider } from "./context/ModalContext/ModalProvider";
+import Layout from "./Layout/Layout";
 import { paths } from "./paths";
 import { theme } from "./theme/theme";
-import Layout from "./Layout/Layout";
-import Home from "./views/Home/Home";
-import Champion from "./components/Champion/Champion";
 import AuthPage from "./views/AuthPage/AuthPage";
-import Lore from "./views/Lore/Lore";
-import Hangman from "./views/Hangman/Hangman";
+import ForgotPassword from "./views/AuthPage/ForgotPassword/ForgotPassword";
 import LoginForm from "./views/AuthPage/LoginForm/LoginForm";
 import RegisterForm from "./views/AuthPage/RegisterForm/RegisterForm";
-import ForgotPassword from "./views/AuthPage/ForgotPassword/ForgotPassword";
-import UserDashboard from "./views/UserDashboard/UserDashboard";
+import Champion from "./views/Champion/Champion";
+import Hangman from "./views/Hangman/Hangman";
+import Home from "./views/Home/Home";
+import Lore from "./views/Lore/Lore";
 import Ranking from "./views/Ranking/Ranking";
+import UserDashboard from "./views/UserDashboard/UserDashboard";
 import "./index.css";
 
 const root = ReactDOM.createRoot(
@@ -25,39 +29,46 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <React.StrictMode>
-    <LoginProvider>
-      <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <Router basename="/">
         <ModalProvider>
-          <Router basename="/">
-            <Routes>
-              <Route path={paths.HOME} element={<Layout />}>
-                <Route path={paths.HOME} element={<Home />} />
-                <Route path={paths.CHAMPION_DETAIL} element={<Champion />} />
-                <Route path={paths.RANKING} element={<Ranking />} />
-                <Route
-                  path={paths.HANGMAN}
-                  element={
-                    <GameProvider>
-                      <Hangman />
-                    </GameProvider>
-                  }
-                />
-                <Route path={paths.AUTH} element={<AuthPage />}>
-                  <Route path={paths.LOGIN} element={<LoginForm />} />
-                  <Route path={paths.REGISTER} element={<RegisterForm />} />
+          <LoginProvider>
+            <BackgroundProvider>
+              <GlobalBackground />
+              <Routes>
+                <Route path={paths.HOME} element={<Layout />}>
                   <Route
-                    path={paths.RESET_PASSWORD}
-                    element={<ForgotPassword />}
+                    path="/__/auth/action"
+                    element={<FirebaseActionHandler />}
                   />
-                </Route>
+                  <Route path={paths.HOME} element={<Home />} />
+                  <Route path={paths.CHAMPION_DETAIL} element={<Champion />} />
+                  <Route path={paths.RANKING} element={<Ranking />} />
+                  <Route
+                    path={paths.HANGMAN}
+                    element={
+                      <GameProvider>
+                        <Hangman />
+                      </GameProvider>
+                    }
+                  />
+                  <Route path={paths.AUTH} element={<AuthPage />}>
+                    <Route path={paths.LOGIN} element={<LoginForm />} />
+                    <Route path={paths.REGISTER} element={<RegisterForm />} />
+                    <Route
+                      path={paths.RESET_PASSWORD}
+                      element={<ForgotPassword />}
+                    />
+                  </Route>
 
-                <Route path={paths.LORE} element={<Lore />} />
-                <Route path={paths.DASHBOARD} element={<UserDashboard />} />
-              </Route>
-            </Routes>
-          </Router>
+                  <Route path={paths.LORE} element={<Lore />} />
+                  <Route path={paths.DASHBOARD} element={<UserDashboard />} />
+                </Route>
+              </Routes>
+            </BackgroundProvider>
+          </LoginProvider>
         </ModalProvider>
-      </ThemeProvider>
-    </LoginProvider>
+      </Router>
+    </ThemeProvider>
   </React.StrictMode>
 );

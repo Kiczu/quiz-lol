@@ -1,27 +1,33 @@
-import { useEffect, useState } from "react";
+import { Person } from "@mui/icons-material";
 import {
   AppBar,
   Box,
   Toolbar,
   IconButton,
-  Typography,
   Menu,
   Container,
   Avatar,
   Tooltip,
   MenuItem,
+  Button,
 } from "@mui/material";
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import MobileNav from "./MobileNav/MobileNav";
-import DesktopNav from "./DesktopNav/DesktopNav";
+
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { paths } from "../../paths";
+import { colors } from "../../theme/colors";
+
+import DesktopNav from "./DesktopNav/DesktopNav";
+import MobileNav from "./MobileNav/MobileNav";
+import {
+  userSettingsContainer,
+  navigationContainer,
+  menuItem,
+  avatarIcon,
+} from "./navigation.style";
 
 const pages = [
-  {
-    name: "Quiz",
-    href: paths.HANGMAN,
-  },
   {
     name: "Home",
     href: paths.HOME,
@@ -60,10 +66,6 @@ const Navigation = () => {
 
   const { userData, handleSignOut } = useAuth();
 
-  useEffect(() => {
-    console.log("Updated userData in Navigation:", userData);
-  }, [userData]);
-
   const handleOpenUserMenu = (e: React.MouseEvent<HTMLElement>) =>
     setAnchorElUser(e.currentTarget);
 
@@ -80,7 +82,8 @@ const Navigation = () => {
     <AppBar
       position="sticky"
       className="app-bar"
-      sx={{ backgroundColor: "#0A1428" }}
+      elevation={0}
+      sx={navigationContainer}
     >
       <Container maxWidth="xl">
         <Toolbar disableGutters>
@@ -96,13 +99,22 @@ const Navigation = () => {
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                 <Avatar
-                  alt={userData?.firstName}
-                  src={userData?.avatar || "/default-avatar.png"}
-                />
+                  alt="avatar"
+                  src={userData?.avatar || undefined}
+                  sx={{
+                    ...avatarIcon,
+                    background: userData?.avatar
+                      ? undefined
+                      : colors.gradientBlue,
+                    color: colors.backgroundSecondary,
+                  }}
+                >
+                  {!userData?.avatar && <Person sx={{ fontSize: 36 }} />}
+                </Avatar>
               </IconButton>
             </Tooltip>
             <Menu
-              sx={{ mt: "45px" }}
+              sx={userSettingsContainer}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
@@ -119,15 +131,15 @@ const Navigation = () => {
             >
               {visibleSetting.map((setting) => (
                 <Link to={setting.href} key={setting.name}>
-                  <MenuItem onClick={handleCloseUserMenu}>
-                    <Typography textAlign="center">{setting.name}</Typography>
+                  <MenuItem onClick={handleCloseUserMenu} sx={menuItem}>
+                    <Button>{setting.name}</Button>
                   </MenuItem>
                 </Link>
               ))}
 
               {userData && (
-                <MenuItem onClick={handleSignOut}>
-                  <Typography textAlign="center">Wyloguj się</Typography>
+                <MenuItem onClick={handleSignOut} sx={menuItem}>
+                  <Button>Wyloguj się</Button>
                 </MenuItem>
               )}
             </Menu>

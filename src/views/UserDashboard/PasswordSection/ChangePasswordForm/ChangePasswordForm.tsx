@@ -1,11 +1,14 @@
+import { Box, Button, TextField } from "@mui/material";
+import { Form, Formik } from "formik";
 import * as yup from "yup";
-import { Box, TextField, Button } from "@mui/material";
-import { Formik, Form } from "formik";
-import { inputStyle } from "../userDashboard.style";
-import { authService } from "../../../services/authService";
-import { useState } from "react";
+
+import { useModal } from "../../../../context/ModalContext/ModalContext";
+import { authService } from "../../../../services/authService";
+import { getErrorMessage } from "../../../../utils/errorUtils";
+import { inputStyle } from "../../userDashboard.style";
 
 const validationSchema = yup.object({
+  currentPassword: yup.string().required("Current password is required"),
   newPassword: yup
     .string()
     .required("New password is required")
@@ -13,7 +16,6 @@ const validationSchema = yup.object({
     .matches(/[A-Z]/, "Password must contain an uppercase letter")
     .matches(/[0-9]/, "Password must contain a number")
     .matches(/[^\w]/, "Password must contain a special character"),
-
   confirmPassword: yup
     .string()
     .oneOf([yup.ref("newPassword")], "Passwords must match")
@@ -21,32 +23,63 @@ const validationSchema = yup.object({
 });
 
 const ChangePasswordForm = () => {
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const { showModal } = useModal();
 
   const handlePasswordChange = async (values: {
+    currentPassword: string;
     newPassword: string;
     confirmPassword: string;
   }) => {
     try {
-      await authService.changePassword(values.newPassword);
-      setSuccess("Password changed successfully!");
-      setError(null);
-    } catch (error) {
-      setError("Failed to change password. Please try again.");
-      setSuccess(null);
+      await authService.updateUserPassword(
+        values.newPassword,
+        values.currentPassword
+      );
+      showModal({
+        variant: "success",
+        title: "Success",
+        content: "Password changed successfully!",
+      });
+    } catch (error: unknown) {
+      showModal({
+        variant: "error",
+        title: "Error",
+        content: getErrorMessage(error),
+      });
     }
   };
 
   return (
     <Formik
-      initialValues={{ newPassword: "", confirmPassword: "" }}
+      initialValues={{
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      }}
       validationSchema={validationSchema}
       onSubmit={handlePasswordChange}
     >
       {({ values, handleChange, handleBlur, errors, touched }) => (
         <Form>
           <Box>
+            <TextField
+              name="currentPassword"
+              label="Current Password"
+              type="password"
+              value={values.currentPassword}
+              onChange={handleChange}
+              onBlur={handleBlur}
+              fullWidth
+              variant="outlined"
+              sx={inputStyle}
+              error={touched.currentPassword && Boolean(errors.currentPassword)}
+              helperText={
+                touched.currentPassword && errors.currentPassword
+                  ? errors.currentPassword
+                  : " "
+              }
+              autoComplete="current-password"
+            />
             <TextField
               name="newPassword"
               label="New Password"

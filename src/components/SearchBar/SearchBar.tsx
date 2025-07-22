@@ -1,4 +1,5 @@
 import { TextField } from "@mui/material";
+
 import useDebounce from "../../hooks/useDebounce";
 
 interface IUseDebounce {
@@ -24,7 +25,7 @@ const SearchBar = ({ initSearch, handleSearchChange, delay }: IUseDebounce) => {
         id="standard-search"
         label="Search field"
         type="search"
-        variant="standard"
+        variant="outlined"
         value={search}
         onChange={(e) => setSearch(e.target.value)}
       />

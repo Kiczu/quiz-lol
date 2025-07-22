@@ -1,16 +1,51 @@
-import { Box, Avatar } from "@mui/material";
-import AvatarSelection from "./AvatarSelection/AvatarSelection";
-import { avatarGridContainer, avatarStyle } from "./avatarSection.style";
+import { Box, Avatar, useMediaQuery, useTheme } from "@mui/material";
+
 import { useAuth } from "../../../context/LoginContext/LoginContext";
+import { colors } from "../../../theme/colors";
+import { getMultiColumnGradientSx } from "../../../utils/gradient";
+
+import {
+  avatarGridContainer,
+  bigAvatarImg,
+  bigAvatarWrapper,
+} from "./avatarSection.style";
+import AvatarSelection from "./AvatarSelection/AvatarSelection";
+
+const predefinedAvatars = [
+  "/avatars/avatar1.webp",
+  "/avatars/avatar2.webp",
+  "/avatars/avatar3.webp",
+  "/avatars/avatar4.webp",
+  "/avatars/avatar5.webp",
+  "/avatars/avatar6.webp",
+  "/avatars/avatar7.webp",
+];
 
 const AvatarSection = () => {
   const { userData } = useAuth();
   const selectedAvatar = userData?.avatar;
 
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const gridColumns = isMobile ? 3 : 4;
+  const columns = gridColumns + 1;
+
   return (
     <Box sx={avatarGridContainer}>
-      <Avatar src={selectedAvatar || undefined} sx={avatarStyle} />
-      <AvatarSelection />
+      <Box
+        sx={{
+          ...bigAvatarWrapper,
+          ...getMultiColumnGradientSx(columns, 0, colors.accentGradient),
+        }}
+      >
+        <Avatar src={selectedAvatar || undefined} sx={bigAvatarImg} />
+      </Box>
+      <AvatarSelection
+        selectedAvatar={selectedAvatar}
+        predefinedAvatars={predefinedAvatars}
+        gridColumns={gridColumns}
+        columns={columns}
+      />
     </Box>
   );
 };
