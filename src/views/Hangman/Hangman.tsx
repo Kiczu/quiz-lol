@@ -1,6 +1,7 @@
 import { Box, Container, Grid, Typography } from "@mui/material";
 
 import GameBox from "../../components/GameBox/GameBox";
+import Lives from "../../components/Lives/Lives";
 
 import Answer from "./Answer/Answer";
 import {
@@ -13,7 +14,6 @@ import {
   rightGrid,
 } from "./hangman.style";
 import Keyboard from "./Keyboard/Keyboard";
-import Lives from "./Lives/Lives";
 import useHangmanData from "./useHangmanData";
 
 const Hangman = () => {
