@@ -1,5 +1,5 @@
 import styled from "@emotion/styled";
-import { keyframes } from "@mui/material";
+import { keyframes, SxProps, Theme } from "@mui/material";
 
 const impact = keyframes`
   0% { opacity: 0; }
@@ -7,12 +7,12 @@ const impact = keyframes`
   100% { opacity: 0; }
 `;
 
-export const MinionImg = styled.img<{ isActive: boolean }>`
+export const MinionImg = styled.img<{ isActive: boolean, minionSize?: number }>`
   opacity: ${(prop) => (prop.isActive ? 0.5 : 1)};
   filter: ${(prop) => (prop.isActive ? "grayscale(100%)" : "grayscale(0%)")};
   z-index: 1;
   width: 100%;
-  max-width: 150px;   
+  max-width: ${(prop) => (prop.minionSize ? prop.minionSize : "150px")};
   height: auto;
   transition: filter 0.2s, opacity 0.2s;
 `;
@@ -27,11 +27,18 @@ export const ImpactAnimation = styled.img`
   z-index: 2;
 `;
 
-export const livesGrid = {
+export const getLivesGrid = (flex: boolean = false): SxProps<Theme> => flex
+  ? {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 1,
+  }
+  : {
     display: "grid",
     gridTemplateColumns: {
-        xs: "repeat(2, 1fr)",
-        sm: "repeat(3, 1fr)",
+      xs: "repeat(2, 1fr)",
+      sm: "repeat(3, 1fr)",
     },
     gap: 2,
     width: { xs: "100%", sm: 450, md: 450 },
@@ -40,12 +47,12 @@ export const livesGrid = {
     justifyItems: "center",
     alignItems: "center",
     margin: "0 auto",
-}
+  };
 
 export const liveWrapper = {
-    position: "relative",
-    width: "100%",
-    display: "flex",
-    justifyContent: "center",
+  position: "relative",
+  width: "100%",
+  display: "flex",
+  justifyContent: "center",
 }
 

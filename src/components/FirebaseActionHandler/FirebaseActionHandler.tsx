@@ -1,6 +1,7 @@
 import { getAuth, applyActionCode } from "firebase/auth";
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import { paths } from "../../paths";
 
 const FirebaseActionHandler = () => {
