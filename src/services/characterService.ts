@@ -9,11 +9,16 @@ function getAll() {
 
 function getChampion(championName: string) {
     return api
-       .get<ApiResponse>(`https://ddragon.leagueoflegends.com/cdn/14.10.1/data/en_US/champion/${championName}.json`)
-       .then((data) => data.data[championName]);
+        .get<ApiResponse>(`https://ddragon.leagueoflegends.com/cdn/14.10.1/data/en_US/champion/${championName}.json`)
+        .then((data) => data.data[championName]);
+}
+
+function getImageUrl(championName: string) {
+    return `https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/${championName}.png`;
 }
 
 export const characterService = {
     getAll,
     getChampion,
+    getImageUrl,
 };
