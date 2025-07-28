@@ -1,4 +1,5 @@
 import { Box, Typography, Tabs, Tab, Container } from "@mui/material";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 import backgroundMap from "../../assets/images/backgroundMap.jpg";
@@ -12,7 +13,6 @@ import {
 } from "./ranking.style";
 import RankingTable from "./RankingTable";
 import useRanking from "./useRanking";
-import { AnimatePresence, motion } from "framer-motion";
 
 const gameModes = ["Hangman", "Regions", "Skills", "PVP", "TotalScore"];
 

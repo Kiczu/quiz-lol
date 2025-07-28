@@ -10,6 +10,7 @@ import {
   Typography,
 } from "@mui/material";
 import { motion } from "framer-motion";
+
 import {
   getRankingWrapperSx,
   rankingTable,
