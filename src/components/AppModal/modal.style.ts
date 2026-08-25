@@ -5,7 +5,7 @@ export const modalDialogPaper = {
     background: "#010A13",
     border: "2px solid",
     borderImage: `${colors.accentGradient} 1`,
-    boxShadow: "0 8px 32px 4px #000A  , 0 0 0 4px #785A2833",
+    boxShadow: "0 8px 32px 4px #000A, 0 0 0 4px #785A2833",
     minWidth: { xs: 280, sm: 400 },
     maxWidth: { xs: "90vw", sm: 460 },
     padding: 2,
