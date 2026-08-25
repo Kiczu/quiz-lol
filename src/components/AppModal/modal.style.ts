@@ -34,7 +34,7 @@ export const modalTitleColor = (variant: string) =>
         ? colors.gold2
         : variant === "warning"
             ? colors.gold3
-            : colors.error ?? "#f44336";
+            : colors.error;
 
 export const modalContent = {
     fontSize: "1.1rem",
