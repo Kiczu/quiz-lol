@@ -11,7 +11,6 @@ export const navigationContainer = {
 export const menuItem = {
     fontWeight: 700,
     letterSpacing: 2,
-    fontSize: 4,
     textTransform: "uppercase",
     color: "inherit",
     textDecoration: "none",
