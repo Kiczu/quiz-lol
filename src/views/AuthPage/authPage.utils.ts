@@ -1,14 +1,12 @@
 import { randomNumberTo } from "../../utils/number";
 
-declare const require: {
-    context: (directory: string, useSubdirectories?: boolean, regExp?: RegExp) => {
-        keys: () => string[];
-        (path: string): string;
-    };
-};
-
-const imagesContext = require.context("../../assets/images/login", true);
-const images = imagesContext.keys().map(imagesContext);
+const images = Object.values(
+    import.meta.glob<string>("../../assets/images/login/*", {
+        eager: true,
+        query: "?url",
+        import: "default",
+    })
+);
 
 export const getRandomImage = () => {
     const savedImage = sessionStorage.getItem('backgroundImage');

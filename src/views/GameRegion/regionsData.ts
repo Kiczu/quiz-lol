@@ -7,7 +7,10 @@ import ixtalBg from "../../assets/regions/backgrounds/ixtal.jpg";
 import noxusBg from "../../assets/regions/backgrounds/noxus.jpg";
 import piltoverBg from "../../assets/regions/backgrounds/piltover.jpg";
 import pustkaBg from "../../assets/regions/backgrounds/pustka.jpg";
+import shadowIslandBg from "../../assets/regions/backgrounds/shadow_island.jpg";
 import shurimaBg from "../../assets/regions/backgrounds/shurima.jpg";
+import targonBg from "../../assets/regions/backgrounds/targon.jpg";
+import zaunBg from "../../assets/regions/backgrounds/zaun.jpg";
 import bandleCityCrest from "../../assets/regions/icons/bandle_city_crest_icon.png";
 import bilgewaterCrest from "../../assets/regions/icons/bilgewater_crest_icon.png";
 import demaciaCrest from "../../assets/regions/icons/demacia_crest_icon.png";
@@ -22,9 +25,6 @@ import shurimaCrest from "../../assets/regions/icons/shurima_crest_icon.png";
 import voidCrest from "../../assets/regions/icons/void_crest_icon.png";
 import zaunCrest from "../../assets/regions/icons/zaun_crest_icon.png";
 
-import targonBg from "../../assets/regions/backgrounds/targon.jpg";
-import shadowIslandBg from "../../assets/regions/backgrounds/shadow_island.jpg";
-import zaunBg from "../../assets/regions/backgrounds/zaun.jpg";
 
 export type Region = {
     name: string;

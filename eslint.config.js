@@ -1,14 +1,21 @@
-module.exports = [
+import tsPlugin from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
+import importPlugin from "eslint-plugin-import";
+import reactPlugin from "eslint-plugin-react";
+
+export default [
   {
     ignores: ["node_modules", "build", "public"],
+  },
+  {
     files: ["src/**/*.{js,jsx,ts,tsx}"],
     plugins: {
-      "@typescript-eslint": require("@typescript-eslint/eslint-plugin"),
-      react: require("eslint-plugin-react"),
-      import: require("eslint-plugin-import"),
+      "@typescript-eslint": tsPlugin,
+      react: reactPlugin,
+      import: importPlugin,
     },
     languageOptions: {
-      parser: require("@typescript-eslint/parser"),
+      parser: tsParser,
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
@@ -41,7 +48,6 @@ module.exports = [
           "newlines-between": "always",
         },
       ],
-      // Dodaj tu własne reguły
     },
   },
 ];
