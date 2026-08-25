@@ -21,6 +21,7 @@ import GuessRegion from "./views/GameRegion/RegionGame";
 import Hangman from "./views/Hangman/Hangman";
 import Home from "./views/Home/Home";
 import Lore from "./views/Lore/Lore";
+import NotFound from "./views/NotFound/NotFound";
 import Ranking from "./views/Ranking/Ranking";
 import UserDashboard from "./views/UserDashboard/UserDashboard";
 import "./index.css";
@@ -72,6 +73,7 @@ root.render(
 
                   <Route path={paths.LORE} element={<Lore />} />
                   <Route path={paths.DASHBOARD} element={<UserDashboard />} />
+                  <Route path="*" element={<NotFound />} />
                 </Route>
               </Routes>
             </BackgroundProvider>
