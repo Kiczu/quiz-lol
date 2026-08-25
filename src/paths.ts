@@ -4,12 +4,10 @@ export const paths = {
     LOGIN: '/auth/login',
     REGISTER: '/auth/register',
     RESET_PASSWORD: '/auth/reset-password',
-    PROFILE: '/profile',
     RANKING: '/ranking',
     DASHBOARD: '/dashboard',
     LORE: '/lore',
     HANGMAN: '/game/hangman',
     REGION: '/game/region',
-    CHAMPION: "/champion",
-    CHAMPION_DETAIL: "/champions/:id",
+    CHAMPION_DETAIL: '/champions/:id',
 }
