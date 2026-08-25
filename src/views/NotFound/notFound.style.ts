@@ -2,7 +2,9 @@ import { colors } from "../../theme/colors";
 import { typography } from "../../theme/typography";
 
 export const notFoundWrapper = {
-    minHeight: "100vh",
+    display: "flex",
+    flexDirection: "column",
+    flex: 1,
     width: "100%",
 }
 
@@ -13,7 +15,7 @@ export const notFoundOverlay = {
     justifyContent: "center",
     textAlign: "center",
     gap: 2,
-    minHeight: "100vh",
+    flex: 1,
     backdropFilter: "blur(4px)",
     backgroundColor: colors.overlayBackground,
     padding: {
