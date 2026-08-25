@@ -1,8 +1,9 @@
 import backgroundMap from "../../assets/images/backgroundMap.jpg";
 import { colors } from "../../theme/colors";
+import { fill, fillColumn } from "../../theme/layout";
 
 export const hangmanViewWrapper = {
-  minHeight: "100vh",
+  ...fillColumn,
   width: "100%",
   backgroundImage: `url(${backgroundMap})`,
   backgroundSize: "cover",
@@ -11,7 +12,7 @@ export const hangmanViewWrapper = {
 };
 
 export const hangmanViewOverlay = {
-  minHeight: "100vh",
+  ...fill,
   backdropFilter: "blur(4px)",
   backgroundColor: colors.overlayBackground,
   padding: {

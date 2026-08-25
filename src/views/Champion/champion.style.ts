@@ -1,13 +1,14 @@
 import { colors } from "../../theme/colors";
+import { fill, fillColumn } from "../../theme/layout";
 
 export const backgroundWrapper = {
-    minHeight: "90vh",
+    ...fillColumn,
     width: "100%",
     position: "relative",
 };
 
 export const overlay = {
-    minHeight: "90vh",
+    ...fill,
     backdropFilter: "blur(4px)",
     backgroundColor: colors.overlayBackground,
     padding: {

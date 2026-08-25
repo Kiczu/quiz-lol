@@ -20,7 +20,7 @@ const AuthPage = () => {
   }, [userData, location.pathname, navigate]);
 
   return (
-    <Grid container component="main" sx={authPageStyles.container}>
+    <Grid container sx={authPageStyles.container}>
       <Grid item xs={false} sm={4} md={7} />
       <Grid
         item

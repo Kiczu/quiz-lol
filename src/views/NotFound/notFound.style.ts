@@ -1,10 +1,9 @@
 import { colors } from "../../theme/colors";
+import { fill, fillColumn } from "../../theme/layout";
 import { typography } from "../../theme/typography";
 
 export const notFoundWrapper = {
-    display: "flex",
-    flexDirection: "column",
-    flex: 1,
+    ...fillColumn,
     width: "100%",
 }
 
@@ -15,7 +14,7 @@ export const notFoundOverlay = {
     justifyContent: "center",
     textAlign: "center",
     gap: 2,
-    flex: 1,
+    ...fill,
     backdropFilter: "blur(4px)",
     backgroundColor: colors.overlayBackground,
     padding: {

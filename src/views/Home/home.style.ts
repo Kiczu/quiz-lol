@@ -1,11 +1,12 @@
 import heroImage from "../../assets/images/hero.jpg";
+import { fill, fillColumn } from "../../theme/layout";
 
 export const homeHeroContainer = {
     position: "relative",
     backgroundImage: `url(${heroImage})`,
     backgroundPosition: "top center",
     backgroundSize: "cover",
-    minHeight: "90vh",
+    ...fillColumn,
 }
 
 export const heroOverlay = {
@@ -15,7 +16,7 @@ export const heroOverlay = {
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    minHeight: "90vh",
+    ...fill,
     background: "linear-gradient(180deg, rgba(0,0,0,0), black);",
 }
 export const headline = {

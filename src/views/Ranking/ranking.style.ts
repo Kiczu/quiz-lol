@@ -1,14 +1,15 @@
 import { colors } from "../../theme/colors"
+import { fill, fillColumn } from "../../theme/layout";
 import { getMultiColumnGradientSx } from "../../utils/gradient";
 
 export const rankingContainer = {
     backgroundColor: colors.background,
     color: colors.textPrimary,
-    minHeight: "100vh",
+    ...fillColumn,
 }
 
 export const rankignOverlay = {
-    minHeight: "100vh",
+    ...fill,
     backdropFilter: "blur(4px)",
     backgroundColor: colors.overlayBackground,
     padding: {
