@@ -1,15 +1,27 @@
 import { colors } from "../../theme/colors";
 import { typography } from "../../theme/typography";
 
-export const notFoundContainer = {
+export const notFoundWrapper = {
+    minHeight: "100vh",
+    width: "100%",
+}
+
+export const notFoundOverlay = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
     justifyContent: "center",
     textAlign: "center",
     gap: 2,
-    minHeight: "80vh",
-    px: 2,
+    minHeight: "100vh",
+    backdropFilter: "blur(4px)",
+    backgroundColor: colors.overlayBackground,
+    padding: {
+        xs: "20px 0",
+        sm: "20px 24px",
+        md: "20px 60px",
+        lg: "20px 80px"
+    },
 }
 
 export const notFoundCode = {
