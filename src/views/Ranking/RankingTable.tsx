@@ -14,6 +14,7 @@ import { motion } from "framer-motion";
 import {
   getRankingWrapperSx,
   rankingTable,
+  rankingTableContent,
   getRankCellSx,
   getUsernameCellSx,
   getAvatarSx,
@@ -36,7 +37,7 @@ const RankingTable = ({ ranking }: RankingTableProps) => {
   return (
     <Box sx={getRankingWrapperSx(1, 0, 2)}>
       <TableContainer sx={rankingTable}>
-        <Table>
+        <Table sx={rankingTableContent}>
           <TableHead>
             <TableRow sx={rankingTableRow}>
               <TableCell sx={rankingTableCell}>Rank</TableCell>
