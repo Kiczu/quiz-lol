@@ -39,7 +39,6 @@ export const rankingTable = {
     background: colors.backgroundSecondary,
     borderRadius: 5,
     overflowX: "auto",
-    overflowY: "visible",
 };
 
 /**

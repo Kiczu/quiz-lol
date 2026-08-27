@@ -7,12 +7,12 @@ const impact = keyframes`
   100% { opacity: 0; }
 `;
 
-export const MinionImg = styled.img<{ isActive: boolean, minionSize?: number }>`
+export const MinionImg = styled.img<{ isActive: boolean }>`
   opacity: ${(prop) => (prop.isActive ? 0.5 : 1)};
   filter: ${(prop) => (prop.isActive ? "grayscale(100%)" : "grayscale(0%)")};
   z-index: 1;
   width: 100%;
-  max-width: ${(prop) => (prop.minionSize ? prop.minionSize : "150px")};
+  max-width: 150px;
   height: auto;
   transition: filter 0.2s, opacity 0.2s;
 `;
@@ -42,7 +42,7 @@ export const getLivesGrid = (flex: boolean = false): SxProps<Theme> => flex
     },
     gap: 2,
     width: { xs: "100%", sm: 450, md: 450 },
-    maxWidth: "100vw",
+    maxWidth: "100%",
     minHeight: { xs: 120, sm: 180, md: 220 },
     justifyItems: "center",
     alignItems: "center",

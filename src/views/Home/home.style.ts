@@ -17,7 +17,7 @@ export const heroOverlay = {
     justifyContent: "center",
     width: "100%",
     ...fill,
-    background: "linear-gradient(180deg, rgba(0,0,0,0), black);",
+    background: "linear-gradient(180deg, rgba(0,0,0,0), black)",
 }
 export const headline = {
     color: "primary.main",
