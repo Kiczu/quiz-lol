@@ -43,6 +43,9 @@ const Ranking = () => {
           <Tabs
             value={activeTab}
             onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons="auto"
+            allowScrollButtonsMobile
             sx={{ mb: 4, borderBottom: 1, borderColor: colors.grey2 }}
           >
             {gameModes.map((mode, index) => (

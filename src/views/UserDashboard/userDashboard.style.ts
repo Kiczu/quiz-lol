@@ -1,6 +1,7 @@
 import { alpha } from "@mui/material";
 
 import { colors } from "../../theme/colors";
+import { fill } from "../../theme/layout";
 
 export const inputStyle = {
     backgroundColor: "transparent",
@@ -16,7 +17,7 @@ export const inputStyle = {
 };
 
 export const dashboardViewContainer = {
-    minHeight: "100vh",
+    ...fill,
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -24,7 +25,7 @@ export const dashboardViewContainer = {
 }
 
 export const dashboardOverlay = {
-    minHeight: "100vh",
+    ...fill,
     backdropFilter: "blur(4px)",
     backgroundColor: alpha(colors.overlayBackground, 0.75),
     width: "100%",

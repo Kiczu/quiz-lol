@@ -3,6 +3,7 @@ import { useContext, useEffect } from "react";
 
 import { GameState } from "../../api/types";
 import { GameContext } from "../../context/GameContext/GameContext";
+import { fillColumn } from "../../theme/layout";
 
 import EndGame from "./EndGame";
 import StartGame from "./StartGame";
@@ -22,12 +23,14 @@ const GameBox = ({ children, title }: Props) => {
   }, [title, gameId, startNewGame]);
 
   return (
-    <Box>
-      <Box>
+    <Box sx={fillColumn}>
+      <Box sx={fillColumn}>
         {gameState === GameState.NotStarted && <StartGame />}
 
         {gameState === GameState.InProgress && (
-          <Box width={"100%"}>{children}</Box>
+          <Box width={"100%"} sx={fillColumn}>
+            {children}
+          </Box>
         )}
         {gameState === GameState.Finished && <EndGame />}
       </Box>

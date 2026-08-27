@@ -1,13 +1,14 @@
 import { colors } from "../../theme/colors";
+import { fill, fillColumn } from "../../theme/layout";
 import { getMultiColumnGradientSx } from "../../utils/gradient";
 
 export const loreViewWrapper = {
-    minHeight: "100vh",
+    ...fillColumn,
     width: "100%",
 }
 
 export const loreViewOverlay = {
-    minHeight: "100vh",
+    ...fill,
     backdropFilter: "blur(4px)",
     backgroundColor: colors.overlayBackground,
     padding: {

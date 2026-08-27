@@ -57,6 +57,7 @@ const MobileNav = ({
           }}
           open={Boolean(anchorElNav)}
           onClose={handleCloseNavMenu}
+          disableScrollLock
           sx={mobileNavPagesContainer}
         >
           {pages.map((page) => (

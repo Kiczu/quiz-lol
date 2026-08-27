@@ -1,8 +1,10 @@
+import { fill } from "../../theme/layout";
+
 import { getRandomImage } from "./authPage.utils";
 
 export const authPageStyles = {
     container: {
-        minHeight: "90vh",
+        ...fill,
         backgroundImage: `url(${getRandomImage()})`,
         backgroundRepeat: "no-repeat",
         backgroundSize: "cover",

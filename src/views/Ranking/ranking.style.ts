@@ -1,14 +1,15 @@
 import { colors } from "../../theme/colors"
+import { fill, fillColumn } from "../../theme/layout";
 import { getMultiColumnGradientSx } from "../../utils/gradient";
 
 export const rankingContainer = {
     backgroundColor: colors.background,
     color: colors.textPrimary,
-    minHeight: "100vh",
+    ...fillColumn,
 }
 
 export const rankignOverlay = {
-    minHeight: "100vh",
+    ...fill,
     backdropFilter: "blur(4px)",
     backgroundColor: colors.overlayBackground,
     padding: {
@@ -35,11 +36,19 @@ export const getRankingWrapperSx = (columns: number, idx: number, border = 2) =>
 });
 
 export const rankingTable = {
-    minWidth: 380,
     background: colors.backgroundSecondary,
     borderRadius: 5,
     overflowX: "auto",
     overflowY: "visible",
+};
+
+/**
+ * The minimum width belongs on the table, not on its scroll container:
+ * a min-width on the container stops it from shrinking to the screen, so it
+ * bursts out of its frame instead of scrolling its contents.
+ */
+export const rankingTableContent = {
+    minWidth: 380,
 };
 
 export const rankingTableCell = {

@@ -1,12 +1,13 @@
 import { colors } from "../../theme/colors";
+import { fill, fillColumn } from "../../theme/layout";
 
 export const regionGameWrapper = {
-    minHeight: "100vh",
+    ...fillColumn,
     width: "100%",
 };
 
 export const regionGameOverlay = {
-    minHeight: "100vh",
+    ...fill,
     backdropFilter: "blur(4px)",
     backgroundColor: colors.overlayBackground,
     padding: {

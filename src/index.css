@@ -2,6 +2,9 @@
 
 html {
   font-size: 18px;
+  /* Always reserve the scrollbar so page width does not jump between views
+     that scroll and views that fit. */
+  overflow-y: scroll;
 }
 
 body {
@@ -20,7 +23,7 @@ body {
 main {
   display: flex;
   flex-direction: column;
-  flex: 1;
+  flex: 1 0 auto;
 }
 
 code {

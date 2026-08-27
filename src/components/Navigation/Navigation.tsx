@@ -128,6 +128,7 @@ const Navigation = () => {
               }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
+              disableScrollLock
             >
               {visibleSetting.map((setting) => (
                 <Link to={setting.href} key={setting.name}>

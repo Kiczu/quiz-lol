@@ -28,6 +28,7 @@ const SkillsTabs = ({ spells }: Props) => {
         onChange={handleChange}
         scrollButtons="auto"
         variant="scrollable"
+        allowScrollButtonsMobile
       >
         {spells.map((spell, i) => (
           <Tab

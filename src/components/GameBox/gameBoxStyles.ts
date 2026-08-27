@@ -1,11 +1,12 @@
 import startGame from "../../assets/images/startGame.jpg";
+import { fill, fillColumn } from "../../theme/layout";
 
 export const startGameContainer = {
     position: "relative",
     backgroundImage: `url(${startGame})`,
     backgroundPosition: "50% 20%",
     backgroundSize: "cover",
-    minHeight: "90vh",
+    ...fillColumn,
 }
 
 export const endGameContainer = {
@@ -14,7 +15,7 @@ export const endGameContainer = {
     alignItems: "center",
     justifyContent: "center",
     gap: 2,
-    minHeight: "90vh",
+    ...fill,
     background: "#010A13",
     color: "#F0E6D2",
 }
@@ -34,6 +35,6 @@ export const overlayGameBox = {
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
-    minHeight: "90vh",
+    ...fill,
     background: "rgba(8, 10, 18, 0.8)"
 }
