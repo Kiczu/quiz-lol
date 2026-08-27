@@ -39,23 +39,13 @@ export const spellName = {
     wordBreak: "break-word",
 };
 
-export const backToLoreButton = {
-    mt: 3,
-    fontWeight: 700,
-    letterSpacing: 1,
-    background: colors.gold2,
-    color: colors.background,
-    boxShadow: `0 0 16px 2px ${colors.gold3}80`,
-    border: `2px solid ${colors.gold3}`,
-    borderRadius: "12px",
-    px: 4,
-    py: 1.5,
-    fontSize: { xs: "1rem", sm: "1.15rem" },
-    textTransform: "uppercase",
-    "&:hover": {
-        background: colors.gold3,
-        color: colors.gold1,
-        borderColor: colors.gold2,
-        boxShadow: `0 0 32px 4px ${colors.gold3}`,
-    },
+export const centeredMessage = {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 3,
+}
+
+export const loader = {
+    color: colors.gold2,
 }
