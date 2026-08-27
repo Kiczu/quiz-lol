@@ -5,17 +5,12 @@ const BASE_URL = 'https://ddragon.leagueoflegends.com';
 
 let versionRequest: Promise<string> | null = null;
 
-/**
- * Latest Data Dragon patch, requested once and shared. Pinning a patch by hand
- * silently freezes the champion roster, so everything derives it from here.
- */
 function getVersion() {
     if (!versionRequest) {
         versionRequest = api
             .get<string[]>(`${BASE_URL}/api/versions.json`)
             .then((versions) => versions[0])
             .catch((error) => {
-                // Drop the cached failure so the next call can retry.
                 versionRequest = null;
                 throw error;
             });

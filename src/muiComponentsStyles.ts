@@ -51,9 +51,6 @@ export const WavingButton = styled(Button)({
         filter: "blur(10px)",
         animation: `${shadowWave} 40s linear infinite`,
     },
-    // Not an identity transform: any transform makes the button a stacking
-    // context, which pulls the z-index -1/-2 pseudo elements behind its own
-    // background. That is what changes the glow on hover - do not remove.
     "&:hover": {
         transform: "scale(1)",
     },

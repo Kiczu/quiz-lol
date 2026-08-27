@@ -10,9 +10,6 @@ export const GlobalBackground = () => {
       sx={{
         position: "fixed",
         zIndex: 0,
-        // inset rather than 100vw/100vh: viewport units include the scrollbar,
-        // so the layer ends up wider than the visible area and shifts when the
-        // scrollbar comes and goes.
         inset: 0,
         backgroundImage: `url(${image})`,
         backgroundSize: "cover",

@@ -15,8 +15,6 @@ export const useChampionData = (id?: string) => {
       return;
     }
 
-    // Guards against a slower request for a previous champion overwriting a
-    // newer one when the id changes mid-flight.
     let ignore = false;
 
     const fetchChampion = async () => {
