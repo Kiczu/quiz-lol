@@ -8,7 +8,7 @@ export const linkCardContainer = {
     transition: "transform 0.18s cubic-bezier(.34,1.56,.64,1)",
     "&:hover": {
         transform: "translateY(-6px) scale(1.035)",
-        boxShadow: "0 8px 46px 6px #C8AA6E44, 0 1px 8px #0004",
+        boxShadow: `0 8px 46px 6px ${colors.gold2}44, 0 1px 8px #0004`,
     },
 }
 
@@ -40,7 +40,7 @@ export const modeImg = {
     width: { xs: 60, sm: 70, md: 80, lg: 90 },
     height: { xs: 60, sm: 70, md: 80, lg: 90 },
     borderRadius: "50%",
-    boxShadow: "0 0 0 2px #C8AA6E99",
+    boxShadow: `0 0 0 2px ${colors.gold2}99`,
     objectFit: "cover",
     mb: 2,
     transition: "box-shadow 0.2s",

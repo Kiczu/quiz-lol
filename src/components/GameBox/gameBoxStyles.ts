@@ -1,4 +1,5 @@
 import startGame from "../../assets/images/startGame.jpg";
+import { colors } from "../../theme/colors";
 import { fill, fillColumn } from "../../theme/layout";
 
 export const startGameContainer = {
@@ -16,8 +17,8 @@ export const endGameContainer = {
     justifyContent: "center",
     gap: 2,
     ...fill,
-    background: "#010A13",
-    color: "#F0E6D2",
+    background: colors.background,
+    color: colors.textPrimary,
 }
 
 export const defeatGame = {

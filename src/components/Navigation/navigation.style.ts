@@ -38,7 +38,7 @@ export const userSettingsContainer = {
     },
     "& .MuiPaper-root": {
         border: "none",
-        boxShadow: "0 4px 32px 2px #0AC8B9",
+        boxShadow: `0 4px 32px 2px ${colors.gradientBlue}`,
     }
 }
 

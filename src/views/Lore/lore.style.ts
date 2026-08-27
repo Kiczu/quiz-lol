@@ -31,12 +31,12 @@ export const championCard = {
     position: "relative",
     background: "rgba(28,34,48, 0.92)",
     borderRadius: "0px",
-    boxShadow: "0 4px 24px 2px #C8AA6E22, 0 1px 8px #0008",
+    boxShadow: `0 4px 24px 2px ${colors.gold2}22, 0 1px 8px #0008`,
     overflow: "hidden",
     border: "none",
     transition: "transform 0.5s cubic-bezier(.34,1.56,.64,1)",
     "&:hover": {
-        boxShadow: "0 8px 32px 4px #C8AA6E55, 0 4px 24px #0397AB88",
+        boxShadow: `0 8px 32px 4px ${colors.gold2}55, 0 4px 24px ${colors.blue2}88`,
         background: "rgba(28,34,48, 0.97)",
         transform: "translateY(-6px) scale(1.035)",
     },
@@ -61,7 +61,7 @@ export const championNameBanner = {
     color: colors.gold1,
     textAlign: "center",
     p: "12px 0",
-    boxShadow: "0 -2px 8px 0 #0AC8B966",
+    boxShadow: `0 -2px 8px 0 ${colors.gradientBlue}66`,
     borderRadius: 0,
     zIndex: 9,
 };

@@ -105,8 +105,8 @@ export const theme = createTheme({
                 {
                     props: { color: "error", variant: "outlined" },
                     style: {
-                        color: "#FF5733",
-                        border: "2px solid #FF5733",
+                        color: colors.error,
+                        border: `2px solid ${colors.error}`,
                         borderRadius: 0,
                         fontWeight: 700,
                         letterSpacing: 2,
@@ -146,7 +146,7 @@ export const theme = createTheme({
                     background: "rgba(28,34,48, 0.94)",
                     border: `2px solid ${colors.gold2}`,
                     borderRadius: 0,
-                    boxShadow: "0 4px 32px 2px #C8AA6E33",
+                    boxShadow: `0 4px 32px 2px ${colors.gold2}33`,
                     backdropFilter: "blur(6px)",
                 },
             },
