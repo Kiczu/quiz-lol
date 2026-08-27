@@ -9,16 +9,14 @@ const images = Object.values(
 );
 
 export const getRandomImage = () => {
-    const savedImage = sessionStorage.getItem('backgroundImage');
+    const savedImage = sessionStorage.getItem("backgroundImage");
 
-    if (savedImage) {
+    if (savedImage && images.includes(savedImage)) {
         return savedImage;
     }
 
-    const randomIndex = randomNumberTo(images.length);
-    const randomImage = images[randomIndex];
-
-    sessionStorage.setItem('backgroundImage', randomImage);
+    const randomImage = images[randomNumberTo(images.length)];
+    sessionStorage.setItem("backgroundImage", randomImage);
 
     return randomImage;
 };
