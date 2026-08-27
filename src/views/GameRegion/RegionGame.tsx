@@ -1,7 +1,7 @@
 import { Box, Container, Typography } from "@mui/material";
 import { useEffect } from "react";
 
-import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import backgroundMap from "../../assets/images/backgroundMap.webp";
 import GameBox from "../../components/GameBox/GameBox";
 import Lives from "../../components/Lives/Lives";
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";

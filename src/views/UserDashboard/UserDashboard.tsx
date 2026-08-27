@@ -2,7 +2,7 @@ import { Box, Grid, Typography, Container } from "@mui/material";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import backgroundMap from "../../assets/images/backgroundMap.webp";
 import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { useAuth } from "../../context/LoginContext/LoginContext";

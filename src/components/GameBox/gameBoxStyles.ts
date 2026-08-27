@@ -1,4 +1,4 @@
-import startGame from "../../assets/images/startGame.jpg";
+import startGame from "../../assets/images/startGame.webp";
 import { colors } from "../../theme/colors";
 import { fill, fillColumn } from "../../theme/layout";
 
