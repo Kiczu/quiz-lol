@@ -51,17 +51,3 @@ export const notFoundDesc = {
     maxWidth: 420,
     mb: 2,
 }
-
-export const notFoundButton = {
-    fontFamily: `${typography.button.fontFamily}, sans-serif`,
-    color: colors.gold1,
-    border: `1px solid ${colors.gold4}`,
-    borderRadius: 0,
-    px: 4,
-    py: 1,
-    letterSpacing: 2,
-    "&:hover": {
-        borderColor: colors.gold2,
-        backgroundColor: colors.gold5,
-    },
-}

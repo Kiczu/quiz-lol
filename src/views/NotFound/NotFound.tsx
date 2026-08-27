@@ -5,9 +5,9 @@ import { Link as ReactRouter } from "react-router-dom";
 import backgroundMap from "../../assets/images/backgroundMap.jpg";
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { paths } from "../../paths";
+import { outlineButton } from "../../theme/buttons";
 
 import {
-  notFoundButton,
   notFoundCode,
   notFoundDesc,
   notFoundOverlay,
@@ -35,7 +35,7 @@ const NotFound = () => {
         <Typography sx={notFoundDesc}>
           This page does not exist in Runeterra. Head back and pick a game mode.
         </Typography>
-        <Button component={ReactRouter} to={paths.HOME} sx={notFoundButton}>
+        <Button component={ReactRouter} to={paths.HOME} sx={outlineButton}>
           Back to home
         </Button>
       </Box>
