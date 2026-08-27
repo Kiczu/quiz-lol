@@ -13,8 +13,8 @@ export const answerWrapper = {
     py: 1,
     border: `2px solid ${colors.gold3}`,
     borderRadius: "16px",
-    background: "linear-gradient(90deg, #c8aa6e33 0%, #32281e33 100%)",
-    boxShadow: "0 0 12px 2px #c8aa6e55",
+    background: `linear-gradient(90deg, ${colors.gold2}33 0%, ${colors.gold5}33 100%)`,
+    boxShadow: `0 0 12px 2px ${colors.gold2}55`,
 };
 
 export const answerLetter = (isCorrect: boolean) => ({

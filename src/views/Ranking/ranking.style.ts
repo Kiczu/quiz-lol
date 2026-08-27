@@ -51,7 +51,7 @@ export const rankingTableContent = {
 };
 
 export const rankingTableCell = {
-    color: "#F0E6D2",
+    color: colors.textPrimary,
     fontWeight: "bold",
     fontSize: 18,
 }
@@ -107,7 +107,7 @@ export const getRowMotionProps = (index: number) => ({
 });
 
 export const getTableRowSx = (isLast: boolean) => ({
-    borderBottom: isLast ? "none" : "1.5px solid #32281E",
+    borderBottom: isLast ? "none" : `1.5px solid ${colors.gold5}`,
     transition: "background 0.2s",
     "&:hover": {
         background: "rgba(200,170,62,0.10)",

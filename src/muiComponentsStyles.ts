@@ -18,12 +18,12 @@ export const shadowWave = keyframes`
 
 export const WavingButton = styled(Button)({
     position: "relative",
-    color: "#F0E6D2",
+    color: colors.textPrimary,
     fontSize: "1.2rem",
     letterSpacing: "4px",
     textTransform: "uppercase",
     fontWeight: "bold",
-    background: "#0A1428",
+    background: colors.backgroundSecondary,
     border: `2px solid ${colors.gold2}`,
     borderRadius: 0,
     margin: "0 auto",
@@ -32,7 +32,7 @@ export const WavingButton = styled(Button)({
     "&:before": {
         content: '""',
         position: "absolute",
-        background: "#0A1428",
+        background: colors.backgroundSecondary,
         width: "100%",
         height: "100%",
         zIndex: "-1",
@@ -43,8 +43,7 @@ export const WavingButton = styled(Button)({
         position: "absolute",
         left: "-2px",
         top: "-2px",
-        background:
-            "linear-gradient(45deg, #C8AA6E, #C89B3C, #785A28, #C8AA6E, #C89B3C, #785A28, #C8AA6E, #C89B3C, #785A28, #C8AA6E)",
+        background: colors.goldWaveGradient,
         backgroundSize: "400%",
         width: "calc(100% + 4px)",
         height: "calc(100% + 4px)",

@@ -39,7 +39,7 @@ export const dataFormsContainer = {
 export const glassPanel = {
     background: "rgba(28,34,48, 0.92)",
     borderRadius: "0px",
-    boxShadow: "0 4px 32px 2px #C8AA6E22, 0 1px 8px #0008",
+    boxShadow: `0 4px 32px 2px ${colors.gold2}22, 0 1px 8px #0008`,
     backdropFilter: "blur(6px)",
     transition: "border 0.18s, box-shadow 0.18s, background 0.2s",
     p: { xs: 2, sm: 3 },
@@ -47,10 +47,10 @@ export const glassPanel = {
 };
 
 export const scoresContainer = {
-    background: "linear-gradient(90deg, #C8AA6E 60%, #0AC8B9 100%)",
-    color: "#1e2328",
+    background: `linear-gradient(90deg, ${colors.gold2} 60%, ${colors.gradientBlue} 100%)`,
+    color: colors.grey3,
     borderRadius: "0px",
-    boxShadow: "0 6px 24px 4px #C8AA6E55",
+    boxShadow: `0 6px 24px 4px ${colors.gold2}55`,
     p: { xs: 2, sm: 4 },
     fontWeight: 700,
     fontSize: "1.5rem",
