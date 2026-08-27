@@ -20,7 +20,7 @@ export const endGameContainer = {
     color: "#F0E6D2",
 }
 
-export const deafetGame = {
+export const defeatGame = {
     maxWidth: "350px",
 }
 

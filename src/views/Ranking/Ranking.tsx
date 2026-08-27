@@ -7,7 +7,7 @@ import { useBackground } from "../../context/BackgroundContext/BackgroundContext
 import { colors } from "../../theme/colors";
 
 import {
-  rankignOverlay,
+  rankingOverlay,
   rankingContainer,
   rankingHeader,
 } from "./ranking.style";
@@ -35,7 +35,7 @@ const Ranking = () => {
 
   return (
     <Box sx={rankingContainer}>
-      <Box sx={rankignOverlay}>
+      <Box sx={rankingOverlay}>
         <Container maxWidth="xl">
           <Typography variant="h1" component="h1" sx={rankingHeader}>
             User Rankings

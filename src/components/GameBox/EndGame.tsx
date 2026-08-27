@@ -3,19 +3,19 @@ import { useContext } from "react";
 import { Link } from "react-router-dom";
 
 
-import Deafet from "../../assets/images/deafet.png";
+import Defeat from "../../assets/images/defeat.png";
 import Victory from "../../assets/images/victory.png";
 import { GameContext } from "../../context/GameContext/GameContext";
 import { paths } from "../../paths";
 
-import { endGameContainer, victoryGame, deafetGame } from "./gameBoxStyles";
+import { endGameContainer, victoryGame, defeatGame } from "./gameBoxStyles";
 
 const EndGame = () => {
   const { isWin, gameScore } = useContext(GameContext);
   return (
     <Box sx={endGameContainer}>
       {!isWin ? (
-        <Box component="img" src={Deafet} sx={deafetGame}></Box>
+        <Box component="img" src={Defeat} sx={defeatGame}></Box>
       ) : (
         <>
           <Box component="img" src={Victory} sx={victoryGame}></Box>
