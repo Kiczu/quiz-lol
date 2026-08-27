@@ -9,7 +9,7 @@ import {
 import { useEffect } from "react";
 import { Link as ReactRouter, useParams } from "react-router-dom";
 
-import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import backgroundMap from "../../assets/images/backgroundMap.webp";
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { paths } from "../../paths";
 import { outlineButton } from "../../theme/buttons";

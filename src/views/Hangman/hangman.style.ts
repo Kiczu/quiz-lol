@@ -1,4 +1,4 @@
-import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import backgroundMap from "../../assets/images/backgroundMap.webp";
 import { colors } from "../../theme/colors";
 import { fill, fillColumn } from "../../theme/layout";
 

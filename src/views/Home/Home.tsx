@@ -2,10 +2,10 @@ import { Box, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 
-import hangmanIcon from "../../assets/images/modes/hangman.jpg";
-import pvpIcon from "../../assets/images/modes/pvp.jpg";
-import regionIcon from "../../assets/images/modes/region.png";
-import skillsIcon from "../../assets/images/modes/skill.jpg";
+import hangmanIcon from "../../assets/images/modes/hangman.webp";
+import pvpIcon from "../../assets/images/modes/pvp.webp";
+import regionIcon from "../../assets/images/modes/region.webp";
+import skillsIcon from "../../assets/images/modes/skill.webp";
 import SelectModeCard from "../../components/SelectModeCard/SelectModeCard";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { paths } from "../../paths";

@@ -3,8 +3,8 @@ import { useContext } from "react";
 import { Link } from "react-router-dom";
 
 
-import Defeat from "../../assets/images/defeat.png";
-import Victory from "../../assets/images/victory.png";
+import Defeat from "../../assets/images/defeat.webp";
+import Victory from "../../assets/images/victory.webp";
 import { GameContext } from "../../context/GameContext/GameContext";
 import { paths } from "../../paths";
 

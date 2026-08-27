@@ -2,7 +2,7 @@ import { Box, Typography, Tabs, Tab, Container } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
-import backgroundMap from "../../assets/images/backgroundMap.jpg";
+import backgroundMap from "../../assets/images/backgroundMap.webp";
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { colors } from "../../theme/colors";
 

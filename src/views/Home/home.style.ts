@@ -1,4 +1,4 @@
-import heroImage from "../../assets/images/hero.jpg";
+import heroImage from "../../assets/images/hero.webp";
 import { fill, fillColumn } from "../../theme/layout";
 
 export const homeHeroContainer = {
