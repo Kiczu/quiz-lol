@@ -15,6 +15,7 @@ const useRegionGameData = () => {
     const [usedRegions, setUsedRegions] = useState<string[]>([]);
     const [isGameEnded, setIsGameEnded] = useState(false);
     const [championImage, setChampionImage] = useState<string | undefined>(undefined);
+    const [version, setVersion] = useState<string | null>(null);
 
     const {
         handleEndGame,
@@ -30,8 +31,12 @@ const useRegionGameData = () => {
 
     useEffect(() => {
         const fetchChampions = async () => {
-            const data = await championRegionService.getAll();
+            const [data, patch] = await Promise.all([
+                championRegionService.getAll(),
+                characterService.getVersion(),
+            ]);
             setChampions(data);
+            setVersion(patch);
         };
         fetchChampions();
     }, []);
@@ -47,7 +52,7 @@ const useRegionGameData = () => {
         if (!champions || champions.length === 0) return;
         const random = champions[Math.floor(Math.random() * champions.length)];
         setChampionToGuess(random);
-        setChampionImage(characterService.getImageUrl(random.name));
+        setChampionImage(version ? characterService.getImageUrl(random.name, version) : undefined);
         setWrongGuesses(0);
         setUsedRegions([]);
         setIsGameEnded(false);

@@ -1,10 +1,6 @@
 import { colors } from "./colors";
 import { typography } from "./typography";
 
-/**
- * Bordered gold button used for secondary actions such as leaving a dead end.
- * Shared so the 404 page and the champion fallback stay in step.
- */
 export const outlineButton = {
     fontFamily: `${typography.button.fontFamily}, sans-serif`,
     color: colors.gold1,

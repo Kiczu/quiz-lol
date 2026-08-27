@@ -2,7 +2,9 @@ import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { useState } from "react";
 
 import CustomTabPanel from "../../../components/CustomTabPanel/CustomTabPanel";
-import { spellName } from "../champion.style";
+import { characterService } from "../../../services/characterService";
+import { htmlToPlainText } from "../../../utils/text";
+import { spellDescription, spellName } from "../champion.style";
 
 interface Spell {
   id: string;
@@ -13,9 +15,10 @@ interface Spell {
 
 type Props = {
   spells: Spell[];
+  version: string;
 };
 
-const SkillsTabs = ({ spells }: Props) => {
+const SkillsTabs = ({ spells, version }: Props) => {
   const [value, setValue] = useState(0);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) =>
@@ -35,7 +38,7 @@ const SkillsTabs = ({ spells }: Props) => {
             key={spell.id}
             icon={
               <img
-                src={`https://ddragon.leagueoflegends.com/cdn/14.13.1/img/spell/${spell.image.full}`}
+                src={characterService.getSpellImageUrl(spell.image.full, version)}
                 alt={spell.name}
               />
             }
@@ -49,7 +52,9 @@ const SkillsTabs = ({ spells }: Props) => {
           <Typography component="p" sx={spellName}>
             {spell.name}
           </Typography>
-          <Typography component="p">{spell.description}</Typography>
+          <Typography component="p" sx={spellDescription}>
+            {htmlToPlainText(spell.description)}
+          </Typography>
         </CustomTabPanel>
       ))}
     </Box>

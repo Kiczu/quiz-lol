@@ -5,6 +5,7 @@ import { characterService } from "../../services/characterService";
 
 export const useChampionData = (id?: string) => {
   const [champion, setChampion] = useState<ChampionDetails | null>(null);
+  const [version, setVersion] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
@@ -14,17 +15,19 @@ export const useChampionData = (id?: string) => {
       return;
     }
 
-    // Guards against a slower request for a previous champion overwriting a
-    // newer one when the id changes mid-flight.
     let ignore = false;
 
     const fetchChampion = async () => {
       setIsLoading(true);
       setHasError(false);
       try {
-        const data = await characterService.getChampion(id);
+        const [data, patch] = await Promise.all([
+          characterService.getChampion(id),
+          characterService.getVersion(),
+        ]);
         if (!ignore) {
           setChampion(data ?? null);
+          setVersion(patch);
         }
       } catch (err) {
         console.error(err);
@@ -46,5 +49,5 @@ export const useChampionData = (id?: string) => {
     };
   }, [id]);
 
-  return { champion, isLoading, hasError };
+  return { champion, version, isLoading, hasError };
 };

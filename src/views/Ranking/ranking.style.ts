@@ -41,11 +41,6 @@ export const rankingTable = {
     overflowX: "auto",
 };
 
-/**
- * The minimum width belongs on the table, not on its scroll container:
- * a min-width on the container stops it from shrinking to the screen, so it
- * bursts out of its frame instead of scrolling its contents.
- */
 export const rankingTableContent = {
     minWidth: 380,
 };
