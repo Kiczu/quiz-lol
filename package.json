@@ -23,13 +23,14 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "lint": "eslint src",
-    "lint:fix": "eslint src --fix"
+    "lint:fix": "eslint src --fix",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.5.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.6",
     "@types/node": "^24.13.3",
     "@types/react": "^18.2.60",
     "@types/react-dom": "^18.2.19",
@@ -40,9 +41,10 @@
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
-    "jest-fetch-mock": "^3.0.3",
+    "jsdom": "^30.0.1",
     "typescript": "^5.9.3",
-    "vite": "^8.2.2"
+    "vite": "^8.2.2",
+    "vitest": "^4.1.11"
   },
   "type": "module"
 }
