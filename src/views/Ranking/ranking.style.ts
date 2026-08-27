@@ -8,7 +8,7 @@ export const rankingContainer = {
     ...fillColumn,
 }
 
-export const rankignOverlay = {
+export const rankingOverlay = {
     ...fill,
     backdropFilter: "blur(4px)",
     backgroundColor: colors.overlayBackground,
