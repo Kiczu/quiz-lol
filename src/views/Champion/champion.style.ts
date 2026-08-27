@@ -39,6 +39,11 @@ export const spellName = {
     wordBreak: "break-word",
 };
 
+export const spellDescription = {
+    whiteSpace: "pre-line",
+    wordBreak: "break-word",
+}
+
 export const centeredMessage = {
     display: "flex",
     flexDirection: "column",

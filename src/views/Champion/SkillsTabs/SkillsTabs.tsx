@@ -3,7 +3,8 @@ import { useState } from "react";
 
 import CustomTabPanel from "../../../components/CustomTabPanel/CustomTabPanel";
 import { characterService } from "../../../services/characterService";
-import { spellName } from "../champion.style";
+import { htmlToPlainText } from "../../../utils/text";
+import { spellDescription, spellName } from "../champion.style";
 
 interface Spell {
   id: string;
@@ -51,7 +52,9 @@ const SkillsTabs = ({ spells, version }: Props) => {
           <Typography component="p" sx={spellName}>
             {spell.name}
           </Typography>
-          <Typography component="p">{spell.description}</Typography>
+          <Typography component="p" sx={spellDescription}>
+            {htmlToPlainText(spell.description)}
+          </Typography>
         </CustomTabPanel>
       ))}
     </Box>
