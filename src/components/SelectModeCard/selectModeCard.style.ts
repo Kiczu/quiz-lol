@@ -68,3 +68,31 @@ export const modeDesc = {
     maxWidth: "240px",
     zIndex: 2,
 }
+export const disabledCardContainer = {
+    display: "block",
+    height: "100%",
+    cursor: "default",
+}
+
+export const modeCardDisabled = {
+    opacity: 0.55,
+    filter: "grayscale(0.7)",
+}
+
+export const comingSoonBadge = {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    zIndex: 3,
+    px: 1,
+    py: 0.25,
+    border: `1px solid ${colors.gold4}`,
+    borderRadius: 1,
+    background: colors.overlayBackground,
+    color: colors.gold2,
+    fontFamily: `${typography.button.fontFamily}, sans-serif`,
+    fontSize: "0.65rem",
+    fontWeight: 700,
+    letterSpacing: 1,
+    textTransform: "uppercase",
+}

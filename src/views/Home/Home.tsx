@@ -18,7 +18,14 @@ import {
   headline,
 } from "./home.style";
 
-const modes = [
+type GameMode = {
+  title: string;
+  desc: string;
+  img: string;
+  link?: string;
+};
+
+const modes: GameMode[] = [
   {
     title: "Hangman",
     desc: "Classic game. Limited attempts. Can you guess?",
@@ -34,13 +41,11 @@ const modes = [
   {
     title: "Skills",
     desc: "Match the skill to the champion.",
-    link: "/skills",
     img: skillsIcon,
   },
   {
     title: "PVP",
     desc: "Play vs players from all over the world.",
-    link: "/quote",
     img: pvpIcon,
   },
 ];
