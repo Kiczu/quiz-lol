@@ -1,24 +1,52 @@
 import { api } from '../api/api';
 import { ApiResponse } from '../api/types';
 
+const BASE_URL = 'https://ddragon.leagueoflegends.com';
+
+let versionRequest: Promise<string> | null = null;
+
+/**
+ * Latest Data Dragon patch, requested once and shared. Pinning a patch by hand
+ * silently freezes the champion roster, so everything derives it from here.
+ */
+function getVersion() {
+    if (!versionRequest) {
+        versionRequest = api
+            .get<string[]>(`${BASE_URL}/api/versions.json`)
+            .then((versions) => versions[0])
+            .catch((error) => {
+                // Drop the cached failure so the next call can retry.
+                versionRequest = null;
+                throw error;
+            });
+    }
+    return versionRequest;
+}
+
 function getAll() {
-    return api
-        .get<ApiResponse>('https://ddragon.leagueoflegends.com/cdn/14.10.1/data/en_US/champion.json')
+    return getVersion()
+        .then((version) => api.get<ApiResponse>(`${BASE_URL}/cdn/${version}/data/en_US/champion.json`))
         .then((data) => Object.values(data.data));
 }
 
 function getChampion(championName: string) {
-    return api
-        .get<ApiResponse>(`https://ddragon.leagueoflegends.com/cdn/14.10.1/data/en_US/champion/${championName}.json`)
+    return getVersion()
+        .then((version) => api.get<ApiResponse>(`${BASE_URL}/cdn/${version}/data/en_US/champion/${championName}.json`))
         .then((data) => data.data[championName]);
 }
 
-function getImageUrl(championName: string) {
-    return `https://ddragon.leagueoflegends.com/cdn/14.10.1/img/champion/${championName}.png`;
+function getImageUrl(championName: string, version: string) {
+    return `${BASE_URL}/cdn/${version}/img/champion/${championName}.png`;
+}
+
+function getSpellImageUrl(spellImage: string, version: string) {
+    return `${BASE_URL}/cdn/${version}/img/spell/${spellImage}`;
 }
 
 export const characterService = {
     getAll,
     getChampion,
+    getVersion,
     getImageUrl,
+    getSpellImageUrl,
 };

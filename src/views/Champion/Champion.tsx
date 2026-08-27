@@ -27,7 +27,7 @@ import { useChampionData } from "./useChampionData";
 
 const Champion = () => {
   const { id } = useParams<{ id: string }>();
-  const { champion, isLoading, hasError } = useChampionData(id);
+  const { champion, version, isLoading, hasError } = useChampionData(id);
   const { setImage } = useBackground();
 
   useEffect(() => {
@@ -44,7 +44,7 @@ const Champion = () => {
       );
     }
 
-    if (hasError || !champion) {
+    if (hasError || !champion || !version) {
       return (
         <Box sx={centeredMessage}>
           <Typography variant="h1" textAlign="center" sx={title}>
@@ -88,7 +88,7 @@ const Champion = () => {
             <Typography padding="20px 0" component="h2" variant="h2">
               Skills
             </Typography>
-            <SkillsTabs spells={champion.spells} />
+            <SkillsTabs spells={champion.spells} version={version} />
           </Grid>
         </Grid>
       </>
