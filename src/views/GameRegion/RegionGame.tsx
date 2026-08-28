@@ -47,12 +47,14 @@ const RegionGame = () => {
               What region does this hero belong to?
             </Typography>
             <Box sx={regionContainer}>
-              <Box
-                component="img"
-                src={championImage}
-                alt={championToGuess?.name}
-                sx={championImageStyle}
-              />
+              {championImage && (
+                <Box
+                  component="img"
+                  src={championImage}
+                  alt={championToGuess?.name}
+                  sx={championImageStyle}
+                />
+              )}
               <Lives
                 maxAttempts={maxAttempts}
                 wrongGuesses={wrongGuesses}

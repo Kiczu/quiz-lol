@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 
+import { ChampionDetails } from "../../api/types";
 import { GameContext } from "../../context/GameContext/GameContext";
 import { championRegionService, ChampionRegion } from "../../services/championRegionService";
 import { characterService } from "../../services/characterService";
@@ -16,6 +17,7 @@ const useRegionGameData = () => {
     const [isGameEnded, setIsGameEnded] = useState(false);
     const [championImage, setChampionImage] = useState<string | undefined>(undefined);
     const [version, setVersion] = useState<string | null>(null);
+    const [ddragonChampions, setDdragonChampions] = useState<ChampionDetails[]>([]);
 
     const {
         handleEndGame,
@@ -31,12 +33,14 @@ const useRegionGameData = () => {
 
     useEffect(() => {
         const fetchChampions = async () => {
-            const [data, patch] = await Promise.all([
+            const [data, patch, roster] = await Promise.all([
                 championRegionService.getAll(),
                 characterService.getVersion(),
+                characterService.getAll(),
             ]);
             setChampions(data);
             setVersion(patch);
+            setDdragonChampions(roster);
         };
         fetchChampions();
     }, []);
@@ -52,7 +56,12 @@ const useRegionGameData = () => {
         if (!champions || champions.length === 0) return;
         const random = champions[Math.floor(Math.random() * champions.length)];
         setChampionToGuess(random);
-        setChampionImage(version ? characterService.getImageUrl(random.name, version) : undefined);
+        const matched = characterService.findByLabel(ddragonChampions, random.name);
+        setChampionImage(
+            version && matched
+                ? characterService.getImageUrl(matched.id, version)
+                : undefined
+        );
         setWrongGuesses(0);
         setUsedRegions([]);
         setIsGameEnded(false);
