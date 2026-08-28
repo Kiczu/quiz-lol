@@ -11,6 +11,14 @@ const roster = [
   { id: "Aatrox", name: "Aatrox" },
 ] as ChampionDetails[];
 
+describe("getSplashUrl", () => {
+  it("builds an unversioned splash url", () => {
+    expect(characterService.getSplashUrl("Aatrox")).toBe(
+      "https://ddragon.leagueoflegends.com/cdn/img/champion/splash/Aatrox_0.jpg"
+    );
+  });
+});
+
 describe("findByLabel", () => {
   it("matches the data dragon id exactly", () => {
     expect(characterService.findByLabel(roster, "Aatrox")?.id).toBe("Aatrox");

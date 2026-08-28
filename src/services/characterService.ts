@@ -45,6 +45,10 @@ function getImageUrl(championName: string, version: string) {
     return `${BASE_URL}/cdn/${version}/img/champion/${championName}.png`;
 }
 
+function getSplashUrl(championId: string) {
+    return `${BASE_URL}/cdn/img/champion/splash/${championId}_0.jpg`;
+}
+
 function getSpellImageUrl(spellImage: string, version: string) {
     return `${BASE_URL}/cdn/${version}/img/spell/${spellImage}`;
 }
@@ -55,5 +59,6 @@ export const characterService = {
     getVersion,
     findByLabel,
     getImageUrl,
+    getSplashUrl,
     getSpellImageUrl,
 };
