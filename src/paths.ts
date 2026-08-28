@@ -9,5 +9,6 @@ export const paths = {
     LORE: '/lore',
     HANGMAN: '/game/hangman',
     REGION: '/game/region',
+    SKILLS: '/game/skills',
     CHAMPION_DETAIL: '/champions/:id',
 }
