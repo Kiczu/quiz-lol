@@ -5,6 +5,7 @@ import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 
 import FirebaseActionHandler from "./components/FirebaseActionHandler/FirebaseActionHandler";
 import GlobalBackground from "./components/GlobalBackground/GlobalBackground";
+import RequireAuth from "./components/RequireAuth/RequireAuth";
 import { BackgroundProvider } from "./context/BackgroundContext/BackgroundContext";
 import { GameProvider } from "./context/GameContext/GameContext";
 import { LoginProvider } from "./context/LoginContext/LoginContext";
@@ -50,25 +51,31 @@ root.render(
                   <Route
                     path={paths.HANGMAN}
                     element={
-                      <GameProvider>
-                        <Hangman />
-                      </GameProvider>
+                      <RequireAuth>
+                        <GameProvider>
+                          <Hangman />
+                        </GameProvider>
+                      </RequireAuth>
                     }
                   />
                   <Route
                     path={paths.REGION}
                     element={
-                      <GameProvider>
-                        <GuessRegion />
-                      </GameProvider>
+                      <RequireAuth>
+                        <GameProvider>
+                          <GuessRegion />
+                        </GameProvider>
+                      </RequireAuth>
                     }
                   />
                   <Route
                     path={paths.SKILLS}
                     element={
-                      <GameProvider>
-                        <SkillsGame />
-                      </GameProvider>
+                      <RequireAuth>
+                        <GameProvider>
+                          <SkillsGame />
+                        </GameProvider>
+                      </RequireAuth>
                     }
                   />
                   <Route path={paths.AUTH} element={<AuthPage />}>
