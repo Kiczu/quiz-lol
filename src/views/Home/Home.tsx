@@ -41,6 +41,7 @@ const modes: GameMode[] = [
   {
     title: "Skills",
     desc: "Match the skill to the champion.",
+    link: paths.SKILLS,
     img: skillsIcon,
   },
   {

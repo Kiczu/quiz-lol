@@ -18,6 +18,7 @@ import LoginForm from "./views/AuthPage/LoginForm/LoginForm";
 import RegisterForm from "./views/AuthPage/RegisterForm/RegisterForm";
 import Champion from "./views/Champion/Champion";
 import GuessRegion from "./views/GameRegion/RegionGame";
+import SkillsGame from "./views/GameSkills/SkillsGame";
 import Hangman from "./views/Hangman/Hangman";
 import Home from "./views/Home/Home";
 import Lore from "./views/Lore/Lore";
@@ -59,6 +60,14 @@ root.render(
                     element={
                       <GameProvider>
                         <GuessRegion />
+                      </GameProvider>
+                    }
+                  />
+                  <Route
+                    path={paths.SKILLS}
+                    element={
+                      <GameProvider>
+                        <SkillsGame />
                       </GameProvider>
                     }
                   />

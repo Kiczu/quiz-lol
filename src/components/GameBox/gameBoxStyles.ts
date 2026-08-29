@@ -11,6 +11,7 @@ export const startGameContainer = {
 }
 
 export const endGameContainer = {
+    position: "relative",
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
