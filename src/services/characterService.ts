@@ -1,5 +1,5 @@
 import { api } from '../api/api';
-import { ApiResponse } from '../api/types';
+import { ApiResponse, ChampionDetails } from '../api/types';
 
 const BASE_URL = 'https://ddragon.leagueoflegends.com';
 
@@ -30,8 +30,23 @@ function getChampion(championName: string) {
         .then((data) => data.data[championName]);
 }
 
+const toSlug = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+function findByLabel(champions: ChampionDetails[], label: string) {
+    const slug = toSlug(label);
+    return (
+        champions.find(
+            (champion) => toSlug(champion.id) === slug || toSlug(champion.name) === slug
+        ) ?? null
+    );
+}
+
 function getImageUrl(championName: string, version: string) {
     return `${BASE_URL}/cdn/${version}/img/champion/${championName}.png`;
+}
+
+function getSplashUrl(championId: string) {
+    return `${BASE_URL}/cdn/img/champion/splash/${championId}_0.jpg`;
 }
 
 function getSpellImageUrl(spellImage: string, version: string) {
@@ -42,6 +57,8 @@ export const characterService = {
     getAll,
     getChampion,
     getVersion,
+    findByLabel,
     getImageUrl,
+    getSplashUrl,
     getSpellImageUrl,
 };

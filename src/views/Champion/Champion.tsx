@@ -12,6 +12,7 @@ import { Link as ReactRouter, useParams } from "react-router-dom";
 import backgroundMap from "../../assets/images/backgroundMap.webp";
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { paths } from "../../paths";
+import { characterService } from "../../services/characterService";
 import { outlineButton } from "../../theme/buttons";
 
 import {
@@ -65,7 +66,7 @@ const Champion = () => {
         <Grid container spacing={{ xs: 1, sm: 6 }}>
           <Grid item xs={12} md={6}>
             <img
-              src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champion.id}_0.jpg`}
+              src={characterService.getSplashUrl(champion.id)}
               alt={champion.name}
               style={championImage}
             />

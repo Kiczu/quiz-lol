@@ -3,6 +3,7 @@ import { useTheme } from "@mui/material/styles";
 import { Link as ReactRouter } from "react-router-dom";
 
 import { ChampionDetails } from "../../../api/types";
+import { characterService } from "../../../services/characterService";
 import { championCard, championImage, getBannerSx } from "../lore.style";
 
 const ChampionList = ({ champions }: { champions: ChampionDetails[] }) => {
@@ -29,7 +30,7 @@ const ChampionList = ({ champions }: { champions: ChampionDetails[] }) => {
             <Box sx={championCard}>
               <Box
                 component="img"
-                src={`https://ddragon.leagueoflegends.com/cdn/img/champion/splash/${champion.id}_0.jpg`}
+                src={characterService.getSplashUrl(champion.id)}
                 alt={champion.name}
                 sx={championImage}
                 loading="lazy"
