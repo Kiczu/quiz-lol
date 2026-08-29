@@ -4,6 +4,7 @@ import { ApiResponse, ChampionDetails } from '../api/types';
 const BASE_URL = 'https://ddragon.leagueoflegends.com';
 
 let versionRequest: Promise<string> | null = null;
+let championsRequest: Promise<ChampionDetails[]> | null = null;
 
 function getVersion() {
     if (!versionRequest) {
@@ -19,9 +20,17 @@ function getVersion() {
 }
 
 function getAll() {
-    return getVersion()
-        .then((version) => api.get<ApiResponse>(`${BASE_URL}/cdn/${version}/data/en_US/champion.json`))
-        .then((data) => Object.values(data.data));
+    if (!championsRequest) {
+        championsRequest = getVersion()
+            .then((version) => api.get<ApiResponse>(`${BASE_URL}/cdn/${version}/data/en_US/champion.json`))
+            .then((data) => Object.values(data.data))
+            .catch((error) => {
+                championsRequest = null;
+                throw error;
+            });
+    }
+
+    return championsRequest;
 }
 
 function getChampion(championName: string) {
