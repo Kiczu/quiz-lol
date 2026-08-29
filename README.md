@@ -1,5 +1,7 @@
 # Quiz-LoL
 
+[![CI](https://github.com/Kiczu/quiz-lol/actions/workflows/ci.yml/badge.svg)](https://github.com/Kiczu/quiz-lol/actions/workflows/ci.yml)
+
 A web app inspired by League of Legends. Features multiple game modes, a personalized user dashboard, leaderboards, user accounts, and a custom LoL-themed UI. This project is built for portfolio presentation, with modern technologies, clean code, and easy scalability for future game modes.
 
 ## Demo
