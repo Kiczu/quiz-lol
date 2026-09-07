@@ -61,3 +61,33 @@ Inspirations
 League of Legends – colors, UI/UX, overall theme
 Online quizzes & social gaming
 ```
+
+## Local development with the Firebase emulators
+
+The three game modes run on Cloud Functions, so the app needs a backend even in
+development. The emulator suite provides one locally, with its own database and
+its own user accounts, so nothing you do while developing touches production.
+
+One-time setup:
+
+- `npm install -g firebase-tools`
+- a JDK 11 or newer on the PATH (the Firestore and Auth emulators are Java)
+
+Then:
+
+```
+npm run emulators
+```
+
+That builds `functions/`, starts Auth, Firestore and Functions, and puts the
+emulator UI on http://127.0.0.1:4000. On the first run it seeds the
+`championRegions` collection from the live project, which the Regions mode needs
+in order to pick a champion. On exit it writes the whole local state - including
+the accounts you registered - to `.emulator-data`, and imports it again next
+time, so you only register once. Use `npm run seed:emulator` if you ever need to
+refresh that collection by hand.
+
+`npm run dev` connects to the emulators automatically. Register an account
+through the app the first time; it lives only in the emulator. To run the dev
+server against the live project instead, put `VITE_USE_EMULATORS=false` in
+`.env.local`.
