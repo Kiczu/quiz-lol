@@ -1,6 +1,7 @@
 import * as admin from "firebase-admin";
 import { FieldValue } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
+import { warn } from "firebase-functions/logger";
 
 admin.initializeApp();
 
@@ -108,17 +109,22 @@ export const requireUid = (uid?: string) => {
   return uid;
 };
 
+const NOT_FOUND = 5;
+
 export const awardPoints = async (uid: string, gameId: string, points: number) => {
   if (points <= 0) return;
 
-  await db
-    .collection("scores")
-    .doc(uid)
-    .set(
-      {
+  try {
+    await db
+      .collection("scores")
+      .doc(uid)
+      .update({
         totalScore: FieldValue.increment(points),
-        scores: { [gameId]: FieldValue.increment(points) },
-      },
-      { merge: true }
-    );
+        [`scores.${gameId}`]: FieldValue.increment(points),
+      });
+  } catch (error) {
+    if ((error as { code?: number }).code !== NOT_FOUND) throw error;
+
+    warn("Dropped points for a player with no public profile", { uid, gameId, points });
+  }
 };
