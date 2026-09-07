@@ -35,11 +35,13 @@ const fetchRanking = async (selectedGameMode: string): Promise<ScoreData[]> => {
     const userIds = Array.from(new Set(rankingData.map(item => item.userId)));
     const userInfos = await fetchUserInfos(userIds);
 
-    return rankingData.map(item => ({
-        ...item,
-        username: userInfos[item.userId]?.username || "Unknown",
-        avatar: userInfos[item.userId]?.avatar || "",
-    }));
+    return rankingData
+        .filter(item => userInfos[item.userId])
+        .map(item => ({
+            ...item,
+            username: userInfos[item.userId].username,
+            avatar: userInfos[item.userId].avatar || "",
+        }));
 };
 
 const fetchUserInfos = async (userIds: string[]): Promise<Record<string, { username: string; avatar?: string }>> => {
@@ -47,11 +49,11 @@ const fetchUserInfos = async (userIds: string[]): Promise<Record<string, { usern
 
     await Promise.all(userIds.map(async (userId) => {
         const userDoc = await getDoc(doc(db, "scores", userId));
-        if (userDoc.exists()) {
+        if (userDoc.exists() && userDoc.data().username) {
             const data = userDoc.data();
             userInfos[userId] = {
-                username: data.username || "Unknown",
-                avatar: data.avatar || data.avatar || "",
+                username: data.username,
+                avatar: data.avatar || "",
             };
         }
     }));
@@ -66,10 +68,11 @@ const fetchGlobalLeaderboard = async (): Promise<ScoreData[]> => {
     for (const docSnap of snapshot.docs) {
         if (docSnap.id.includes("_")) continue;
         const data = docSnap.data();
+        if (!data.username) continue;
         totalScores.push({
             userId: docSnap.id,
             score: data.totalScore || 0,
-            username: data.username || "Unknown",
+            username: data.username,
             avatar: data.avatar || "",
         });
     }
