@@ -27,3 +27,11 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      - name: Install functions
+        run: npm ci
+        working-directory: functions
+
+      - name: Build functions
+        run: npm run build
+        working-directory: functions
