@@ -1,5 +1,5 @@
 import { sendEmailVerification, updateEmail } from "firebase/auth";
-import React, { createContext, useEffect, useState, useContext } from "react";
+import React, { createContext, useEffect, useRef, useState, useContext } from "react";
 
 import { EditableUserFields, RawUserData } from "../../api/types";
 import { authService } from "../../services/authService";
@@ -15,6 +15,11 @@ interface LoginContextType {
   userData: RawUserData | null;
   isLoading: boolean;
   handleSignIn: (email: string, password: string) => Promise<void>;
+  handleRegister: (
+    email: string,
+    password: string,
+    details: { username: string; firstName: string; lastName: string }
+  ) => Promise<void>;
   handleSignInWithGoogle: () => Promise<void>;
   handleSignOut: () => Promise<void>;
   refreshUserData: () => Promise<void>;
@@ -27,6 +32,7 @@ export const LoginProvider = ({ children }: Props) => {
   const [userData, setUserData] = useState<RawUserData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const { showErrorModal, showModal } = useModal();
+  const latestRefresh = useRef(0);
 
   useEffect(() => {
     setIsLoading(true);
@@ -42,6 +48,7 @@ export const LoginProvider = ({ children }: Props) => {
   }, []);
 
   const refreshUserData = async () => {
+    const request = (latestRefresh.current += 1);
     setIsLoading(true);
     const user = authService.getCurrentUser();
     if (!user) {
@@ -51,12 +58,24 @@ export const LoginProvider = ({ children }: Props) => {
     }
     await user.reload();
     const fetchedData = await userAggregateService.getUserData(user.uid);
+
+    if (request !== latestRefresh.current) return;
+
     setUserData(fetchedData ?? null);
     setIsLoading(false);
   };
 
   const handleSignIn = async (email: string, password: string) => {
     await authService.loginUser(email, password);
+    await refreshUserData();
+  };
+
+  const handleRegister = async (
+    email: string,
+    password: string,
+    details: { username: string; firstName: string; lastName: string }
+  ) => {
+    await authService.registerUser(email, password, details);
     await refreshUserData();
   };
 
@@ -155,6 +174,7 @@ export const LoginProvider = ({ children }: Props) => {
         userData,
         isLoading,
         handleSignIn,
+        handleRegister,
         handleSignInWithGoogle,
         handleSignOut,
         refreshUserData,
