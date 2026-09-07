@@ -26,7 +26,9 @@
     "lint:fix": "eslint src --fix",
     "test": "vitest",
     "test:run": "vitest run",
-    "images": "node scripts/optimize-images.mjs"
+    "images": "node scripts/optimize-images.mjs",
+    "emulators": "npm --prefix functions run build && node scripts/emulators.mjs",
+    "seed:emulator": "node scripts/seed-emulator.mjs"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
