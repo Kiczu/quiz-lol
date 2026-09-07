@@ -3,21 +3,21 @@ import { Box, Typography } from "@mui/material";
 import { answerWrapper, answerLetter } from "./answer.style";
 
 type Props = {
-  letters: { value: string; isCorrect: boolean }[];
+  mask: string[];
 };
 
-const isLetterToGuess = (char: string) => /[a-zA-Z]/.test(char);
+const isRevealedLetter = (char: string) => /[a-zA-Z]/.test(char);
 
-const Answer = ({ letters }: Props) => (
+const Answer = ({ mask }: Props) => (
   <Box sx={answerWrapper}>
-    {letters.map(({ value, isCorrect }, key) => (
+    {mask.map((value, key) => (
       <Typography
         variant="h3"
         component="span"
         key={key}
-        sx={answerLetter(isCorrect)}
+        sx={answerLetter(isRevealedLetter(value))}
       >
-        {isLetterToGuess(value) ? (isCorrect ? value : "_") : value}
+        {value === "" ? "_" : value}
       </Typography>
     ))}
   </Box>

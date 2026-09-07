@@ -6,12 +6,11 @@ import GameBox from "../../components/GameBox/GameBox";
 import Lives from "../../components/Lives/Lives";
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { COLUMN_MAP } from "../../theme/config";
+import { errorMessage, loader } from "../../theme/layout";
 import { useResponsiveColumns } from "../../utils/useResponsiveColumns";
 
 import ChampionOptions from "./ChampionOptions/ChampionOptions";
 import {
-  errorMessage,
-  loader,
   optionsWrapper,
   skillsContainer,
   skillsGameOverlay,
