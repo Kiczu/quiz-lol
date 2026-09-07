@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GameContext } from "../../context/GameContext/GameContext";
 import { GuessResult, gameRoundService } from "../../services/gameRoundService";
 
-import useSkillsGameData from "./useSkillsGameData";
+import useRegionGameData from "./useRegionGameData";
 
 vi.mock("../../services/gameRoundService", () => ({
   gameRoundService: {
@@ -16,13 +16,8 @@ vi.mock("../../services/gameRoundService", () => ({
 const round = {
   roundId: "round-1",
   maxAttempts: 3,
-  spellName: "Darkin Blade",
-  spellIcon: "spell.png",
-  options: ["Aatrox", "Ahri", "Akali", "Ashe"].map((id) => ({
-    id,
-    name: id,
-    icon: `${id}.png`,
-  })),
+  championName: "Aatrox",
+  championIcon: "Aatrox.png",
 };
 
 const guessResult = (overrides: Partial<GuessResult> = {}): GuessResult => ({
@@ -37,16 +32,18 @@ const guessResult = (overrides: Partial<GuessResult> = {}): GuessResult => ({
 });
 
 const handleEndGame = vi.fn();
+const startNewGame = vi.fn();
+const handleStartGame = vi.fn();
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <GameContext.Provider
     value={{
-      gameId: "Skills",
+      gameId: "Regions",
       gameScore: 0,
       gameState: "InProgress" as never,
       isWin: false,
-      startNewGame: vi.fn(),
-      handleStartGame: vi.fn(),
+      startNewGame,
+      handleStartGame,
       handleEndGame,
     }}
   >
@@ -55,57 +52,39 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 const renderGame = async () => {
-  const view = renderHook(() => useSkillsGameData(), { wrapper });
+  const view = renderHook(() => useRegionGameData(), { wrapper });
   await waitFor(() => expect(view.result.current.isLoading).toBe(false));
   return view;
 };
 
-describe("useSkillsGameData", () => {
+describe("useRegionGameData", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(gameRoundService.startRound).mockResolvedValue(round);
   });
 
-  it("asks the server for a Skills round", async () => {
+  it("never receives the region from the server", async () => {
+    const { result } = await renderGame();
+
+    expect(result.current.round).not.toHaveProperty("region");
+    expect(JSON.stringify(result.current.round)).not.toContain("noxus");
+  });
+
+  it("leaves the game lifecycle to GameBox", async () => {
     await renderGame();
 
-    expect(gameRoundService.startRound).toHaveBeenCalledWith("Skills");
-  });
-
-  it("never receives the answer from the server", async () => {
-    const { result } = await renderGame();
-
-    expect(result.current.round).not.toHaveProperty("answerId");
-    expect(JSON.stringify(result.current.round)).not.toContain("answerId");
-  });
-
-  it("shows the question the server handed out", async () => {
-    const { result } = await renderGame();
-
-    expect(result.current.round?.spellName).toBe("Darkin Blade");
-    expect(result.current.round?.options).toHaveLength(4);
-  });
-
-  it("takes the wrong guess count from the server, not from itself", async () => {
-    vi.mocked(gameRoundService.submitGuess).mockResolvedValue(guessResult());
-    const { result } = await renderGame();
-
-    await act(async () => {
-      await result.current.handleSelectChampion("Ahri");
-    });
-
-    expect(result.current.wrongGuesses).toBe(1);
-    expect(handleEndGame).not.toHaveBeenCalled();
+    expect(startNewGame).not.toHaveBeenCalled();
+    expect(handleStartGame).not.toHaveBeenCalled();
   });
 
   it("ends the game with the points the server awarded", async () => {
     vi.mocked(gameRoundService.submitGuess).mockResolvedValue(
-      guessResult({ correct: true, won: true, finished: true, points: 6, answer: "Aatrox" })
+      guessResult({ correct: true, won: true, finished: true, wrongGuesses: 1, points: 6, answer: "noxus" })
     );
     const { result } = await renderGame();
 
     await act(async () => {
-      await result.current.handleSelectChampion("Aatrox");
+      await result.current.handleSelectRegion("noxus");
     });
 
     expect(handleEndGame).toHaveBeenCalledWith(6, true);
@@ -113,26 +92,26 @@ describe("useSkillsGameData", () => {
 
   it("ends as a loss when the server says the round is over", async () => {
     vi.mocked(gameRoundService.submitGuess).mockResolvedValue(
-      guessResult({ finished: true, wrongGuesses: 3, answer: "Aatrox" })
+      guessResult({ finished: true, wrongGuesses: 3, answer: "noxus" })
     );
     const { result } = await renderGame();
 
     await act(async () => {
-      await result.current.handleSelectChampion("Ashe");
+      await result.current.handleSelectRegion("ionia");
     });
 
     expect(handleEndGame).toHaveBeenCalledWith(0, false);
   });
 
-  it("does not ask twice about the same champion", async () => {
+  it("does not ask twice about the same region", async () => {
     vi.mocked(gameRoundService.submitGuess).mockResolvedValue(guessResult());
     const { result } = await renderGame();
 
     await act(async () => {
-      await result.current.handleSelectChampion("Ahri");
+      await result.current.handleSelectRegion("ionia");
     });
     await act(async () => {
-      await result.current.handleSelectChampion("Ahri");
+      await result.current.handleSelectRegion("ionia");
     });
 
     expect(gameRoundService.submitGuess).toHaveBeenCalledTimes(1);

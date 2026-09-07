@@ -42,25 +42,6 @@ const isUsernameTaken = async (username: string): Promise<boolean> => {
     const snapshot = await getDocs(q);
     return !snapshot.empty;
 };
-const saveGameScore = async (userId: string, gameId: string, score: number) => {
-    const scoreRef = doc(db, "scores", userId);
-    const scoreSnap = await getDoc(scoreRef);
-
-    const scores: ScoresMap = scoreSnap.exists()
-        ? scoreSnap.data().scores || {}
-        : {};
-
-    const current = scores[gameId] || 0;
-    scores[gameId] = current + score;
-
-    const totalScore = Object.values(scores).reduce((acc, val) => acc + val, 0);
-
-    await setDoc(scoreRef, {
-        scores,
-        totalScore,
-    }, { merge: true });
-};
-
 const getUserScores = async (userId: string): Promise<{ scores: ScoresMap; totalScore: number }> => {
     const ref = doc(db, "scores", userId);
     const snap = await getDoc(ref);
@@ -89,7 +70,6 @@ const deleteUserPublic = async (uid: string) => {
 };
 
 export const scoreService = {
-    saveGameScore,
     createUserPublic,
     getUserPublic,
     updateUserPublic,

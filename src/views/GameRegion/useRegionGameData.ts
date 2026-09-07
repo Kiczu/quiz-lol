@@ -1,117 +1,70 @@
-import { useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 
-import { ChampionDetails } from "../../api/types";
 import { GameContext } from "../../context/GameContext/GameContext";
-import { championRegionService, ChampionRegion } from "../../services/championRegionService";
-import { characterService } from "../../services/characterService";
+import { RegionRound, gameRoundService } from "../../services/gameRoundService";
 
 import { regions } from "./regionsData";
 
-const maxAttempts = 3;
-
 const useRegionGameData = () => {
-    const [champions, setChampions] = useState<ChampionRegion[] | null>(null);
-    const [championToGuess, setChampionToGuess] = useState<ChampionRegion | null>(null);
+    const [round, setRound] = useState<RegionRound | null>(null);
     const [wrongGuesses, setWrongGuesses] = useState(0);
     const [usedRegions, setUsedRegions] = useState<string[]>([]);
-    const [isGameEnded, setIsGameEnded] = useState(false);
-    const [championImage, setChampionImage] = useState<string | undefined>(undefined);
-    const [version, setVersion] = useState<string | null>(null);
-    const [ddragonChampions, setDdragonChampions] = useState<ChampionDetails[]>([]);
+    const [isRoundOver, setIsRoundOver] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [hasError, setHasError] = useState(false);
 
-    const {
-        handleEndGame,
-        handleStartGame,
-        startNewGame,
-    } = useContext(GameContext);
+    const { handleEndGame } = useContext(GameContext);
 
-    useEffect(() => {
-        startNewGame("region");
-        handleStartGame();
-         
+    const startRound = useCallback(async () => {
+        setIsLoading(true);
+        setHasError(false);
+
+        try {
+            setRound(await gameRoundService.startRound<RegionRound>("Regions"));
+            setWrongGuesses(0);
+            setUsedRegions([]);
+            setIsRoundOver(false);
+        } catch (error) {
+            console.error(error);
+            setHasError(true);
+        } finally {
+            setIsLoading(false);
+        }
     }, []);
 
     useEffect(() => {
-        const fetchChampions = async () => {
-            const [data, patch, roster] = await Promise.all([
-                championRegionService.getAll(),
-                characterService.getVersion(),
-                characterService.getAll(),
-            ]);
-            setChampions(data);
-            setVersion(patch);
-            setDdragonChampions(roster);
-        };
-        fetchChampions();
-    }, []);
+        startRound();
+    }, [startRound]);
 
-    useEffect(() => {
-        if (champions && champions.length > 0) {
-            pickRandomChampion();
-        }
-         
-    }, [champions]);
+    const handleSelectRegion = async (selected: string) => {
+        if (!round || isRoundOver || usedRegions.includes(selected)) return;
 
-    const pickRandomChampion = () => {
-        if (!champions || champions.length === 0) return;
-        const random = champions[Math.floor(Math.random() * champions.length)];
-        setChampionToGuess(random);
-        const matched = characterService.findByLabel(ddragonChampions, random.name);
-        setChampionImage(
-            version && matched
-                ? characterService.getImageUrl(matched.id, version)
-                : undefined
-        );
-        setWrongGuesses(0);
-        setUsedRegions([]);
-        setIsGameEnded(false);
-    };
+        setUsedRegions((used) => [...used, selected]);
 
-    const getPoints = (wrongGuesses: number) => {
-        if (wrongGuesses === 0) return 10;
-        if (wrongGuesses === 1) return 6;
-        if (wrongGuesses === 2) return 3;
-        return 0;
-    };
+        try {
+            const result = await gameRoundService.submitGuess(round.roundId, selected);
+            setWrongGuesses(result.wrongGuesses);
 
-    const handleSelectRegion = (selected: string) => {
-        if (!championToGuess || isGameEnded) return;
-        if (usedRegions.includes(selected)) return;
-
-        setUsedRegions((prev) => [...prev, selected]);
-
-        if (selected === championToGuess.region) {
-            const points = getPoints(wrongGuesses);
-            setIsGameEnded(true);
-            handleEndGame(points, true);
-            return;
-        }
-
-        const newWrong = wrongGuesses + 1;
-        setWrongGuesses(newWrong);
-        if (newWrong >= maxAttempts) {
-            setIsGameEnded(true);
-            handleEndGame(0, false);
+            if (result.finished) {
+                setIsRoundOver(true);
+                handleEndGame(result.points, result.won);
+            }
+        } catch (error) {
+            console.error(error);
+            setHasError(true);
         }
     };
-
-
-
-    const isCorrect = championToGuess && usedRegions.includes(championToGuess.region);
-    const isGameOver = wrongGuesses >= maxAttempts;
 
     return {
         regions,
-        championToGuess,
+        round,
         wrongGuesses,
-        maxAttempts,
-        isCorrect,
-        isGameOver,
-        isGameEnded,
+        maxAttempts: round?.maxAttempts ?? 0,
         usedRegions,
-        championImage,
+        isLoading,
+        hasError,
         handleSelectRegion,
-        pickRandomChampion, // jeśli chcesz pozwolić grać ponownie bez reloadu
+        startRound,
     };
 };
 

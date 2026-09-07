@@ -1,6 +1,6 @@
 import { Box, Grid, Typography } from "@mui/material";
 
-import { ChampionOption } from "../useSkillsGameData";
+import { ChampionOption } from "../../../services/gameRoundService";
 
 import {
   getOptionWrapperSx,

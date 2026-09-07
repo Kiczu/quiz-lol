@@ -56,12 +56,3 @@ export const optionsWrapper = {
     width: "100%",
     mt: 2,
 };
-
-export const loader = {
-    color: colors.gold2,
-};
-
-export const errorMessage = {
-    color: colors.textSecondary,
-    textAlign: "center",
-};
