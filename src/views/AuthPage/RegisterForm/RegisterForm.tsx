@@ -12,9 +12,9 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 
 
+import { useAuth } from "../../../context/LoginContext/LoginContext";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
-import { authService } from "../../../services/authService";
 import { getErrorMessage } from "../../../utils/errorUtils";
 
 import type { UserPrivateData } from "../../../api/types";
@@ -54,12 +54,13 @@ const initValues: RegistrationFormData = {
 
 const RegisterForm = () => {
   const { showModal, showErrorModal } = useModal();
+  const { handleRegister } = useAuth();
   const navigate = useNavigate();
   const handleSubmit = async (values: RegistrationFormData) => {
     const { username, firstName, lastName, email, password } = values;
 
     try {
-      await authService.registerUser(email, password, {
+      await handleRegister(email, password, {
         username,
         firstName,
         lastName,
