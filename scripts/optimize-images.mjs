@@ -3,7 +3,7 @@ import path from "node:path";
 
 import sharp from "sharp";
 
-const ASSETS_DIR = "src/assets";
+const ASSETS_DIR = process.argv[2] ?? "src/assets";
 const MAX_WIDTH = 2560;
 const QUALITY = 85;
 const SOURCE_EXTENSIONS = [".jpg", ".jpeg", ".png"];
