@@ -2,71 +2,103 @@
 
 [![CI](https://github.com/Kiczu/quiz-lol/actions/workflows/ci.yml/badge.svg)](https://github.com/Kiczu/quiz-lol/actions/workflows/ci.yml)
 
-A web app inspired by League of Legends. Features multiple game modes, a personalized user dashboard, leaderboards, user accounts, and a custom LoL-themed UI. This project is built for portfolio presentation, with modern technologies, clean code, and easy scalability for future game modes.
+A League of Legends quiz app: three playable game modes, user accounts, a leaderboard
+and a champion browser. Champion data comes from Riot's Data Dragon; everything that
+decides whether an answer is correct runs on the server, not in the browser.
+
+Built as a portfolio project, with a custom League-inspired UI.
+
+![Home screen with the four game modes](docs/screenshots/home.webp)
 
 ## Demo
 
-[Live Demo](https://)
+Not deployed yet.
 
-## Tech Stack
+## Game modes
 
-- **React + TypeScript** (SPA, modular codebase)
-- **Material-UI (MUI)** – custom League of Legends inspired theme
-- **Firebase** (authentication, user database, scores)
-- **React Context API** (user session management)
-- **Responsive Design** (works on desktop & mobile)
+| Mode | You see | You answer with | Scoring | Lives |
+|---|---|---|---|---|
+| **Hangman** | a masked champion name | one letter at a time | 1 per revealed letter, +10 for solving | 6 |
+| **Regions** | a champion portrait | one of the 13 regions of Runeterra | 10 / 6 / 3 by wrong guesses | 3 |
+| **Skills** | an ability icon and name | one of four champions | 10 / 6 / 3 by wrong guesses | 3 |
 
-## Main Features
+| Hangman | Regions | Skills |
+|---|---|---|
+| ![Hangman](docs/screenshots/hangman.webp) | ![Regions](docs/screenshots/regions.webp) | ![Skills](docs/screenshots/skills.webp) |
 
-- Email/password & Google registration/login
-- Personalized user dashboard (avatar, profile edit, scores overview)
-- Global leaderboard (compare top scores across different game modes)
-- Multiple game modes (hangman, quiz – more in progress)
-- Custom UI inspired by League of Legends
-- Well-structured architecture, easy to add new game modes
+## Features
 
-## Installation
+- Sign in with email and password or with Google, password reset, email verification
+- User dashboard: avatar, profile details, password change, per-mode scores, account deletion
+- Leaderboard per game mode and by total score
+- Champion browser with search, and a detail page per champion with abilities and splash art
 
-```bash
-git clone https://github.com/Kiczu/quiz-lol.git
-cd quiz-lol
+## Screenshots
+
+| Leaderboard | Champion browser |
+|---|---|
+| ![Leaderboard](docs/screenshots/ranking.webp) | ![Champion browser](docs/screenshots/lore.webp) |
+
+| Champion detail | User dashboard |
+|---|---|
+| ![Champion detail](docs/screenshots/champion.webp) | ![User dashboard](docs/screenshots/dashboard.webp) |
+
+| Sign in | |
+|---|---|
+| ![Sign in](docs/screenshots/login.webp) | |
+
+## Architecture
+
+The app is two deployables in one repository.
+
+`src/` is the React client. `functions/` is a separate Node project deployed to Cloud
+Functions, and it owns every decision that affects a score:
+
+- `startRound` picks the champion, builds the question and stores the answer in a
+  `secret` subdocument. The client receives the question only - never the answer.
+- `submitGuess` checks the guess against that subdocument, counts the wrong guesses,
+  decides when the round is over and writes the score with the admin SDK.
+
+`firestore.rules` closes the `rounds` collection to every client and freezes `totalScore`
+and `scores` on the public profile, so a player can edit their username and avatar but
+cannot write their own points. The browser holds no answer and awards no points, which
+means the leaderboard cannot be forged from the developer console.
+
+## Tech stack
+
+- **React 18 + TypeScript**, **Vite** as the build tool
+- **Material-UI** with a custom League-inspired theme, **framer-motion** for animation
+- **React Router**, **Formik** and **Yup** for forms and validation
+- **Firebase**: Authentication, Firestore, Cloud Functions (Node 22, TypeScript)
+- **Vitest** and **Testing Library** for tests, **ESLint** for linting
+- **GitHub Actions** running lint, tests and both builds on every push
+
+## Getting started
+
+The repository is wired to one Firebase project, so a fresh clone needs its own:
+
+1. Create a Firebase project and enable Authentication, Firestore and Cloud Functions
+   (Cloud Functions require the Blaze plan).
+2. Replace the values in `src/api/firebase/firebaseConfig.ts` with your own web config.
+3. Put your project id in `.firebaserc`.
+4. Install dependencies and start the dev server:
+
+```
 npm install
-npm start
-Don’t forget to set up your own Firebase credentials – see instructions in firebaseConfig.ts.
+npm run dev
+```
 
-Screenshots
+To deploy the backend:
 
-
-
-Replace screenshots with your own – consider showing both desktop and mobile views!
-
-Test Account
-Email: 
-Password: 
-
-Or simply create your own account to test all features.
-
-Contact
-Author: Jan Kowalski
-Email: jan.kowalski@gmail.com
-LinkedIn
-
-Roadmap
-- Add more game modes (quiz, memory, tournament mode)
-- In-app user notifications (feedback after actions)
-- Achievements & seasonal challenges
-- Improved accessibility & extended technical documentation
-
-Inspirations
-League of Legends – colors, UI/UX, overall theme
-Online quizzes & social gaming
+```
+firebase deploy --only functions,firestore:rules
 ```
 
 ## Local development with the Firebase emulators
 
-The three game modes run on Cloud Functions, so the app needs a backend even in
-development. The emulator suite provides one locally, with its own database and
-its own user accounts, so nothing you do while developing touches production.
+The game modes run on Cloud Functions, so the app needs a backend even in development.
+The emulator suite provides one locally, with its own database and its own user accounts,
+so nothing you do while developing touches production.
 
 One-time setup:
 
@@ -79,15 +111,37 @@ Then:
 npm run emulators
 ```
 
-That builds `functions/`, starts Auth, Firestore and Functions, and puts the
-emulator UI on http://127.0.0.1:4000. On the first run it seeds the
-`championRegions` collection from the live project, which the Regions mode needs
-in order to pick a champion. On exit it writes the whole local state - including
-the accounts you registered - to `.emulator-data`, and imports it again next
-time, so you only register once. Use `npm run seed:emulator` if you ever need to
-refresh that collection by hand.
+That builds `functions/`, starts Auth, Firestore and Functions, and puts the emulator UI
+on http://127.0.0.1:4000. On the first run it seeds the `championRegions` collection from
+the live project, which the Regions mode needs in order to pick a champion. On exit it
+writes the whole local state - including the accounts you registered - to
+`.emulator-data`, and imports it again next time, so you only register once. Use
+`npm run seed:emulator` if you ever need to refresh that collection by hand.
 
-`npm run dev` connects to the emulators automatically. Register an account
-through the app the first time; it lives only in the emulator. To run the dev
-server against the live project instead, put `VITE_USE_EMULATORS=false` in
-`.env.local`.
+`npm run dev` connects to the emulators automatically. Register an account through the app
+the first time; it lives only in the emulator. To run the dev server against the live
+project instead, put `VITE_USE_EMULATORS=false` in `.env.local`.
+
+## Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Vite dev server |
+| `npm run build` | type-check and build the client |
+| `npm run test` / `npm run test:run` | Vitest, watch mode / single run |
+| `npm run lint` / `npm run lint:fix` | ESLint |
+| `npm run emulators` | build `functions/` and start the emulator suite |
+| `npm run seed:emulator` | copy `championRegions` into a running emulator |
+| `npm run images` | optimise images in `src/assets` |
+
+## Roadmap
+
+- **PVP mode** - the one game mode still missing, and the reason the round logic moved
+  to the server first
+- In-app notifications after actions
+- Achievements and seasonal challenges
+- Accessibility pass
+
+## Author
+
+Built by [Kiczu](https://github.com/Kiczu).
