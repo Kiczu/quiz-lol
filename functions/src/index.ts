@@ -5,7 +5,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 import { hangman } from "./hangman";
 import { regions } from "./regions";
 import { skills } from "./skills";
-import { GameHandler, Round, awardPoints, db, requireUid } from "./shared";
+import { GameHandler, GuessResult, Round, awardPoints, db, requireString, requireUid } from "./shared";
 
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
@@ -15,25 +15,26 @@ const handlers: Record<string, GameHandler> = {
   Hangman: hangman,
 };
 
-const handlerFor = (gameId?: string) => {
-  const handler = gameId ? handlers[gameId] : undefined;
-
-  if (!handler) {
+const handlerFor = (gameId: unknown) => {
+  if (typeof gameId !== "string" || !Object.hasOwn(handlers, gameId)) {
     throw new HttpsError("invalid-argument", "Unknown game.");
   }
-
-  return handler;
+  return handlers[gameId];
 };
 
 export const startRound = onCall(async (request) => {
   const uid = requireUid(request.auth?.uid);
-  const { gameId } = (request.data ?? {}) as { gameId?: string };
+  const { gameId } = request.data ?? {};
   const handler = handlerFor(gameId);
+  const profile = await db.collection("scores").doc(uid).get();
+  if (!profile.exists) {
+    throw new HttpsError("failed-precondition", "Create your profile before playing.");
+  }
 
   const { question, secret } = await handler.start();
   const round = db.collection("rounds").doc();
-
-  await round.set({
+  const batch = db.batch();
+  batch.set(round, {
     uid,
     gameId,
     question,
@@ -41,78 +42,61 @@ export const startRound = onCall(async (request) => {
     used: [],
     points: 0,
     finished: false,
+    results: {},
     createdAt: FieldValue.serverTimestamp(),
   });
-  await round.collection("secret").doc("answer").set(secret);
+  batch.set(round.collection("secret").doc("answer"), secret);
+  await batch.commit();
 
   return { roundId: round.id, maxAttempts: handler.maxAttempts, ...question };
 });
 
 export const submitGuess = onCall(async (request) => {
   const uid = requireUid(request.auth?.uid);
-  const { roundId, guess } = (request.data ?? {}) as {
-    roundId?: string;
-    guess?: string;
-  };
-
-  if (!roundId || !guess) {
-    throw new HttpsError("invalid-argument", "roundId and guess are required.");
-  }
-
+  const roundId = requireString(request.data?.roundId, "roundId", /^[\w-]{1,128}$/);
+  const guess = requireString(request.data?.guess, "guess", /^[\w-]{1,80}$/);
   const roundRef = db.collection("rounds").doc(roundId);
-  const roundSnap = await roundRef.get();
-  const round = roundSnap.data() as Round | undefined;
 
-  if (!round) {
-    throw new HttpsError("not-found", "That round does not exist.");
-  }
-  if (round.uid !== uid) {
-    throw new HttpsError("permission-denied", "That round belongs to someone else.");
-  }
-  if (round.finished) {
-    throw new HttpsError("failed-precondition", "That round is already over.");
-  }
+  return db.runTransaction(async (transaction) => {
+    const roundSnap = await transaction.get(roundRef);
+    const round = roundSnap.data() as Round | undefined;
+    if (!round) throw new HttpsError("not-found", "That round does not exist.");
+    if (round.uid !== uid) {
+      throw new HttpsError("permission-denied", "That round belongs to someone else.");
+    }
+    if (round.results && Object.hasOwn(round.results, guess)) return round.results[guess];
+    if (round.finished || round.used.includes(guess)) {
+      throw new HttpsError("failed-precondition", "That guess is already resolved.");
+    }
 
-  const handler = handlerFor(round.gameId);
-  handler.assertGuess(round, guess);
+    const handler = handlerFor(round.gameId);
+    handler.assertGuess(round, guess);
+    const secretSnap = await transaction.get(roundRef.collection("secret").doc("answer"));
+    const secret = secretSnap.data();
+    if (!secret) throw new HttpsError("failed-precondition", "The round has no answer.");
 
-  if (round.used.includes(guess)) {
-    return {
-      correct: false,
-      won: false,
-      finished: false,
-      wrongGuesses: round.wrongGuesses,
-      points: round.points,
-      mask: null,
-      answer: null,
+    const judgement = handler.judge(round, secret, guess);
+    const wrongGuesses = round.wrongGuesses + (judgement.correct ? 0 : 1);
+    const finished = judgement.solved || wrongGuesses >= handler.maxAttempts;
+    const profile = finished ? await transaction.get(db.collection("scores").doc(uid)) : null;
+    const result: GuessResult = {
+      correct: judgement.correct,
+      won: judgement.solved,
+      finished,
+      wrongGuesses,
+      points: judgement.points,
+      mask: judgement.mask ?? null,
+      answer: finished ? handler.reveal(secret) : null,
     };
-  }
 
-  const secretSnap = await roundRef.collection("secret").doc("answer").get();
-  const secret = secretSnap.data() ?? {};
-  const judgement = handler.judge(round, secret, guess);
-
-  const wrongGuesses = judgement.correct ? round.wrongGuesses : round.wrongGuesses + 1;
-  const finished = judgement.solved || wrongGuesses >= handler.maxAttempts;
-
-  await roundRef.update({
-    used: [...round.used, guess],
-    wrongGuesses,
-    points: judgement.points,
-    finished,
+    transaction.update(roundRef, {
+      used: [...round.used, guess],
+      wrongGuesses,
+      points: judgement.points,
+      finished,
+      results: { ...round.results, [guess]: result },
+    });
+    if (profile) awardPoints(transaction, profile, round.gameId, judgement.points);
+    return result;
   });
-
-  if (finished) {
-    await awardPoints(uid, round.gameId, judgement.points);
-  }
-
-  return {
-    correct: judgement.correct,
-    won: judgement.solved,
-    finished,
-    wrongGuesses,
-    points: judgement.points,
-    mask: judgement.mask ?? null,
-    answer: finished ? handler.reveal(secret) : null,
-  };
 });
