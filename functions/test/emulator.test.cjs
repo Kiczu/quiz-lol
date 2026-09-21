@@ -79,6 +79,64 @@ after(async () => {
     await admin.app().delete();
 });
 
+test("solo: concurrent winning requests and retries award points once", async () => {
+    const ref = await solo();
+    const results = await Promise.all(Array.from({ length: 4 }, () => call("submitGuess", { roundId: ref.id, guess: "Ahri" })));
+    results.forEach((result) => assert.equal(result.points, 10));
+    assert.equal((await score()).totalScore, 10);
+    assert.equal((await score()).scores.Skills, 10);
+    assert.equal((await ref.get()).data().finished, true);
+    await assert.rejects(call("submitGuess", { roundId: ref.id, guess: "Ashe" }), { code: "FAILED_PRECONDITION" });
+});
+
+test("solo: simultaneous wrong guesses are not lost", async () => {
+    const ref = await solo();
+    await Promise.all(["Ashe", "Akali"].map((guess) => call("submitGuess", { roundId: ref.id, guess })));
+    assert.equal((await ref.get()).data().wrongGuesses, 2);
+    const result = await call("submitGuess", { roundId: ref.id, guess: "Ahri" });
+    assert.equal(result.points, 3);
+    assert.equal((await score()).totalScore, 3);
+});
+
+test("solo: Hangman keeps letter points and its win bonus", async () => {
+    const ref = await solo("Hangman", { question: { mask: ["", "", "", ""] } });
+    for (const guess of "AHR") {
+        const result = await call("submitGuess", { roundId: ref.id, guess });
+        assert.equal(result.finished, false);
+        assert.equal(result.answer, null);
+    }
+    const result = await call("submitGuess", { roundId: ref.id, guess: "I" });
+    assert.equal(result.points, 14);
+    assert.equal((await score()).scores.Hangman, 14);
+});
+
+test("solo: Regions counts attempts and losses award no points", async () => {
+    const ref = await solo("Regions");
+    for (const guess of ["noxus", "demacia", "freljord"]) await call("submitGuess", { roundId: ref.id, guess });
+    assert.equal((await ref.get()).data().finished, true);
+    assert.equal((await score()).totalScore, 0);
+    const win = await solo("Regions");
+    await call("submitGuess", { roundId: win.id, guess: "noxus" });
+    await call("submitGuess", { roundId: win.id, guess: "ionia" });
+    assert.equal((await score()).scores.Regions, 6);
+});
+
+test("solo: deleted profiles are not recreated by a late answer", async () => {
+    const ref = await solo();
+    await profile(players[0]).delete();
+    await call("submitGuess", { roundId: ref.id, guess: "Ahri" });
+    assert.equal((await profile(players[0]).get()).exists, false);
+});
+
+test("solo: authentication, ownership and input validation", async () => {
+    const ref = await solo();
+    await assert.rejects(call("submitGuess", { roundId: ref.id, guess: "Ahri" }, null), { code: "UNAUTHENTICATED" });
+    await assert.rejects(call("submitGuess", { roundId: ref.id, guess: "Ahri" }, players[1]), { code: "PERMISSION_DENIED" });
+    await assert.rejects(call("submitGuess", { roundId: {}, guess: "Ahri" }), { code: "INVALID_ARGUMENT" });
+    await assert.rejects(call("startRound", { gameId: "constructor" }), { code: "INVALID_ARGUMENT" });
+    await assert.rejects(call("submitGuess", { roundId: ref.id, guess: "Teemo" }), { code: "INVALID_ARGUMENT" });
+});
+
 test("rules: clients cannot read solo answers or edit scores", async () => {
     const ref = await solo();
     assert.equal((await readAs(`rounds/${ref.id}/secret/answer`, players[0])).status, 403);
@@ -87,4 +145,24 @@ test("rules: clients cannot read solo answers or edit scores", async () => {
         body: JSON.stringify({ fields: { totalScore: { integerValue: "9999" }, scores: { mapValue: { fields: {} } } } }),
     });
     assert.equal(response.status, 403);
+});
+
+test("live: all solo modes start and complete against Data Dragon", async () => {
+    const regionRef = db.collection("championRegions").doc(`test-${randomUUID()}`);
+    refs.push(regionRef);
+    await regionRef.set({ region: "Ionia" });
+    for (const gameId of ["Skills", "Regions", "Hangman"]) {
+        const started = await call("startRound", { gameId });
+        const ref = db.collection("rounds").doc(started.roundId);
+        refs.push(ref);
+        assert.equal(started.answer, undefined);
+        const secret = (await ref.collection("secret").doc("answer").get()).data();
+        const guesses = gameId === "Hangman" ? [...new Set(secret.name.replace(/[^A-Z]/g, ""))]
+            : [gameId === "Skills" ? secret.championId : secret.region];
+        let result;
+        for (const guess of guesses) result = await call("submitGuess", { roundId: ref.id, guess });
+        assert.equal(result.won, true);
+        assert.equal(result.finished, true);
+        assert.equal((await score()).scores[gameId], result.points);
+    }
 });
