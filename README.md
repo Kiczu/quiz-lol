@@ -71,7 +71,7 @@ means the leaderboard cannot be forged from the developer console.
 - **React Router**, **Formik** and **Yup** for forms and validation
 - **Firebase**: Authentication, Firestore, Cloud Functions (Node 22, TypeScript)
 - **Vitest** and **Testing Library** for tests, **ESLint** for linting
-- **GitHub Actions** running lint, tests and both builds on every push
+- **GitHub Actions** running lint, tests, both builds and emulator tests on pull requests and pushes to main
 
 ## Getting started
 
@@ -85,13 +85,14 @@ The repository is wired to one Firebase project, so a fresh clone needs its own:
 
 ```
 npm install
+npm install --prefix functions
 npm run dev
 ```
 
 To deploy the backend:
 
 ```
-firebase deploy --only functions,firestore:rules
+npx firebase deploy --only functions,firestore:rules
 ```
 
 ## Local development with the Firebase emulators
@@ -102,8 +103,10 @@ so nothing you do while developing touches production.
 
 One-time setup:
 
-- `npm install -g firebase-tools`
-- a JDK 11 or newer on the PATH (the Firestore and Auth emulators are Java)
+- Install dependencies in both projects: `npm install` and `npm install --prefix functions`.
+- Install JDK 21 and make sure `java -version` works. Firestore needs Java; Firebase CLI
+  is included in this project's dev dependencies.
+- Node 22 matches the deployed Functions runtime.
 
 Then:
 
@@ -122,6 +125,11 @@ writes the whole local state - including the accounts you registered - to
 the first time; it lives only in the emulator. To run the dev server against the live
 project instead, put `VITE_USE_EMULATORS=false` in `.env.local`.
 
+`npm run test:backend` builds the functions, starts isolated emulators for a demo project,
+runs security-rule tests, and shuts that test suite down. Its separate ports
+are configured in `firebase.test.json`, so it can run alongside the development emulators.
+The tests use deterministic fixtures and do not need Data Dragon. Test accounts and documents are removed at the end of the run.
+
 ## Scripts
 
 | Command | What it does |
@@ -132,6 +140,8 @@ project instead, put `VITE_USE_EMULATORS=false` in `.env.local`.
 | `npm run lint` / `npm run lint:fix` | ESLint |
 | `npm run emulators` | build `functions/` and start the emulator suite |
 | `npm run seed:emulator` | copy `championRegions` into a running emulator |
+| `npm run test:backend` | run isolated backend and security-rule tests |
+| `npm run test:emulator:live` | test all games against running development emulators and Data Dragon |
 | `npm run images` | optimise images in `src/assets` |
 
 ## Roadmap
