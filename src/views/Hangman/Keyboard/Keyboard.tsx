@@ -5,9 +5,10 @@ import { keyboardButtonBase } from "./keyboard.style";
 type Props = {
   usedLetters: string[];
   onLetterClick: (letter: string) => void;
+  disabled?: boolean;
 };
 
-const Keyboard = ({ usedLetters, onLetterClick }: Props) => {
+const Keyboard = ({ usedLetters, onLetterClick, disabled = false }: Props) => {
   return (
     <Grid
       container
@@ -24,7 +25,7 @@ const Keyboard = ({ usedLetters, onLetterClick }: Props) => {
             <Button
               variant="outlined"
               onClick={() => onLetterClick(letter)}
-              disabled={isUsed}
+              disabled={disabled || isUsed}
               sx={keyboardButtonBase(isUsed)}
             >
               {String.fromCharCode(65 + i)}

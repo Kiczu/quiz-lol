@@ -8,7 +8,7 @@ export type ChampionOption = {
     icon: string;
 };
 
-type RoundBase = {
+export type RoundBase = {
     roundId: string;
     maxAttempts: number;
 };
