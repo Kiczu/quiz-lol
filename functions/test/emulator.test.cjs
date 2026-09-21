@@ -1,4 +1,4 @@
-const { randomUUID } = require("node:crypto");
+const { randomBytes, randomUUID } = require("node:crypto");
 const { readFileSync } = require("node:fs");
 const { resolve } = require("node:path");
 const assert = require("node:assert/strict");
@@ -42,6 +42,21 @@ const solo = async (gameId = "Skills", overrides = {}) => {
     refs.push(ref);
     await ref.set({ uid: players[0].uid, gameId, question, used: [], wrongGuesses: 0, points: 0, finished: false, results: {}, ...overrides });
     await ref.collection("secret").doc("answer").set({ championId: "Ahri", region: "ionia", name: "AHRI" });
+    return ref;
+};
+
+const room = async (overrides = {}) => {
+    const ref = db.collection("pvpRooms").doc(randomBytes(3).toString("hex").toUpperCase());
+    refs.push(ref);
+    await ref.set({
+        status: "waiting", playerIds: [players[0].uid],
+        players: [{ uid: players[0].uid, name: "Host", score: 0 }],
+        currentRound: 0, totalRounds: 5, question: null, answeredIds: [], deadline: null,
+        expiresAt: Date.now() + 3_600_000, winnerId: null, ...overrides,
+    });
+    await ref.collection("secret").doc("game").set({
+        rounds: Array.from({ length: 5 }, () => ({ question, secret: { championId: "Ahri" } })), answers: {},
+    });
     return ref;
 };
 
@@ -147,6 +162,100 @@ test("rules: clients cannot read solo answers or edit scores", async () => {
     assert.equal(response.status, 403);
 });
 
+test("pvp: only two distinct players can join, even concurrently", async () => {
+    const ref = await room();
+    await call("joinPvpRoom", { code: ref.id });
+    assert.equal((await ref.get()).data().status, "waiting");
+    const results = await Promise.allSettled(players.slice(1).map((player) => call("joinPvpRoom", { code: ref.id }, player)));
+    assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
+    assert.equal((await ref.get()).data().playerIds.length, 2);
+});
+
+test("pvp: five rounds finish once and both scores reach PVP ranking", async () => {
+    const ref = await room();
+    await call("joinPvpRoom", { code: ref.id }, players[1]);
+    for (let round = 0; round < 5; round += 1) {
+        await call("submitPvpAnswer", { code: ref.id, round, guess: "Ahri" });
+        await call("submitPvpAnswer", { code: ref.id, round, guess: "Ashe" });
+        const waiting = (await ref.get()).data();
+        assert.equal(waiting.players[0].score, round * 10);
+        assert.equal(waiting.answeredIds.length, 1);
+        assert.equal(waiting.answers, undefined);
+        await call("submitPvpAnswer", { code: ref.id, round, guess: round === 0 ? "Ahri" : "Ashe" }, players[1]);
+    }
+    const completed = (await ref.get()).data();
+    assert.equal(completed.status, "finished");
+    assert.equal(completed.winnerId, players[0].uid);
+    assert.equal(completed.question, null);
+    assert.equal((await score()).scores.PVP, 50);
+    assert.equal((await score(players[1])).scores.PVP, 10);
+    await assert.rejects(call("submitPvpAnswer", { code: ref.id, round: 4, guess: "Ahri" }), { code: "FAILED_PRECONDITION" });
+    assert.equal((await score()).totalScore, 50);
+});
+
+test("pvp: simultaneous final answers produce a draw without duplicate points", async () => {
+    const ref = await room();
+    await call("joinPvpRoom", { code: ref.id }, players[1]);
+    await ref.update({ currentRound: 4 });
+    await Promise.allSettled([...players.slice(0, 2), ...players.slice(0, 2)].map((player) => call("submitPvpAnswer", { code: ref.id, round: 4, guess: "Ahri" }, player)));
+    assert.equal((await ref.get()).data().winnerId, null);
+    assert.equal((await ref.get()).data().status, "finished");
+    assert.equal((await score()).totalScore, 10);
+    assert.equal((await score(players[1])).totalScore, 10);
+});
+
+test("pvp: timeouts count missing answers as wrong and advance only once", async () => {
+    const ref = await room();
+    await call("joinPvpRoom", { code: ref.id }, players[1]);
+    await assert.rejects(call("advancePvpRound", { code: ref.id, round: 0 }), { code: "FAILED_PRECONDITION" });
+    await call("submitPvpAnswer", { code: ref.id, round: 0, guess: "Ahri" });
+    await ref.update({ deadline: Date.now() - 1000 });
+    await assert.rejects(call("submitPvpAnswer", { code: ref.id, round: 0, guess: "Ahri" }, players[1]), { code: "DEADLINE_EXCEEDED" });
+    const results = await Promise.allSettled(players.slice(0, 2).map((player) => call("advancePvpRound", { code: ref.id, round: 0 }, player)));
+    assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
+    const next = (await ref.get()).data();
+    assert.equal(next.currentRound, 1);
+    assert.deepEqual(next.players.map((player) => player.score), [10, 0]);
+});
+
+test("pvp: leaving cancels the match without ranking points", async () => {
+    const ref = await room();
+    await call("joinPvpRoom", { code: ref.id }, players[1]);
+    await call("leavePvpRoom", { code: ref.id });
+    await call("leavePvpRoom", { code: ref.id });
+    assert.equal((await ref.get()).data().status, "cancelled");
+    await assert.rejects(call("submitPvpAnswer", { code: ref.id, round: 0, guess: "Ahri" }, players[1]), { code: "FAILED_PRECONDITION" });
+    assert.equal((await score()).totalScore, 0);
+});
+
+test("pvp: expired rooms reject new players", async () => {
+    const ref = await room({ expiresAt: Date.now() - 1000 });
+    await assert.rejects(call("joinPvpRoom", { code: ref.id }, players[1]), { code: "FAILED_PRECONDITION" });
+});
+
+test("pvp: an invalid public username cannot break the opponent's room", async () => {
+    const ref = await room();
+    await profile(players[1]).update({ username: { invalid: true } });
+    await call("joinPvpRoom", { code: ref.id }, players[1]);
+    assert.equal((await ref.get()).data().players[1].name, "Player");
+});
+
+test("rules: participants see the room but no one can read answers or write match state", async () => {
+    const ref = await room();
+    assert.equal((await readAs(`pvpRooms/${ref.id}`, players[0])).status, 200);
+    assert.equal((await readAs(`pvpRooms/${ref.id}`, players[2])).status, 403);
+    assert.equal((await readAs(`pvpRooms/${ref.id}/secret/game`, players[0])).status, 403);
+    await assert.rejects(call("submitPvpAnswer", { code: ref.id, round: 0, guess: "Ahri" }, players[2]), { code: "PERMISSION_DENIED" });
+    await assert.rejects(call("leavePvpRoom", { code: ref.id }, players[2]), { code: "PERMISSION_DENIED" });
+    const response = await fetch(firestore(`pvpRooms/${ref.id}`), {
+        method: "PATCH", headers: { Authorization: `Bearer ${players[0].token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ fields: { status: { stringValue: "finished" } } }),
+    });
+    assert.equal(response.status, 403);
+    await call("joinPvpRoom", { code: ref.id }, players[1]);
+    assert.equal((await readAs(`pvpRooms/${ref.id}`, players[1])).status, 200);
+});
+
 test("live: all solo modes start and complete against Data Dragon", async () => {
     const regionRef = db.collection("championRegions").doc(`test-${randomUUID()}`);
     refs.push(regionRef);
@@ -165,4 +274,21 @@ test("live: all solo modes start and complete against Data Dragon", async () => 
         assert.equal(result.finished, true);
         assert.equal((await score()).scores[gameId], result.points);
     }
+});
+
+test("live: create, join and complete a real five-question PvP match", async () => {
+    const { code } = await call("createPvpRoom", {});
+    const ref = db.collection("pvpRooms").doc(code);
+    refs.push(ref);
+    assert.match(code, /^[A-F0-9]{6}$/);
+    await call("joinPvpRoom", { code }, players[1]);
+    const { rounds } = (await ref.collection("secret").doc("game").get()).data();
+    for (let round = 0; round < rounds.length; round += 1) {
+        assert.equal((await ref.get()).data().question.spellName, rounds[round].question.spellName);
+        const guess = rounds[round].secret.championId;
+        await Promise.all(players.slice(0, 2).map((player) => call("submitPvpAnswer", { code, round, guess }, player)));
+    }
+    assert.equal((await ref.get()).data().status, "finished");
+    assert.equal((await score()).scores.PVP, 50);
+    assert.equal((await score(players[1])).scores.PVP, 50);
 });

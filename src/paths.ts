@@ -10,5 +10,6 @@ export const paths = {
     HANGMAN: '/game/hangman',
     REGION: '/game/region',
     SKILLS: '/game/skills',
+    PVP: '/game/pvp',
     CHAMPION_DETAIL: '/champions/:id',
 }
