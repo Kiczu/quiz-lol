@@ -1,6 +1,8 @@
 import heroImage from "../../assets/images/hero.webp";
 import { fill, fillColumn } from "../../theme/layout";
 
+export const homeColumns = { xs: 1, sm: 2, lg: 4 };
+
 export const homeHeroContainer = {
     position: "relative",
     backgroundImage: `url(${heroImage})`,
@@ -16,41 +18,42 @@ export const heroOverlay = {
     alignItems: "center",
     justifyContent: "center",
     width: "100%",
+    boxSizing: "border-box",
+    px: { xs: 2, sm: 3, lg: 4 },
+    py: { xs: 4, sm: 5, lg: 6 },
     ...fill,
     background: "linear-gradient(180deg, rgba(0,0,0,0), black)",
 }
 export const headline = {
     color: "primary.main",
     textShadow: "0 2px 16px #000",
-    mb: 2,
-    mt: 5,
-    p: 1,
+    m: 0,
     fontWeight: 700,
     textAlign: "center",
-    fontSize: { xs: "2rem", sm: "2.5rem", md: "3rem" },
+    fontSize: { xs: "2rem", sm: "2.5rem", lg: "3rem" },
     lineHeight: 1.1,
     letterSpacing: 1,
+    overflowWrap: "anywhere",
 }
 
 export const subtitle = {
     color: "gold2.main",
     textShadow: "0 1px 8px #000",
-    mb: 5,
+    m: 0,
     fontWeight: 400,
     textAlign: "center",
-    fontSize: { xs: "1.5rem", md: "1.8rem" },
+    fontSize: { xs: "1.15rem", sm: "1.4rem", lg: "1.8rem" },
 }
 
 export const modesContainer = {
-    width: "80%",
+    width: "100%",
+    maxWidth: 1280,
     display: "grid",
-    gap: 10,
-    gridTemplateColumns: {
-        xs: "1fr",
-        sm: "1fr 1fr",
-        md: "repeat(4, 1fr)",
-    },
+    gap: { xs: 2, sm: 3, xl: 4 },
+    gridTemplateColumns: Object.fromEntries(Object.entries(homeColumns).map(([breakpoint, columns]) =>
+        [breakpoint, `repeat(${columns}, minmax(0, 1fr))`])),
+    gridAutoRows: "1fr",
     background: "transparent",
-    mt: 5,
+    mt: { xs: 3, sm: 4 },
     alignItems: "stretch",
 }
