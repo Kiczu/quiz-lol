@@ -8,10 +8,13 @@ import PvpGame from "./PvpGame";
 
 vi.mock("../../services/pvpService", () => ({ pvpService: {
     createRoom: vi.fn(), joinRoom: vi.fn(), watchRoom: vi.fn(), submitAnswer: vi.fn(), advanceRound: vi.fn(), leaveRoom: vi.fn(),
-    findMatch: vi.fn(), cancelSearch: vi.fn(), watchSearch: vi.fn(),
+    findMatch: vi.fn(), cancelSearch: vi.fn(), watchSearch: vi.fn(), heartbeat: vi.fn(),
 } }));
 vi.mock("../../context/LoginContext/LoginContext", () => ({ useAuth: () => ({ userData: { uid: "host" } }) }));
 const setImage = vi.fn();
+const showModal = vi.fn();
+const closeModal = vi.fn();
+vi.mock("../../context/ModalContext/ModalContext", () => ({ useModal: () => ({ showModal, closeModal }) }));
 vi.mock("../../context/BackgroundContext/BackgroundContext", () => ({ useBackground: () => ({ setImage }) }));
 
 let updateRoom: (room: PvpRoom) => void;
@@ -34,6 +37,7 @@ describe("PvpGame", () => {
             return unsubscribe;
         });
         vi.mocked(pvpService.findMatch).mockResolvedValue({ data: { state: "waiting", code: null } });
+        vi.mocked(pvpService.heartbeat).mockResolvedValue({ data: { acknowledged: true } });
         vi.mocked(pvpService.cancelSearch).mockResolvedValue({ data: { state: "cancelled", code: null } });
         vi.mocked(pvpService.watchSearch).mockImplementation((_uid, onSearch) => {
             updateSearch = onSearch;
@@ -105,5 +109,23 @@ describe("PvpGame", () => {
         vi.mocked(pvpService.advanceRound).mockResolvedValue({ data: { advanced: true } });
         fireEvent.click(screen.getByRole("button", { name: /Time is up/ }));
         await waitFor(() => expect(pvpService.advanceRound).toHaveBeenCalledWith({ code: "ABC123", round: 0 }));
+    });
+
+    it("shows the actual ranking delta separately from the match score", () => {
+        open();
+        act(() => updateRoom({ ...room, mode: "ranked", status: "finished", winnerId: "guest", rankingChanges: { host: -8, guest: 20 } }));
+        expect(screen.getByText("PVP ranking: -8.")).toBeInTheDocument();
+        expect(screen.getByText("Defeat")).toBeInTheDocument();
+    });
+
+    it("requires confirmation before forfeiting a ranked match", async () => {
+        open();
+        act(() => updateRoom({ ...room, mode: "ranked" }));
+        fireEvent.click(screen.getByRole("button", { name: "Leave room" }));
+        expect(pvpService.leaveRoom).not.toHaveBeenCalled();
+        expect(showModal).toHaveBeenCalledWith(expect.objectContaining({ title: "Forfeit this ranked match?" }));
+        vi.mocked(pvpService.leaveRoom).mockResolvedValue({ data: { left: true } });
+        await act(async () => showModal.mock.calls[0][0].onConfirm());
+        expect(pvpService.leaveRoom).toHaveBeenCalledWith({ code: "ABC123" });
     });
 });
