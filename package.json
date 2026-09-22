@@ -29,8 +29,8 @@
     "images": "node scripts/optimize-images.mjs",
     "emulators": "npm --prefix functions run build && node scripts/emulators.mjs",
     "seed:emulator": "node scripts/seed-emulator.mjs",
-    "test:emulator": "node --test --test-skip-pattern=live functions/test/emulator.test.cjs",
-    "test:emulator:live": "npm --prefix functions run build && firebase emulators:exec --config firebase.test.json --project demo-quiz-lol --only auth,firestore,functions \"node --test functions/test/emulator.test.cjs\"",
+    "test:emulator": "node --test --test-skip-pattern=live functions/test/emulator.test.cjs functions/test/pvpQuestions.test.cjs",
+    "test:emulator:live": "npm --prefix functions run build && firebase emulators:exec --config firebase.test.json --project demo-quiz-lol --only auth,firestore,functions \"node --test functions/test/emulator.test.cjs functions/test/pvpQuestions.test.cjs\"",
     "test:backend": "npm --prefix functions run build && firebase emulators:exec --config firebase.test.json --project demo-quiz-lol --only auth,firestore,functions \"npm run test:emulator\""
   },
   "devDependencies": {

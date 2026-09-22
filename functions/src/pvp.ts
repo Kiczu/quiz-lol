@@ -4,10 +4,12 @@ import { DocumentReference, Transaction } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { finishMatch, resolveDisconnectedPlayers } from "./pvpRanking";
+import { QuizQuestion, loadPvpRounds, pvpRoundCount } from "./pvpQuestions";
 import { db, requireString, requireUid } from "./shared";
-import { skills } from "./skills";
 
-const totalRounds = 5;
+export { loadPvpRounds } from "./pvpQuestions";
+
+const totalRounds = pvpRoundCount;
 const roundDuration = 60_000;
 const roomDuration = 60 * 60_000;
 const options = { region: "europe-west1", maxInstances: 10 };
@@ -15,7 +17,7 @@ const options = { region: "europe-west1", maxInstances: 10 };
 export const playerName = (value: unknown) =>
   typeof value === "string" && value.trim() ? value.trim().slice(0, 40) : "Player";
 
-type Question = {
+type Question = QuizQuestion | {
   spellName: string;
   spellIcon: string;
   options: { id: string; name: string; icon: string }[];
@@ -39,12 +41,9 @@ export type Room = {
   winnerId: string | null;
 };
 export type RoomSecret = {
-  rounds: { question: Question; secret: { championId: string } }[];
+  rounds: { question: Question; secret: { championId: string } | { answerId: string } }[];
   answers: Record<string, string>;
 };
-
-export const loadPvpRounds = async () =>
-  await Promise.all(Array.from({ length: totalRounds }, () => skills.start())) as RoomSecret["rounds"];
 
 export const makePvpRoom = (players: Player[], question: Question | null = null, mode: "private" | "ranked" = "private"): Room => ({
   mode,
@@ -89,7 +88,8 @@ const finishRound = async (
   room: Room,
   secret: RoomSecret
 ) => {
-  const answer = secret.rounds[room.currentRound].secret.championId;
+  const solution = secret.rounds[room.currentRound].secret;
+  const answer = "answerId" in solution ? solution.answerId : solution.championId;
   const players = room.players.map((player) => ({
     ...player,
     score: player.score + (secret.answers[player.uid] === answer ? 10 : 0),
@@ -160,7 +160,7 @@ export const joinPvpRoom = onCall(options, async (request) => {
 export const submitPvpAnswer = onCall(options, async (request) => {
   const uid = requireUid(request.auth?.uid);
   const ref = roomRefFor(request.data?.code);
-  const guess = requireString(request.data?.guess, "champion", /^[\w-]{1,80}$/);
+  const guess = requireString(request.data?.guess, "answer", /^[\w-]{1,80}$/);
   return db.runTransaction(async (transaction) => {
     const room = await readRoom(transaction, ref, uid);
     if ((await resolveDisconnectedPlayers(transaction, ref, room)).status !== room.status) return { accepted: false };
@@ -168,7 +168,7 @@ export const submitPvpAnswer = onCall(options, async (request) => {
     if (room.answeredIds.includes(uid)) return { accepted: true };
     if (Date.now() >= room.deadline!) throw new HttpsError("deadline-exceeded", "Time is up for this round.");
     if (!room.question?.options.some((option) => option.id === guess)) {
-      throw new HttpsError("invalid-argument", "Choose one of the four champions.");
+      throw new HttpsError("invalid-argument", "Choose one of the four answers.");
     }
     const secretRef = ref.collection("secret").doc("game");
     const secret = (await transaction.get(secretRef)).data() as RoomSecret;
