@@ -3,7 +3,8 @@ import { randomBytes } from "node:crypto";
 import { DocumentReference, Transaction } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
-import { awardPoints, db, requireString, requireUid } from "./shared";
+import { finishMatch, resolveDisconnectedPlayers } from "./pvpRanking";
+import { db, requireString, requireUid } from "./shared";
 import { skills } from "./skills";
 
 const totalRounds = 5;
@@ -22,6 +23,10 @@ type Question = {
 
 type Player = { uid: string; name: string; score: number };
 export type Room = {
+  mode?: "private" | "ranked";
+  lastSeen?: Record<string, number>;
+  rankingChanges?: Record<string, number>;
+  endReason?: "score" | "forfeit" | "disconnect" | "abandoned";
   status: "waiting" | "playing" | "finished" | "cancelled";
   playerIds: string[];
   players: Player[];
@@ -41,7 +46,9 @@ export type RoomSecret = {
 export const loadPvpRounds = async () =>
   await Promise.all(Array.from({ length: totalRounds }, () => skills.start())) as RoomSecret["rounds"];
 
-export const makePvpRoom = (players: Player[], question: Question | null = null): Room => ({
+export const makePvpRoom = (players: Player[], question: Question | null = null, mode: "private" | "ranked" = "private"): Room => ({
+  mode,
+  lastSeen: Object.fromEntries(players.map((player) => [player.uid, Date.now()])),
   status: question ? "playing" : "waiting",
   playerIds: players.map((player) => player.uid),
   players,
@@ -89,23 +96,17 @@ const finishRound = async (
   }));
   const nextRound = room.currentRound + 1;
   const finished = nextRound === room.totalRounds;
-  const profiles = finished
-    ? await transaction.getAll(...players.map((player) => db.collection("scores").doc(player.uid)))
-    : [];
-
-  transaction.update(ref, {
-    players,
-    status: finished ? "finished" : "playing",
-    currentRound: finished ? room.currentRound : nextRound,
-    question: finished ? null : secret.rounds[nextRound].question,
-    answeredIds: [],
-    deadline: finished ? null : Date.now() + roundDuration,
-    winnerId: finished && players[0].score !== players[1].score
-      ? (players[0].score > players[1].score ? players[0].uid : players[1].uid)
-      : null,
-  });
+  if (finished) {
+    const winnerId = players[0].score === players[1].score ? null
+      : players[0].score > players[1].score ? players[0].uid : players[1].uid;
+    await finishMatch(transaction, ref, { ...room, players }, winnerId, "score");
+  } else {
+    transaction.update(ref, {
+      players, currentRound: nextRound, question: secret.rounds[nextRound].question,
+      answeredIds: [], deadline: Date.now() + roundDuration,
+    });
+  }
   transaction.update(ref.collection("secret").doc("game"), { answers: {} });
-  profiles.forEach((profile, index) => awardPoints(transaction, profile, "PVP", players[index].score));
 };
 
 export const createPvpRoom = onCall(options, async (request) => {
@@ -139,7 +140,7 @@ export const joinPvpRoom = onCall(options, async (request) => {
     if (!room) throw new HttpsError("not-found", "Room not found. Check the code.");
     if (room.expiresAt <= Date.now()) throw new HttpsError("failed-precondition", "This room has expired.");
     if (room.playerIds.includes(uid)) return { code: ref.id };
-    if (room.status !== "waiting" || room.playerIds.length !== 1) {
+    if (room.mode === "ranked" || room.status !== "waiting" || room.playerIds.length !== 1) {
       throw new HttpsError("failed-precondition", "This room is no longer available.");
     }
     const profile = await transaction.get(db.collection("scores").doc(uid));
@@ -162,6 +163,7 @@ export const submitPvpAnswer = onCall(options, async (request) => {
   const guess = requireString(request.data?.guess, "champion", /^[\w-]{1,80}$/);
   return db.runTransaction(async (transaction) => {
     const room = await readRoom(transaction, ref, uid);
+    if ((await resolveDisconnectedPlayers(transaction, ref, room)).status !== room.status) return { accepted: false };
     checkRound(room, request.data?.round);
     if (room.answeredIds.includes(uid)) return { accepted: true };
     if (Date.now() >= room.deadline!) throw new HttpsError("deadline-exceeded", "Time is up for this round.");
@@ -186,6 +188,7 @@ export const advancePvpRound = onCall(options, async (request) => {
   const ref = roomRefFor(request.data?.code);
   await db.runTransaction(async (transaction) => {
     const room = await readRoom(transaction, ref, uid);
+    if ((await resolveDisconnectedPlayers(transaction, ref, room)).status !== room.status) return;
     checkRound(room, request.data?.round);
     if (Date.now() < room.deadline!) {
       throw new HttpsError("failed-precondition", "The other player still has time to answer.");
@@ -201,9 +204,25 @@ export const leavePvpRoom = onCall(options, async (request) => {
   const ref = roomRefFor(request.data?.code);
   await db.runTransaction(async (transaction) => {
     const room = await readRoom(transaction, ref, uid);
-    if (room.status === "waiting" || room.status === "playing") {
+    if ((await resolveDisconnectedPlayers(transaction, ref, room)).status !== room.status) return;
+    if (room.mode === "ranked" && room.status === "playing") {
+      await finishMatch(transaction, ref, room, room.playerIds.find((playerId) => playerId !== uid)!, "forfeit");
+    } else if (room.status === "waiting" || room.status === "playing") {
       transaction.update(ref, { status: "cancelled", question: null, deadline: null });
     }
   });
   return { left: true };
+});
+
+export const heartbeatPvpRoom = onCall(options, async (request) => {
+  const uid = requireUid(request.auth?.uid);
+  const ref = roomRefFor(request.data?.code);
+  await db.runTransaction(async (transaction) => {
+    const room = await readRoom(transaction, ref, uid);
+    const resolved = await resolveDisconnectedPlayers(transaction, ref, room);
+    if (resolved.mode === "ranked" && resolved.status === "playing") {
+      transaction.update(ref, { [`lastSeen.${uid}`]: Date.now() });
+    }
+  });
+  return { acknowledged: true };
 });

@@ -33,11 +33,23 @@ For a private duel, create a room and share its six-character code with a second
 signed-in player. The match starts when they join. Both players answer the same five
 questions; points and correctness stay hidden until both answers are in or time runs out.
 After a timeout, either player can select **Time is up — continue**; unanswered questions
-score zero. Equal final scores are a draw. A completed match adds each player's points
-to the PVP leaderboard. Leaving cancels the match without awarding ranking points.
+score zero. Equal final scores are a draw. Match scores are separate from ranking points:
+
+- Public matches award the winner 20 ranking points and deduct up to 20 from the loser.
+  PVP ranking points never fall below zero. Draws change neither player's ranking.
+- Private matches never affect either the PVP or total leaderboard. Leaving cancels them.
+- Leaving a public match forfeits it, regardless of the current quiz score.
+- Public matches renew presence every 15 seconds. A player has 60 seconds to reconnect;
+  after that they forfeit. If both players are absent, both lose up to 20 points and
+  neither receives a reward. Presence checks, answers and the next queue request settle
+  these outcomes; there is no background scheduler when both browsers are closed.
+
+The match result records each player's actual ranking change. TotalScore changes by
+the same amount as PVP, so a loss never spends points earned in solo modes. Existing
+scores are retained; rooms created before the ranked/private distinction are unranked.
 
 Refreshing keeps the room through the page URL. Rooms expire after an hour. This first
-version has no skill-based matchmaking, automatic forfeits on disconnect, or rematch voting.
+version has no skill-based matchmaking, repeated-opponent protection or rematch voting.
 Expiry prevents further play; it does not delete room documents from Firestore.
 
 | Hangman | Regions | Skills |
@@ -192,7 +204,7 @@ they share test ports. Test accounts and documents are removed at the end of the
 
 ## Roadmap
 
-- PVP skill-based matchmaking, rematches and disconnect handling
+- PVP skill-based matchmaking, repeated-opponent protection and rematches
 - In-app notifications after actions
 - Achievements and seasonal challenges
 - Accessibility pass

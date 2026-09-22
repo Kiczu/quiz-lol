@@ -6,6 +6,7 @@ import { GameState } from "../../api/types";
 import backgroundMap from "../../assets/images/backgroundMap.webp";
 import GameBox from "../../components/GameBox/GameBox";
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
+import { useModal } from "../../context/ModalContext/ModalContext";
 import { WavingButton } from "../../muiComponentsStyles";
 import { paths } from "../../paths";
 import { colors } from "../../theme/colors";
@@ -21,8 +22,19 @@ const PvpGame = () => {
     const game = usePvpGameData();
     const [joinCode, setJoinCode] = useState("");
     const { setImage } = useBackground();
+    const { showModal, closeModal } = useModal();
     const columns = useResponsiveColumns(COLUMN_MAP);
     const { room } = game;
+    const leaveRoom = () => {
+        if (room?.mode !== "ranked" || room.status !== "playing") return void game.leave();
+        showModal({
+            variant: "confirm", title: "Forfeit this ranked match?",
+            content: "Leaving gives your opponent the win and costs up to 20 ranking points.",
+            onlyConfirm: false, onCancel: closeModal,
+            onConfirm: () => { closeModal(); void game.leave(); },
+        });
+    };
+    const rankingChange = room?.rankingChanges?.[game.uid ?? ""] ?? 0;
 
     useEffect(() => {
         setImage(backgroundMap);
@@ -47,8 +59,10 @@ const PvpGame = () => {
                 You have 60 seconds per question. Highest score wins; equal scores are a draw.
             </Typography>
             <WavingButton disabled={game.busy} onClick={game.matchmaking.start}>Find opponent</WavingButton>
+            <Typography variant="body2">Ranked: win +20, loss -20, draw 0. Your ranking cannot drop below 0.</Typography>
             <Typography color={colors.textSecondary}>Prefer to play with a friend?</Typography>
             <Button variant="outlined" disabled={game.busy} onClick={game.create}>Create private room</Button>
+            <Typography variant="body2">Private matches never affect your ranking.</Typography>
             <Typography>or join with a room code</Typography>
             <Box component="form" onSubmit={(event) => { event.preventDefault(); void game.join(joinCode); }}>
                 <Stack spacing={2}>
@@ -79,14 +93,21 @@ const PvpGame = () => {
     const result = (
         <Box sx={lobbyPanel}>
             <Typography variant="h2" sx={skillsTitle}>
-                {game.expired ? "Room expired" : room?.status === "cancelled" ? "Match cancelled"
+                {game.expired ? "Room expired" : room?.endReason === "abandoned" ? "Match abandoned" : room?.status === "cancelled" ? "Match cancelled"
                     : !room?.winnerId ? "Draw" : room.winnerId === game.uid ? "Victory" : "Defeat"}
             </Typography>
             <Typography>
                 {room?.status === "finished"
-                    ? `Your score: ${room.players.find((player) => player.uid === game.uid)?.score ?? 0}. Match points have been added to the PVP ranking.`
+                    ? `Your score: ${room.players.find((player) => player.uid === game.uid)?.score ?? 0}.`
                     : "No ranking points were awarded. Create a new room to play again."}
             </Typography>
+            {room?.status === "finished" && <Typography>
+                {room.mode === "ranked" ? `PVP ranking: ${rankingChange > 0 ? "+" : ""}${rankingChange}.`
+                    : "Private match. Ranking unchanged."}
+            </Typography>}
+            {(room?.endReason === "forfeit" || room?.endReason === "disconnect") && <Typography>
+                {room.endReason === "forfeit" ? "The match ended by forfeit." : "The match ended after a player failed to reconnect within 60 seconds."}
+            </Typography>}
             <Button component={Link} to={paths.RANKING}>View ranking</Button>
             <WavingButton disabled={game.busy} onClick={game.leave}>Back to lobby</WavingButton>
         </Box>
@@ -98,6 +119,7 @@ const PvpGame = () => {
                 <Typography variant="h1" sx={skillsTitle}>PVP</Typography>
                 <Typography color={colors.textSecondary}>Skills duel · 1 vs 1</Typography>
                 {game.error && <Alert severity="error" role="alert">{game.error}</Alert>}
+                {game.connectionError && <Alert severity="warning">{game.connectionError}</Alert>}
                 {game.matchmaking.error && <Alert severity="warning">{game.matchmaking.error}</Alert>}
                 {game.busy && <CircularProgress size={24} aria-label="Saving" />}
                 {room && (
@@ -142,9 +164,11 @@ const PvpGame = () => {
                     </Stack>}
                 </GameBox>
                 {game.code && !ended && <>
-                    <Button disabled={game.busy} onClick={game.leave}>{room ? "Leave room" : "Back to lobby"}</Button>
+                    <Button disabled={game.busy} onClick={leaveRoom}>{room ? "Leave room" : "Back to lobby"}</Button>
                     {room?.status === "playing" && <Typography variant="caption" color={colors.textSecondary}>
-                        Leaving cancels the match for both players. No ranking points are awarded.
+                        {room.mode === "ranked"
+                            ? "Leaving forfeits the match. After a disconnect you have 60 seconds to return. Keep this page open while playing."
+                            : "Leaving cancels this private match. No ranking points are awarded."}
                     </Typography>}
                 </>}
             </Container>
