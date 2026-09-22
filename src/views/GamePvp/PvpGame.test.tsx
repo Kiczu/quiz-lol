@@ -118,6 +118,21 @@ describe("PvpGame", () => {
         expect(screen.getByText("Defeat")).toBeInTheDocument();
     });
 
+    it("renders mixed questions with text-only answers and submits their option ids", async () => {
+        open();
+        act(() => updateRoom({ ...room, question: {
+            category: "Lore", prompt: "Whose story is described below?", image: null,
+            text: "A traveller from a distant land...", dataVersion: "test",
+            options: ["Ahri", "Ashe", "Akali", "Aatrox"].map((name) => ({ id: "answer-" + name, name })),
+        } }));
+        expect(screen.getByText("Lore")).toBeInTheDocument();
+        expect(screen.getByText("A traveller from a distant land...")).toBeInTheDocument();
+        expect(screen.queryByRole("img")).not.toBeInTheDocument();
+        vi.mocked(pvpService.submitAnswer).mockResolvedValue({ data: { accepted: true } });
+        fireEvent.click(screen.getByRole("button", { name: "Ahri" }));
+        await waitFor(() => expect(pvpService.submitAnswer).toHaveBeenCalledWith({ code: "ABC123", round: 0, guess: "answer-Ahri" }));
+    });
+
     it("requires confirmation before forfeiting a ranked match", async () => {
         open();
         act(() => updateRoom({ ...room, mode: "ranked" }));
