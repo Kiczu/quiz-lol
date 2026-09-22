@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/Kiczu/quiz-lol/actions/workflows/ci.yml/badge.svg)](https://github.com/Kiczu/quiz-lol/actions/workflows/ci.yml)
 
-A League of Legends quiz app: three solo game modes, a private PvP duel, user accounts, a leaderboard
+A League of Legends quiz app: three solo game modes, online and private PvP duels, user accounts, a leaderboard
 and a champion browser. Champion data comes from Riot's Data Dragon; everything that
 decides whether an answer is correct runs on the server, not in the browser.
 
@@ -23,7 +23,13 @@ Not deployed yet.
 | **Skills** | an ability icon and name | one of four champions | 10 / 6 / 3 by wrong guesses | 3 |
 | **PVP** | the same ability question as your opponent | one of four champions, once per round | 10 per correct answer across 5 rounds | 60 seconds per round |
 
-PVP uses private rooms. Create one and share its six-character code with a second
+Choose **Find opponent** to join the public PVP queue. Two signed-in players searching
+at the same time are paired automatically; being signed in alone does not join the queue.
+Keep the page open while searching. Requests renew every ten seconds and expire after
+45 seconds without a renewal, so disconnected players stop being eligible. **Cancel search**
+leaves the queue; if a match has already been created, it opens that match instead.
+
+For a private duel, create a room and share its six-character code with a second
 signed-in player. The match starts when they join. Both players answer the same five
 questions; points and correctness stay hidden until both answers are in or time runs out.
 After a timeout, either player can select **Time is up — continue**; unanswered questions
@@ -31,7 +37,7 @@ score zero. Equal final scores are a draw. A completed match adds each player's 
 to the PVP leaderboard. Leaving cancels the match without awarding ranking points.
 
 Refreshing keeps the room through the page URL. Rooms expire after an hour. This first
-version has no public matchmaking, automatic forfeits on disconnect, or rematch voting.
+version has no skill-based matchmaking, automatic forfeits on disconnect, or rematch voting.
 Expiry prevents further play; it does not delete room documents from Firestore.
 
 | Hangman | Regions | Skills |
@@ -81,6 +87,11 @@ PVP has separate room callables and a live Firestore subscription. Only particip
 read their room; no client can read its secret questions or write match state. The server
 enforces membership, answer limits, deadlines and the final ranking update. GameBox renders
 the room's server-controlled phase, including its lobby and draw-aware result screen.
+
+`findPvpMatch` and `cancelPvpSearch` manage one queue ticket per account. Matching consumes
+both tickets and creates the room in one transaction. Only the ticket owner can read it;
+clients cannot list the queue or write tickets. The queue is shared by clients connected
+to the same Firebase project (or the same emulator), not between development and production.
 
 ## Tech stack
 
@@ -149,7 +160,8 @@ To try PVP on one computer:
 2. Open the app in a normal browser window and a private window, or two browser profiles.
 3. Register or sign in to a different local account in each window. Two regular tabs
    share the same login and cannot play against each other.
-4. Choose PVP, create a room in the first window and enter its code in the second.
+4. Choose PVP and **Find opponent** in both windows. The match starts automatically.
+   Alternatively, create a private room in one window and enter its code in the other.
 5. Play five rounds and check the PVP ranking.
 
 The game data and images still come from Data Dragon, so an internet connection is needed.
@@ -159,9 +171,10 @@ Functions emulator reloads the compiled JavaScript.
 `npm run test:backend` builds the functions, starts isolated emulators for a demo project,
 runs transaction and security-rule tests, and shuts that test suite down. Its separate ports
 are configured in `firebase.test.json`, so it can run alongside the development emulators.
-The tests use deterministic fixtures and do not need Data Dragon. With the development
-emulators already running, `npm run test:emulator:live` also checks real question generation
-and a complete PvP match. Test accounts and documents are removed at the end of the run.
+The tests use deterministic fixtures and do not need Data Dragon. `npm run test:emulator:live`
+starts its own isolated demo emulators and also checks real question generation, public
+matchmaking and a complete private PvP match. Run these two suites separately because
+they share test ports. Test accounts and documents are removed at the end of the run.
 
 ## Scripts
 
@@ -174,12 +187,12 @@ and a complete PvP match. Test accounts and documents are removed at the end of 
 | `npm run emulators` | build `functions/` and start the emulator suite |
 | `npm run seed:emulator` | copy `championRegions` into a running emulator |
 | `npm run test:backend` | run isolated backend and security-rule tests |
-| `npm run test:emulator:live` | test all games against running development emulators and Data Dragon |
+| `npm run test:emulator:live` | test all games with isolated emulators and live Data Dragon questions |
 | `npm run images` | optimise images in `src/assets` |
 
 ## Roadmap
 
-- Public PVP matchmaking, rematches and disconnect handling
+- PVP skill-based matchmaking, rematches and disconnect handling
 - In-app notifications after actions
 - Achievements and seasonal challenges
 - Accessibility pass

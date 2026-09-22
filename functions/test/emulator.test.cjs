@@ -12,6 +12,7 @@ for (const host of [process.env.FIRESTORE_EMULATOR_HOST, process.env.FIREBASE_AU
     assert.match(host, /^(127\.0\.0\.1|localhost):\d+$/, "Tests only run against local emulators.");
 }
 admin.initializeApp({ projectId });
+const { searchForOpponent, cancelSearch } = require("../lib/matchmaking");
 const db = admin.firestore();
 const refs = [];
 const players = [];
@@ -35,6 +36,14 @@ const question = {
     spellName: "Test ability",
     spellIcon: "https://example.com/spell.png",
     options: ["Ahri", "Ashe", "Akali", "Aatrox"].map((id) => ({ id, name: id, icon: `${id}.png` })),
+};
+
+const loadMatchQuestions = async () => Array.from({ length: 5 }, () => ({ question, secret: { championId: "Ahri" } }));
+const ticket = (player) => db.collection("pvpQueue").doc(player.uid);
+const findOpponent = async (player, searchId, load = loadMatchQuestions) => {
+    const result = await searchForOpponent(player.uid, searchId, load);
+    if (result.code) refs.push(db.collection("pvpRooms").doc(result.code));
+    return result;
 };
 
 const solo = async (gameId = "Skills", overrides = {}) => {
@@ -78,11 +87,13 @@ before(async () => {
         const account = await response.json();
         assert.ok(account.idToken, JSON.stringify(account));
         players.push({ uid: account.localId, token: account.idToken });
+        refs.push(db.collection("pvpQueue").doc(account.localId));
     }
 });
 
 beforeEach(async () => {
     await Promise.all(players.map((player, i) => profile(player).set({ username: `Test ${i}`, avatar: null, scores: {}, totalScore: 0 })));
+    await Promise.all(players.map((player) => ticket(player).delete()));
 });
 
 after(async () => {
@@ -254,6 +265,117 @@ test("rules: participants see the room but no one can read answers or write matc
     assert.equal(response.status, 403);
     await call("joinPvpRoom", { code: ref.id }, players[1]);
     assert.equal((await readAs(`pvpRooms/${ref.id}`, players[1])).status, 200);
+});
+
+test("queue: waiting players renew their lease without matching themselves", async () => {
+    const searchId = randomUUID();
+    assert.equal((await findOpponent(players[0], searchId)).state, "waiting");
+    const first = (await ticket(players[0]).get()).data();
+    assert.equal((await findOpponent(players[0], searchId)).state, "waiting");
+    const renewed = (await ticket(players[0]).get()).data();
+    assert.ok(renewed.expiresAt >= first.expiresAt);
+    await assert.rejects(findOpponent(players[0], randomUUID()), { code: "already-exists" });
+});
+
+test("queue: three simultaneous players form exactly one match", async () => {
+    const searchIds = players.map(() => randomUUID());
+    await findOpponent(players[0], searchIds[0]);
+    await Promise.all(players.slice(1).map((player, index) => findOpponent(player, searchIds[index + 1])));
+    const entries = await Promise.all(players.map(async (player) => (await ticket(player).get()).data()));
+    const paired = entries.filter((entry) => entry.state === "matched");
+    assert.equal(paired.length, 2);
+    assert.equal(paired[0].code, paired[1].code);
+    assert.equal(entries.filter((entry) => entry.state === "waiting").length, 1);
+    const game = (await db.collection("pvpRooms").doc(paired[0].code).get()).data();
+    assert.equal(game.status, "playing");
+    assert.equal(new Set(game.playerIds).size, 2);
+    assert.equal(game.question.spellName, question.spellName);
+    const pairedIndex = entries.findIndex((entry) => entry.state === "matched");
+    assert.equal((await findOpponent(players[pairedIndex], randomUUID())).code, paired[0].code);
+});
+
+test("queue: offline entries are excluded from matchmaking", async () => {
+    await ticket(players[0]).set({ state: "waiting", searchId: randomUUID(), expiresAt: Date.now() - 1, code: null });
+    const result = await findOpponent(players[1], randomUUID(), async () => { throw new Error("No questions should be loaded"); });
+    assert.equal(result.state, "waiting");
+});
+
+test("queue: cancelling before enrollment prevents a delayed request from rejoining", async () => {
+    const searchId = randomUUID();
+    await cancelSearch(players[0].uid, searchId);
+    assert.equal((await findOpponent(players[0], searchId)).state, "cancelled");
+    const newId = randomUUID();
+    assert.equal((await findOpponent(players[0], newId)).state, "waiting");
+    await cancelSearch(players[0].uid, searchId);
+    assert.equal((await ticket(players[0]).get()).data().state, "waiting");
+    assert.equal((await ticket(players[0]).get()).data().searchId, newId);
+});
+
+test("queue: a player who cancels while questions load is not paired", async () => {
+    const firstId = randomUUID();
+    await findOpponent(players[0], firstId);
+    let release;
+    let started;
+    const ready = new Promise((resolve) => { started = resolve; });
+    const gate = new Promise((resolve) => { release = resolve; });
+    const pending = findOpponent(players[1], randomUUID(), async () => {
+        started();
+        await gate;
+        return loadMatchQuestions();
+    });
+    await ready;
+    await cancelSearch(players[0].uid, firstId);
+    release();
+    assert.equal((await pending).state, "waiting");
+    assert.equal((await ticket(players[0]).get()).data().state, "cancelled");
+});
+
+test("queue: a committed match wins over cancellation and can be resumed", async () => {
+    const firstId = randomUUID();
+    await findOpponent(players[0], firstId);
+    const paired = await findOpponent(players[1], randomUUID());
+    assert.equal(paired.state, "matched");
+    assert.equal((await cancelSearch(players[0].uid, firstId)).code, paired.code);
+    assert.equal((await findOpponent(players[0], firstId)).code, paired.code);
+    await db.collection("pvpRooms").doc(paired.code).update({ status: "finished" });
+    assert.equal((await findOpponent(players[0], firstId)).state, "cancelled");
+    assert.equal((await findOpponent(players[0], randomUUID())).state, "waiting");
+});
+
+test("queue: failed question loading leaves both players eligible for retry", async () => {
+    await findOpponent(players[0], randomUUID());
+    const secondId = randomUUID();
+    await assert.rejects(findOpponent(players[1], secondId, async () => { throw new Error("offline"); }));
+    assert.equal((await ticket(players[0]).get()).data().state, "waiting");
+    assert.equal((await findOpponent(players[1], secondId)).state, "matched");
+});
+
+test("queue: callable authentication, validation and private queue rules", async () => {
+    await assert.rejects(call("findPvpMatch", { searchId: randomUUID() }, null), { code: "UNAUTHENTICATED" });
+    await assert.rejects(call("findPvpMatch", { searchId: "bad" }), { code: "INVALID_ARGUMENT" });
+    await call("findPvpMatch", { searchId: randomUUID() });
+    assert.equal((await readAs(`pvpQueue/${players[0].uid}`, players[0])).status, 200);
+    assert.equal((await readAs(`pvpQueue/${players[0].uid}`, players[1])).status, 403);
+    assert.equal((await readAs("pvpQueue", players[0])).status, 403);
+    const response = await fetch(firestore(`pvpQueue/${players[0].uid}`), {
+        method: "PATCH", headers: { Authorization: `Bearer ${players[0].token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ fields: { state: { stringValue: "matched" } } }),
+    });
+    assert.equal(response.status, 403);
+});
+
+test("live: online players are automatically paired into a playable room", async () => {
+    const firstId = randomUUID();
+    assert.equal((await call("findPvpMatch", { searchId: firstId })).state, "waiting");
+    const paired = await call("findPvpMatch", { searchId: randomUUID() }, players[1]);
+    assert.equal(paired.state, "matched");
+    const ref = db.collection("pvpRooms").doc(paired.code);
+    refs.push(ref);
+    assert.equal((await call("findPvpMatch", { searchId: firstId })).code, paired.code);
+    const secret = (await ref.collection("secret").doc("game").get()).data();
+    const guess = secret.rounds[0].secret.championId;
+    await Promise.all(players.slice(0, 2).map((player) => call("submitPvpAnswer", { code: paired.code, round: 0, guess }, player)));
+    assert.equal((await ref.get()).data().currentRound, 1);
 });
 
 test("live: all solo modes start and complete against Data Dragon", async () => {

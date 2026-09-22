@@ -4,10 +4,13 @@ import { useSearchParams } from "react-router-dom";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { PvpRoom, pvpService } from "../../services/pvpService";
 
+import useMatchmaking from "./useMatchmaking";
+
 const usePvpGameData = () => {
     const { userData } = useAuth();
     const [searchParams, setSearchParams] = useSearchParams();
     const code = searchParams.get("room") ?? "";
+    const matchmaking = useMatchmaking(code ? undefined : userData?.uid, (matchedCode) => setSearchParams({ room: matchedCode }));
     const [room, setRoom] = useState<PvpRoom | null>(null);
     const [error, setError] = useState("");
     const [busy, setBusy] = useState(false);
@@ -83,7 +86,7 @@ const usePvpGameData = () => {
     const secondsLeft = room?.deadline ? Math.max(0, Math.ceil((room.deadline - now) / 1000)) : 0;
     const answered = !!room && (room.answeredIds.includes(userData?.uid ?? "") || submittedRound === room.currentRound);
 
-    return { code, room, error, busy, uid: userData?.uid, expired, secondsLeft, answered, create, join, answer, advance, leave };
+    return { code, room, error, busy, uid: userData?.uid, expired, secondsLeft, answered, create, join, answer, advance, leave, matchmaking };
 };
 
 export default usePvpGameData;
