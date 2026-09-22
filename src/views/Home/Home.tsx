@@ -1,6 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import { useTheme } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
 
 import hangmanIcon from "../../assets/images/modes/hangman.webp";
 import pvpIcon from "../../assets/images/modes/pvp.webp";
@@ -9,6 +7,7 @@ import skillsIcon from "../../assets/images/modes/skill.webp";
 import SelectModeCard from "../../components/SelectModeCard/SelectModeCard";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { paths } from "../../paths";
+import { useResponsiveColumns } from "../../utils/useResponsiveColumns";
 
 import {
   homeHeroContainer,
@@ -16,6 +15,7 @@ import {
   modesContainer,
   subtitle,
   headline,
+  homeColumns,
 } from "./home.style";
 
 type GameMode = {
@@ -54,13 +54,7 @@ const modes: GameMode[] = [
 
 const Home = () => {
   const { userData } = useAuth();
-  const theme = useTheme();
-  const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
-  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
-
-  let columns = 1;
-  if (isMdUp) columns = 4;
-  else if (isSmUp) columns = 2;
+  const columns = useResponsiveColumns(homeColumns);
 
   return (
     <Box sx={homeHeroContainer}>
