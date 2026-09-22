@@ -2,7 +2,7 @@ import * as admin from "firebase-admin";
 import { DocumentSnapshot, FieldValue, Transaction } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
 
-admin.initializeApp();
+if (admin.apps.length === 0) admin.initializeApp();
 
 export const db = admin.firestore();
 
