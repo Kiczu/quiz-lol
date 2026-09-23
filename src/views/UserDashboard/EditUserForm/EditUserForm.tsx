@@ -1,8 +1,9 @@
-import { Box, TextField, Button, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as yup from "yup";
 
 import { EditableUserFields, RawUserData } from "../../../api/types";
+import FormTextField from "../../../components/FormTextField/FormTextField";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { useUsernameValidation } from "../../../hooks/useUsernameValidation";
 import { colors } from "../../../theme/colors";
@@ -86,7 +87,7 @@ const EditUserForm = ({
       validationSchema={validationSchema}
       onSubmit={handleSubmit}
     >
-      {({ values, handleChange, handleBlur, errors, touched }) => {
+      {({ handleBlur, isSubmitting }) => {
         const handleUsernameBlur = async (
           e: React.FocusEvent<HTMLInputElement>
         ) => {
@@ -102,72 +103,50 @@ const EditUserForm = ({
                   To finish setting up your account, please choose a username.
                 </Typography>
               )}
-              <TextField
+              <FormTextField
                 name="username"
                 label="Username"
-                value={values.username}
-                onChange={handleChange}
                 onBlur={handleUsernameBlur}
                 fullWidth
                 variant="outlined"
                 sx={inputStyle}
                 disabled={!isUsername}
-                error={
-                  (touched.username && Boolean(errors.username)) ||
-                  Boolean(usernameError)
-                }
+                error={Boolean(usernameError)}
                 helperText={
-                  usernameError
-                    ? usernameError
-                    : touched.username && errors.username
-                    ? errors.username
-                    : isUsername
+                  usernameError || (isUsername
                     ? "The username is permanent, choose wisely!"
-                    : "You cannot change your username"
+                    : "You cannot change your username")
                 }
               />
 
-              <TextField
+              <FormTextField
                 name="firstName"
                 label="First Name"
-                value={values.firstName}
-                onChange={handleChange}
-                onBlur={handleBlur}
                 fullWidth
                 variant="outlined"
                 sx={inputStyle}
-                error={touched.firstName && Boolean(errors.firstName)}
-                helperText={
-                  touched.firstName && errors.firstName ? errors.firstName : " "
-                }
               />
-              <TextField
+              <FormTextField
                 name="lastName"
                 label="Last Name"
-                value={values.lastName}
-                onChange={handleChange}
-                onBlur={handleBlur}
                 fullWidth
                 variant="outlined"
                 sx={inputStyle}
-                error={touched.lastName && Boolean(errors.lastName)}
-                helperText={
-                  touched.lastName && errors.lastName ? errors.lastName : " "
-                }
               />
-              <TextField
+              <FormTextField
                 name="email"
                 label="Email"
-                value={values.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
                 fullWidth
                 variant="outlined"
                 sx={inputStyle}
-                error={touched.email && Boolean(errors.email)}
-                helperText={touched.email && errors.email ? errors.email : null}
+                helperText={null}
               />
-              <Button type="submit" variant="contained" sx={{ mt: 3 }}>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                variant="contained"
+                sx={{ mt: 3 }}
+              >
                 Save Changes
               </Button>
             </Box>

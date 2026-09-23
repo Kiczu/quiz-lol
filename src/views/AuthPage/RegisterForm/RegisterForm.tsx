@@ -1,7 +1,6 @@
 import {
   Avatar,
   Button,
-  TextField,
   Typography,
   Grid,
   Box,
@@ -11,11 +10,12 @@ import { Form, Formik } from "formik";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 
-
+import FormTextField from "../../../components/FormTextField/FormTextField";
 import { useAuth } from "../../../context/LoginContext/LoginContext";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
 import { getErrorMessage } from "../../../utils/errorUtils";
+import { confirmPasswordSchema, passwordSchema } from "../../../utils/passwordValidation";
 
 import type { UserPrivateData } from "../../../api/types";
 
@@ -24,17 +24,8 @@ const registerSchema = yup.object().shape({
   firstName: yup.string().required("Name is required"),
   lastName: yup.string().required("Surname is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
-  password: yup
-    .string()
-    .required("Password is required")
-    .min(8, "Password must be at least 8 characters")
-    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .matches(/[0-9]/, "Password must contain at least one number")
-    .matches(/[^\w]/, "Password must contain at least one special character"),
-  confirmPassword: yup
-    .string()
-    .required("Confirm password is required")
-    .oneOf([yup.ref("password")], "Passwords must match"),
+  password: passwordSchema,
+  confirmPassword: confirmPasswordSchema("password"),
 });
 
 interface RegistrationFormData extends Omit<UserPrivateData, "uid"> {
@@ -123,15 +114,8 @@ const RegisterForm = () => {
         onSubmit={handleSubmit}
         validationSchema={registerSchema}
       >
-        {({
-          values,
-          handleBlur,
-          handleChange,
-          handleSubmit,
-          errors,
-          touched,
-        }) => (
-          <Form onSubmit={handleSubmit}>
+        {({ isSubmitting }) => (
+          <Form>
             <Grid container spacing={2}>
               {formFields.map(({ name, label, type, autoComplete }) => (
                 <Grid
@@ -140,29 +124,20 @@ const RegisterForm = () => {
                   sm={["username", "email"].includes(name) ? 12 : 6}
                   key={name}
                 >
-                  <TextField
+                  <FormTextField
                     fullWidth
                     label={label}
                     name={name}
                     type={type}
                     autoComplete={autoComplete}
-                    value={values[name as keyof RegistrationFormData]}
-                    onChange={handleChange}
-                    onBlur={handleBlur}
-                    error={
-                      touched[name as keyof RegistrationFormData] &&
-                      Boolean(errors[name as keyof RegistrationFormData])
-                    }
-                    helperText={
-                      touched[name as keyof RegistrationFormData] &&
-                      errors[name as keyof RegistrationFormData]
-                    }
+                    helperText={null}
                   />
                 </Grid>
               ))}
             </Grid>
             <Button
               type="submit"
+              disabled={isSubmitting}
               fullWidth
               variant="contained"
               sx={{ mt: 3, mb: 2 }}

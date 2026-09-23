@@ -1,7 +1,6 @@
 import {
   Avatar,
   Button,
-  TextField,
   Box,
   Typography,
   Grid,
@@ -11,6 +10,7 @@ import { Form, Formik } from "formik";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import * as yup from "yup";
 
+import FormTextField from "../../../components/FormTextField/FormTextField";
 import { useAuth } from "../../../context/LoginContext/LoginContext";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
@@ -66,17 +66,10 @@ const LoginForm = () => {
         onSubmit={handleSubmit}
         validationSchema={loginSchema}
       >
-        {({
-          values,
-          handleChange,
-          handleSubmit,
-          handleBlur,
-          errors,
-          touched,
-        }) => (
-          <Form onSubmit={handleSubmit}>
+        {({ isSubmitting }) => (
+          <Form>
             <Box sx={{ mt: 1 }}>
-              <TextField
+              <FormTextField
                 margin="normal"
                 fullWidth
                 id="email"
@@ -84,13 +77,8 @@ const LoginForm = () => {
                 name="email"
                 autoComplete="email"
                 autoFocus
-                value={values.email}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={Boolean(touched.email) && Boolean(errors.email)}
-                helperText={touched.email && errors.email ? errors.email : " "}
               />
-              <TextField
+              <FormTextField
                 margin="normal"
                 fullWidth
                 name="password"
@@ -98,16 +86,10 @@ const LoginForm = () => {
                 type="password"
                 id="password"
                 autoComplete="current-password"
-                value={values.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                error={Boolean(touched.password) && Boolean(errors.password)}
-                helperText={
-                  touched.password && errors.password ? errors.password : " "
-                }
               />
               <Button
                 type="submit"
+              disabled={isSubmitting}
                 fullWidth
                 variant="contained"
                 sx={{ mb: 2 }}

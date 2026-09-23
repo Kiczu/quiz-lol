@@ -1,7 +1,8 @@
-import { Box, Button, TextField } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as yup from "yup";
 
+import FormTextField from "../FormTextField/FormTextField";
 interface Props {
   onSubmit: (password: string) => Promise<void> | void;
   onCancel?: () => void;
@@ -15,26 +16,18 @@ const ReauthPasswordForm = ({ onSubmit, onCancel }: Props) => (
   <Formik
     initialValues={{ password: "" }}
     validationSchema={schema}
-    onSubmit={async ({ password }, { setSubmitting }) => {
+    onSubmit={async ({ password }) => {
       await onSubmit(password);
-      setSubmitting(false);
     }}
   >
-    {({ values, handleChange, handleBlur, errors, touched, isSubmitting }) => (
+    {({ isSubmitting }) => (
       <Form>
         <Box>
-          <TextField
+          <FormTextField
             name="password"
             label="Current Password"
             type="password"
-            value={values.password}
-            onChange={handleChange}
-            onBlur={handleBlur}
             fullWidth
-            error={touched.password && Boolean(errors.password)}
-            helperText={
-              touched.password && errors.password ? errors.password : " "
-            }
             sx={{ mb: 2 }}
             autoFocus
             disabled={isSubmitting}
