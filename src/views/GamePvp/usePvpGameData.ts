@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
 import { useAuth } from "../../context/LoginContext/LoginContext";
@@ -39,7 +39,7 @@ const usePvpGameData = () => {
         return () => window.clearInterval(timer);
     }, []);
 
-    const run = async (action: () => Promise<void>) => {
+    const run = useCallback(async (action: () => Promise<void>) => {
         if (inFlight.current) return;
         inFlight.current = true;
         setBusy(true);
@@ -52,7 +52,7 @@ const usePvpGameData = () => {
             inFlight.current = false;
             setBusy(false);
         }
-    };
+    }, []);
 
     const create = () => run(async () => {
         const result = await pvpService.createRoom();
@@ -65,17 +65,18 @@ const usePvpGameData = () => {
     });
 
     const answer = (guess: string) => run(async () => {
-        if (!userData || !room || room.status !== "playing" || room.answeredIds.includes(userData.uid)
+        if (!userData || !room || room.status !== "playing" || room.nextRoundAt || room.answeredIds.includes(userData.uid)
             || submittedRound === room.currentRound) return;
         const round = room.currentRound;
         await pvpService.submitAnswer({ code, round, guess });
         setSubmittedRound(round);
     });
 
-    const advance = () => run(async () => {
-        if (!room) return;
-        await pvpService.advanceRound({ code, round: room.currentRound });
-    });
+    const currentRound = room?.currentRound;
+    const advance = useCallback(() => run(async () => {
+        if (currentRound === undefined) return;
+        await pvpService.advanceRound({ code, round: currentRound });
+    }), [code, currentRound, run]);
 
     const leave = () => run(async () => {
         if (room && (room.status === "waiting" || room.status === "playing")) {
@@ -85,10 +86,17 @@ const usePvpGameData = () => {
     });
 
     const expired = !!room && room.expiresAt <= now && room.status !== "finished";
-    const secondsLeft = room?.deadline ? Math.max(0, Math.ceil((room.deadline - now) / 1000)) : 0;
+    const secondsLeft = room?.deadline ? Math.max(0, Math.ceil((room.deadline - Math.max(now, Date.now())) / 1000)) : 0;
+    const breakSecondsLeft = room?.nextRoundAt ? Math.max(0, Math.ceil((room.nextRoundAt - Math.max(now, Date.now())) / 1000)) : 0;
     const answered = !!room && (room.answeredIds.includes(userData?.uid ?? "") || submittedRound === room.currentRound);
 
-    return { code, room, error, connectionError, busy, uid: userData?.uid, expired, secondsLeft, answered, create, join, answer, advance, leave, matchmaking };
+    useEffect(() => {
+        if (room?.status !== "playing" || expired) return;
+        const transitionAt = room.nextRoundAt ?? room.deadline;
+        if (transitionAt && transitionAt <= now) void advance();
+    }, [room, now, expired, advance]);
+
+    return { code, room, error, connectionError, busy, uid: userData?.uid, expired, secondsLeft, breakSecondsLeft, answered, create, join, answer, advance, leave, matchmaking };
 };
 
 export default usePvpGameData;

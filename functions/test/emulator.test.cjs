@@ -72,6 +72,17 @@ const room = async (overrides = {}) => {
 const firestore = (path) => `http://${process.env.FIRESTORE_EMULATOR_HOST}/v1/projects/${projectId}/databases/(default)/documents/${path}`;
 const readAs = (path, player) => fetch(firestore(path), { headers: { Authorization: `Bearer ${player.token}` } });
 
+const completeBreak = async (ref) => {
+    const game = (await ref.get()).data();
+    if (game.status === "finished") return;
+    assert.equal(game.question, null);
+    assert.equal(game.deadline, null);
+    assert.ok(game.roundResult);
+    assert.ok(game.nextRoundAt);
+    await ref.update({ nextRoundAt: Date.now() - 1 });
+    await call("advancePvpRound", { code: ref.id, round: game.currentRound });
+};
+
 before(async () => {
     if (process.env.FIREBASE_EMULATOR_HUB) {
         assert.match(process.env.FIREBASE_EMULATOR_HUB, /^(127\.0\.0\.1|localhost):\d+$/);
@@ -193,6 +204,7 @@ test("pvp: private matches keep their scores out of both rankings", async () => 
         assert.equal(waiting.answeredIds.length, 1);
         assert.equal(waiting.answers, undefined);
         await call("submitPvpAnswer", { code: ref.id, round, guess: round === 0 ? "Ahri" : "Ashe" }, players[1]);
+        await completeBreak(ref);
     }
     const completed = (await ref.get()).data();
     assert.equal(completed.status, "finished");
@@ -222,11 +234,72 @@ test("pvp: timeouts count missing answers as wrong and advance only once", async
     await call("submitPvpAnswer", { code: ref.id, round: 0, guess: "Ahri" });
     await ref.update({ deadline: Date.now() - 1000 });
     await assert.rejects(call("submitPvpAnswer", { code: ref.id, round: 0, guess: "Ahri" }, players[1]), { code: "DEADLINE_EXCEEDED" });
-    const results = await Promise.allSettled(players.slice(0, 2).map((player) => call("advancePvpRound", { code: ref.id, round: 0 }, player)));
-    assert.equal(results.filter((result) => result.status === "fulfilled").length, 1);
+    const results = await Promise.all(players.slice(0, 2).map((player) => call("advancePvpRound", { code: ref.id, round: 0 }, player)));
+    assert.equal(results.filter((result) => result.advanced).length, 1);
+    const next = (await ref.get()).data();
+    assert.equal(next.currentRound, 0);
+    assert.equal(next.question, null);
+    assert.equal(next.roundResult.winnerId, players[0].uid);
+    assert.deepEqual(next.roundResult.correctIds, [players[0].uid]);
+    assert.deepEqual(next.players.map((player) => player.score), [10, 0]);
+    await completeBreak(ref);
+    assert.equal((await ref.get()).data().currentRound, 1);
+});
+
+test("pvp: round results enforce a shared five-second break before revealing the next question", async () => {
+    const ref = await room();
+    await call("joinPvpRoom", { code: ref.id }, players[1]);
+    await call("submitPvpAnswer", { code: ref.id, round: 0, guess: "Ahri" });
+    assert.equal((await ref.get()).data().roundResult, undefined);
+    const before = Date.now();
+    await call("submitPvpAnswer", { code: ref.id, round: 0, guess: "Ashe" }, players[1]);
+    const paused = (await ref.get()).data();
+    assert.equal(paused.status, "playing");
+    assert.equal(paused.currentRound, 0);
+    assert.equal(paused.question, null);
+    assert.equal(paused.deadline, null);
+    assert.ok(paused.nextRoundAt >= before + 5000);
+    assert.ok(paused.nextRoundAt <= Date.now() + 5000);
+    assert.deepEqual(paused.roundResult, {
+        winnerId: players[0].uid, answer: { id: "Ahri", name: "Ahri" }, correctIds: [players[0].uid],
+    });
+    await assert.rejects(call("submitPvpAnswer", { code: ref.id, round: 0, guess: "Ahri" }), { code: "FAILED_PRECONDITION" });
+    await assert.rejects(call("submitPvpAnswer", { code: ref.id, round: 1, guess: "Ahri" }), { code: "FAILED_PRECONDITION" });
+    await assert.rejects(call("advancePvpRound", { code: ref.id, round: 0 }, players[2]), { code: "PERMISSION_DENIED" });
+    assert.equal((await call("advancePvpRound", { code: ref.id, round: 0 })).advanced, false);
+    assert.deepEqual((await ref.get()).data(), paused);
+    await new Promise((resolve) => setTimeout(resolve, Math.max(0, paused.nextRoundAt - Date.now())));
+    const startedAt = Date.now();
+    const results = await Promise.all(players.slice(0, 2).map((player) => call("advancePvpRound", { code: ref.id, round: 0 }, player)));
+    assert.equal(results.filter((result) => result.advanced).length, 1);
     const next = (await ref.get()).data();
     assert.equal(next.currentRound, 1);
+    assert.deepEqual(next.question, question);
+    assert.equal(next.roundResult, null);
+    assert.equal(next.nextRoundAt, null);
+    assert.deepEqual(next.answeredIds, []);
+    assert.ok(next.deadline >= startedAt + 60_000);
     assert.deepEqual(next.players.map((player) => player.score), [10, 0]);
+    assert.equal((await call("advancePvpRound", { code: ref.id, round: 0 })).advanced, false);
+    await call("submitPvpAnswer", { code: ref.id, round: 1, guess: "Ashe" });
+    assert.deepEqual((await ref.get()).data().answeredIds, [players[0].uid]);
+});
+
+test("pvp: equal round results draw whether both players are correct, wrong or time out", async () => {
+    for (const guess of ["Ahri", "Ashe", null]) {
+        const ref = await room();
+        await call("joinPvpRoom", { code: ref.id }, players[1]);
+        if (guess) {
+            await Promise.all(players.slice(0, 2).map((player) => call("submitPvpAnswer", { code: ref.id, round: 0, guess }, player)));
+        } else {
+            await ref.update({ deadline: Date.now() - 1 });
+            await call("advancePvpRound", { code: ref.id, round: 0 });
+        }
+        const paused = (await ref.get()).data();
+        assert.equal(paused.roundResult.winnerId, null);
+        assert.deepEqual(paused.roundResult.correctIds, guess === "Ahri" ? paused.playerIds : []);
+        assert.deepEqual(paused.players.map((player) => player.score), guess === "Ahri" ? [10, 10] : [0, 0]);
+    }
 });
 
 test("pvp: leaving cancels the match without ranking points", async () => {
@@ -305,6 +378,20 @@ test("ranked: draws leave both rankings unchanged", async () => {
     await Promise.all(players.slice(0, 2).map((player) => call("submitPvpAnswer", { code: ref.id, round: 4, guess: "Ahri" }, player)));
     assert.equal((await ref.get()).data().winnerId, null);
     for (const player of players.slice(0, 2)) assert.equal((await score(player)).totalScore, 0);
+});
+
+test("ranked: forfeiting during the break ends the match and clears the pending round", async () => {
+    const ref = await rankedRoom();
+    await Promise.all(players.slice(0, 2).map((player) => call("submitPvpAnswer", { code: ref.id, round: 0, guess: "Ahri" }, player)));
+    await call("leavePvpRoom", { code: ref.id });
+    const finished = (await ref.get()).data();
+    assert.equal(finished.status, "finished");
+    assert.equal(finished.endReason, "forfeit");
+    assert.equal(finished.winnerId, players[1].uid);
+    assert.equal(finished.nextRoundAt, null);
+    assert.equal(finished.roundResult, null);
+    assert.equal((await call("advancePvpRound", { code: ref.id, round: 0 }, players[1])).advanced, false);
+    assert.equal((await score(players[1])).scores.PVP, 20);
 });
 
 test("ranked: leaving forfeits regardless of the current score and cannot award twice", async () => {
@@ -464,6 +551,7 @@ test("pvp: mixed questions accept generic answer ids and finish through the same
         assert.deepEqual((await ref.get()).data().question, rounds[index].question);
         await call("submitPvpAnswer", { code: ref.id, round: index, guess: index + "-a" });
         await call("submitPvpAnswer", { code: ref.id, round: index, guess: index + "-b" }, players[1]);
+        await completeBreak(ref);
     }
     assert.equal((await ref.get()).data().players[0].score, 50);
     assert.equal((await score()).scores.PVP, 20);
@@ -495,6 +583,7 @@ test("live: online players complete the same mixed quiz and receive ranked rewar
         const wrong = question.options.find((option) => option.id !== solution.answerId).id;
         await call("submitPvpAnswer", { code: paired.code, round: index, guess: solution.answerId });
         await call("submitPvpAnswer", { code: paired.code, round: index, guess: wrong }, players[1]);
+        await completeBreak(ref);
     }
     assert.equal((await ref.get()).data().status, "finished");
     assert.equal((await score()).scores.PVP, 20);
@@ -533,6 +622,7 @@ test("live: create, join and complete a real five-question PvP match", async () 
         assert.deepEqual((await ref.get()).data().question, rounds[round].question);
         const guess = rounds[round].secret.answerId;
         await Promise.all(players.slice(0, 2).map((player) => call("submitPvpAnswer", { code, round, guess }, player)));
+        await completeBreak(ref);
     }
     assert.equal((await ref.get()).data().status, "finished");
     assert.equal((await score()).scores.PVP, undefined);

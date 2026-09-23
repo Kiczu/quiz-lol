@@ -51,7 +51,7 @@ const Ranking = () => {
             {gameModes.map((mode, index) => (
               <Tab
                 key={mode}
-                label={mode}
+                label={mode === "PVP" ? "Player vs Player" : mode}
                 sx={{
                   color:
                     index === gameModes.length - 1

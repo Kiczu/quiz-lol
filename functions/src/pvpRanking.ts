@@ -26,7 +26,7 @@ export const finishMatch = async (
   }
   const result = {
     status: "finished" as const, players: room.players, winnerId, endReason, rankingChanges,
-    question: null, deadline: null, answeredIds: [],
+    question: null, deadline: null, answeredIds: [], nextRoundAt: null, roundResult: null,
   };
   transaction.update(ref, result);
   return { ...room, ...result };
