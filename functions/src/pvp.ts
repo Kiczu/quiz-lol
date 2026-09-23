@@ -3,8 +3,8 @@ import { randomBytes } from "node:crypto";
 import { DocumentReference, Transaction } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
-import { finishMatch, resolveDisconnectedPlayers } from "./pvpRanking";
 import { QuizQuestion, loadPvpRounds, pvpRoundCount } from "./pvpQuestions";
+import { finishMatch, resolveDisconnectedPlayers } from "./pvpRanking";
 import { db, requireString, requireUid } from "./shared";
 
 export { loadPvpRounds } from "./pvpQuestions";

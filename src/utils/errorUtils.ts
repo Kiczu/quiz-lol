@@ -1,13 +1,13 @@
 import { FirebaseError } from "firebase/app";
 
-export function isFirebaseCode(error: unknown, code: string): boolean {
+export const isFirebaseCode = (error: unknown, code: string): boolean => {
     return (
         error instanceof FirebaseError &&
         error.code === code
     );
-}
+};
 
-export function isPopupClosedError(error: unknown): boolean {
+export const isPopupClosedError = (error: unknown): boolean => {
     return (
         error instanceof FirebaseError &&
         error.code === "auth/popup-closed-by-user"
@@ -15,7 +15,7 @@ export function isPopupClosedError(error: unknown): boolean {
             error instanceof Error &&
             error.message?.toLowerCase().includes("popup closed")
         );
-}
+};
 
 export const getErrorMessage = (error: unknown): string => {
     if (error instanceof FirebaseError) {

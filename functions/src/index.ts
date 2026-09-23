@@ -4,8 +4,8 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { hangman } from "./hangman";
 import { regions } from "./regions";
-import { skills } from "./skills";
 import { GameHandler, GuessResult, Round, awardPoints, db, requireString, requireUid } from "./shared";
+import { skills } from "./skills";
 
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
