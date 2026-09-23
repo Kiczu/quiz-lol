@@ -1,6 +1,18 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { buildPvpRounds } = require("../lib/pvpQuestions");
+const { toRegionValue } = require("../lib/regions");
+const { regionNames } = require("../lib/contracts/regions");
+
+test("regions: public names and legacy aliases resolve to the same ids", () => {
+    for (const [id, name] of Object.entries(regionNames)) {
+        assert.equal(toRegionValue(name), id);
+        assert.equal(toRegionValue(name.toUpperCase()), id);
+    }
+    assert.equal(toRegionValue("Targon"), "mt-targon");
+    assert.equal(toRegionValue("Void"), "void");
+    assert.equal(toRegionValue("Unknown"), null);
+});
 
 const catalog = () => ({
     version: "test-version",

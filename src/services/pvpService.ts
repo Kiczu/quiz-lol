@@ -4,38 +4,9 @@ import { httpsCallable } from "firebase/functions";
 import { db } from "../api/firebase/db";
 import { functions } from "../api/firebase/functions";
 
-import { ChampionOption } from "./gameRoundService";
+import type { PvpRoom, PvpSearch, PvpSearchResult } from "../../functions/src/contracts/pvp";
 
-export type PvpQuestion = {
-    category: string;
-    prompt: string;
-    image: string | null;
-    text: string | null;
-    dataVersion: string;
-    options: { id: string; name: string; icon?: string }[];
-} | { spellName: string; spellIcon: string; options: ChampionOption[] };
-
-export type PvpRoom = {
-    mode?: "private" | "ranked";
-    rankingChanges?: Record<string, number>;
-    endReason?: "score" | "forfeit" | "disconnect" | "abandoned";
-    status: "waiting" | "playing" | "finished" | "cancelled";
-    playerIds: string[];
-    players: { uid: string; name: string; score: number }[];
-    currentRound: number;
-    totalRounds: number;
-    question: PvpQuestion | null;
-    answeredIds: string[];
-    deadline: number | null;
-    nextRoundAt?: number | null;
-    roundResult?: {
-        winnerId: string | null;
-        answer: { id: string; name: string };
-        correctIds: string[];
-    } | null;
-    expiresAt: number;
-    winnerId: string | null;
-};
+export type { PvpQuestion, PvpRoom, PvpSearch, PvpSearchResult } from "../../functions/src/contracts/pvp";
 
 const createRoom = httpsCallable<void, { code: string }>(functions, "createPvpRoom");
 const joinRoom = httpsCallable<{ code: string }, { code: string }>(functions, "joinPvpRoom");
@@ -43,9 +14,6 @@ const submitAnswer = httpsCallable<{ code: string; round: number; guess: string 
 const advanceRound = httpsCallable<{ code: string; round: number }>(functions, "advancePvpRound");
 const leaveRoom = httpsCallable<{ code: string }>(functions, "leavePvpRoom");
 const heartbeat = httpsCallable<{ code: string }>(functions, "heartbeatPvpRoom");
-
-export type PvpSearchResult = { state: "waiting" | "matched" | "cancelled"; code: string | null };
-export type PvpSearch = PvpSearchResult & { searchId: string; expiresAt: number };
 
 const findMatch = httpsCallable<{ searchId: string }, PvpSearchResult>(functions, "findPvpMatch");
 const cancelSearch = httpsCallable<{ searchId: string }, PvpSearchResult>(functions, "cancelPvpSearch");

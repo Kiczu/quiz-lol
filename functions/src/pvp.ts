@@ -3,56 +3,27 @@ import { randomBytes } from "node:crypto";
 import { DocumentReference, Transaction } from "firebase-admin/firestore";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
-import { QuizQuestion, loadPvpRounds, pvpRoundCount } from "./pvpQuestions";
+import { PvpPlayer, PvpQuestion, PvpRoom, pvpRules } from "./contracts/pvp";
+import { loadPvpRounds } from "./pvpQuestions";
 import { finishMatch, resolveDisconnectedPlayers } from "./pvpRanking";
 import { db, requireString, requireUid } from "./shared";
 
 export { loadPvpRounds } from "./pvpQuestions";
 
-const totalRounds = pvpRoundCount;
-const roundDuration = 60_000;
-const roundBreakDuration = 5_000;
+const { totalRounds, roundDuration, roundBreakDuration, pointsPerAnswer } = pvpRules;
 const roomDuration = 60 * 60_000;
 const options = { region: "europe-west1", maxInstances: 10 };
 
 export const playerName = (value: unknown) =>
   typeof value === "string" && value.trim() ? value.trim().slice(0, 40) : "Player";
 
-type Question = QuizQuestion | {
-  spellName: string;
-  spellIcon: string;
-  options: { id: string; name: string; icon: string }[];
-};
-
-type Player = { uid: string; name: string; score: number };
-export type Room = {
-  mode?: "private" | "ranked";
-  lastSeen?: Record<string, number>;
-  rankingChanges?: Record<string, number>;
-  endReason?: "score" | "forfeit" | "disconnect" | "abandoned";
-  status: "waiting" | "playing" | "finished" | "cancelled";
-  playerIds: string[];
-  players: Player[];
-  currentRound: number;
-  totalRounds: number;
-  question: Question | null;
-  answeredIds: string[];
-  deadline: number | null;
-  nextRoundAt?: number | null;
-  roundResult?: {
-    winnerId: string | null;
-    answer: { id: string; name: string };
-    correctIds: string[];
-  } | null;
-  expiresAt: number;
-  winnerId: string | null;
-};
+export type Room = PvpRoom & { lastSeen?: Record<string, number> };
 export type RoomSecret = {
-  rounds: { question: Question; secret: { championId: string } | { answerId: string } }[];
+  rounds: { question: PvpQuestion; secret: { championId: string } | { answerId: string } }[];
   answers: Record<string, string>;
 };
 
-export const makePvpRoom = (players: Player[], question: Question | null = null, mode: "private" | "ranked" = "private"): Room => ({
+export const makePvpRoom = (players: PvpPlayer[], question: PvpQuestion | null = null, mode: "private" | "ranked" = "private"): Room => ({
   mode,
   lastSeen: Object.fromEntries(players.map((player) => [player.uid, Date.now()])),
   status: question ? "playing" : "waiting",
@@ -102,7 +73,7 @@ const finishRound = async (
   const correctIds = room.playerIds.filter((uid) => secret.answers[uid] === answer);
   const players = room.players.map((player) => ({
     ...player,
-    score: player.score + (secret.answers[player.uid] === answer ? 10 : 0),
+    score: player.score + (secret.answers[player.uid] === answer ? pointsPerAnswer : 0),
   }));
   const nextRound = room.currentRound + 1;
   const finished = nextRound === room.totalRounds;

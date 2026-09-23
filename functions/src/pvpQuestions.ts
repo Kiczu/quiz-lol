@@ -1,18 +1,10 @@
 import { HttpsError } from "firebase-functions/v2/https";
 
-import { regionValues, toRegionValue } from "./regions";
+import { QuizChoice, QuizQuestion, pvpRules } from "./contracts/pvp";
+import { regionNames } from "./contracts/regions";
+import { toRegionValue } from "./regions";
 import { Champion, DDRAGON, championIcon, db, findByLabel, loadRoster, pick, readJson, shuffle as shuffleItems, spellIcon } from "./shared";
 
-export const pvpRoundCount = 5;
-type Choice = { id: string; name: string; icon?: string };
-export type QuizQuestion = {
-  category: string;
-  prompt: string;
-  image: string | null;
-  text: string | null;
-  options: Choice[];
-  dataVersion: string;
-};
 export type QuizRound = { question: QuizQuestion; secret: { answerId: string } };
 type QuizChampion = Champion & { title?: string; blurb?: string };
 type Item = {
@@ -46,7 +38,7 @@ export const buildPvpRounds = (catalog: QuizCatalog, random = Math.random): Quiz
   const championChoices = champions.map((champion) => ({
     id: champion.id, name: champion.name, icon: championIcon(champion.id, catalog.version),
   }));
-  const round = (category: string, prompt: string, answer: Choice, choices: Choice[], image: string | null = null, text: string | null = null): QuizRound => ({
+  const round = (category: string, prompt: string, answer: QuizChoice, choices: QuizChoice[], image: string | null = null, text: string | null = null): QuizRound => ({
     question: {
       category, prompt, image, text, dataVersion: catalog.version,
       options: shuffle([answer, ...shuffle(choices.filter((choice) => choice.id !== answer.id)).slice(0, 3)]),
@@ -61,13 +53,8 @@ export const buildPvpRounds = (catalog: QuizCatalog, random = Math.random): Quiz
     return round("Abilities", 'Which champion uses "' + textOnly(ability.name) + '"?',
       championChoice(ability.championId), championChoices, ability.image);
   });
-  const regionNames: Record<string, string> = {
-    "bandle-city": "Bandle City", bilgewater: "Bilgewater", demacia: "Demacia", freljord: "Freljord",
-    ionia: "Ionia", ixtal: "Ixtal", "mt-targon": "Targon", noxus: "Noxus", piltover: "Piltover",
-    "shadow-isles": "Shadow Isles", shurima: "Shurima", void: "The Void", zaun: "Zaun",
-  };
-  const regionChoices = [...new Set(Object.values(regionValues))].map((id) => ({ id, name: regionNames[id] }));
-  const regions = catalog.regions.filter((entry) => championChoice(entry.championId) && regionNames[entry.region]
+  const regionChoices = Object.entries(regionNames).map(([id, name]) => ({ id, name }));
+  const regions = catalog.regions.filter((entry) => championChoice(entry.championId) && regionChoices.some((choice) => choice.id === entry.region)
     && !catalog.regions.some((other) => other.championId === entry.championId && other.region !== entry.region));
   if (regions.length) factories.push(() => {
     const entry = choose(regions);
@@ -108,8 +95,8 @@ export const buildPvpRounds = (catalog: QuizCatalog, random = Math.random): Quiz
     return round("Summoner spells", "Which summoner spell is shown here?",
       { id: answer.id, name: answer.name }, spells.map(({ id, name }) => ({ id, name })), answer.image);
   });
-  if (factories.length < pvpRoundCount) throw new HttpsError("unavailable", "Not enough question categories are available. Please try again.");
-  return shuffle(factories).slice(0, pvpRoundCount).map((factory) => factory());
+  if (factories.length < pvpRules.totalRounds) throw new HttpsError("unavailable", "Not enough question categories are available. Please try again.");
+  return shuffle(factories).slice(0, pvpRules.totalRounds).map((factory) => factory());
 };
 
 let staticData: { version: string; promise: Promise<{ items: Record<string, Item>; summonerSpells: SummonerSpell[] }> } | null = null;

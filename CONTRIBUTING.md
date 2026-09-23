@@ -7,6 +7,7 @@
 - Follow the surrounding indentation, import groups, naming and `*.style.ts` layout. Keep JSX readable rather than compressing it into one line.
 - Share repeated behaviour when it has multiple real callers. Do not introduce general frameworks for a single use case.
 - Keep browser code separate from privileged Firebase code. Never expose answer secrets or trust client-side scoring.
+- Browser and server share public DTOs and rules from `functions/src/contracts`. Keep this directory dependency-free; browser code must not import other Functions modules. Its location preserves the existing Functions deployment layout.
 - Do not add code comments unless the change specifically calls for them.
 
 ## Changes and history

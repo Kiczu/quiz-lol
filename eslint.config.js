@@ -52,4 +52,23 @@ export default [
       ],
     },
   },
+  {
+    files: ["src/**/*.{js,jsx,ts,tsx}"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        patterns: [{
+          regex: "(^|/)functions/(?!src/contracts/)",
+          message: "Browser code may only import public Functions contracts.",
+        }],
+      }],
+    },
+  },
+  {
+    files: ["functions/src/contracts/**/*.ts"],
+    rules: {
+      "no-restricted-imports": ["error", {
+        patterns: [{ regex: ".", message: "Public contracts must stay dependency-free." }],
+      }],
+    },
+  },
 ];

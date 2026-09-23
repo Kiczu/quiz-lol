@@ -1,18 +1,18 @@
 import { DocumentReference, FieldValue, Transaction } from "firebase-admin/firestore";
 
+import { pvpRules } from "./contracts/pvp";
 import { db } from "./shared";
 
 import type { Room } from "./pvp";
 
-const rankingStake = 20;
-const reconnectWindow = 60_000;
+const { rankingStake, reconnectWindow } = pvpRules;
 
 export const finishMatch = async (
   transaction: Transaction,
   ref: DocumentReference,
   room: Room,
   winnerId: string | null,
-  endReason: "score" | "forfeit" | "disconnect" | "abandoned"
+  endReason: NonNullable<Room["endReason"]>
 ): Promise<Room> => {
   const rankingChanges: Record<string, number> = Object.fromEntries(room.playerIds.map((uid) => [uid, 0]));
   if (room.mode === "ranked" && (winnerId || endReason === "abandoned")) {

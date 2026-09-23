@@ -1,5 +1,6 @@
 import { HttpsError } from "firebase-functions/v2/https";
 
+import { regionValues } from "./contracts/regions";
 import {
   GameHandler,
   championIcon,
@@ -9,24 +10,6 @@ import {
   pick,
   scoreByWrongGuesses,
 } from "./shared";
-
-export const regionValues: Record<string, string> = {
-  "bandle city": "bandle-city",
-  bilgewater: "bilgewater",
-  demacia: "demacia",
-  freljord: "freljord",
-  ionia: "ionia",
-  ixtal: "ixtal",
-  "mt. targon": "mt-targon",
-  targon: "mt-targon",
-  noxus: "noxus",
-  piltover: "piltover",
-  "shadow isles": "shadow-isles",
-  shurima: "shurima",
-  "the void": "void",
-  void: "void",
-  zaun: "zaun",
-};
 
 export const toRegionValue = (region: string): string | null =>
   regionValues[region.toLowerCase()] ?? null;

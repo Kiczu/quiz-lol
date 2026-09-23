@@ -2,6 +2,7 @@ import { Alert, Box, Button, CircularProgress, Container, Stack, TextField, Typo
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
+import { pvpRules } from "../../../functions/src/contracts/pvp";
 import { GameState } from "../../api/types";
 import backgroundMap from "../../assets/images/backgroundMap.webp";
 import GameBox from "../../components/GameBox/GameBox";
@@ -28,7 +29,7 @@ const PvpGame = () => {
         if (room?.mode !== "ranked" || room.status !== "playing") return void game.leave();
         showModal({
             variant: "confirm", title: "Forfeit this ranked match?",
-            content: "Leaving gives your opponent the win and costs up to 20 ranking points.",
+            content: `Leaving gives your opponent the win and costs up to ${pvpRules.rankingStake} ranking points.`,
             onlyConfirm: false, onCancel: closeModal,
             onConfirm: () => { closeModal(); void game.leave(); },
         });
@@ -49,8 +50,8 @@ const PvpGame = () => {
         <Box sx={lobbyPanel}>
             <Typography variant="h3">Play against an online opponent</Typography>
             <Typography color={colors.textSecondary}>
-                Five shared questions from different League categories. One answer each, 10 points for a correct guess.
-                You have 60 seconds per question. Highest score wins; equal scores are a draw.
+                {pvpRules.totalRounds} shared questions from different League categories. One answer each, {pvpRules.pointsPerAnswer} points for a correct guess.
+                You have {pvpRules.roundDuration / 1000} seconds per question. Highest score wins; equal scores are a draw.
             </Typography>
             <WavingButton disabled={game.busy} onClick={game.matchmaking.start}>Find opponent</WavingButton>
             <Typography color={colors.textSecondary}>Prefer to play with a friend?</Typography>
