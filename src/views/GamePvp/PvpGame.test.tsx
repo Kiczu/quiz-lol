@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PvpRoom, PvpSearch, pvpService } from "../../services/pvpService";
 
@@ -38,11 +38,21 @@ describe("PvpGame", () => {
         });
         vi.mocked(pvpService.findMatch).mockResolvedValue({ data: { state: "waiting", code: null } });
         vi.mocked(pvpService.heartbeat).mockResolvedValue({ data: { acknowledged: true } });
+        vi.mocked(pvpService.advanceRound).mockResolvedValue({ data: { advanced: true } });
         vi.mocked(pvpService.cancelSearch).mockResolvedValue({ data: { state: "cancelled", code: null } });
         vi.mocked(pvpService.watchSearch).mockImplementation((_uid, onSearch) => {
             updateSearch = onSearch;
             return vi.fn();
         });
+    });
+
+    afterEach(() => vi.useRealTimers());
+
+    it("uses the full mode name without displaying the ranked rules in the lobby", () => {
+        open("/game/pvp");
+        expect(screen.getByRole("heading", { name: "Player vs Player" })).toBeInTheDocument();
+        expect(screen.queryByText(/Ranked: win/)).not.toBeInTheDocument();
+        expect(screen.getByText("Private matches never affect your ranking.")).toBeInTheDocument();
     });
 
     it("finds an online opponent and opens the match without a room code", async () => {
@@ -102,20 +112,65 @@ describe("PvpGame", () => {
         expect(screen.getByRole("button", { name: "Back to lobby" })).toBeInTheDocument();
     });
 
-    it("offers a server-controlled timeout transition", async () => {
+    it("automatically requests a server-controlled timeout transition", async () => {
         open();
         act(() => updateRoom({ ...room, deadline: Date.now() - 1000 }));
         expect(screen.getByRole("button", { name: /Ahri/ })).toBeDisabled();
-        vi.mocked(pvpService.advanceRound).mockResolvedValue({ data: { advanced: true } });
-        fireEvent.click(screen.getByRole("button", { name: /Time is up/ }));
         await waitFor(() => expect(pvpService.advanceRound).toHaveBeenCalledWith({ code: "ABC123", round: 0 }));
     });
 
     it("shows the actual ranking delta separately from the match score", () => {
         open();
         act(() => updateRoom({ ...room, mode: "ranked", status: "finished", winnerId: "guest", rankingChanges: { host: -8, guest: 20 } }));
-        expect(screen.getByText("PVP ranking: -8.")).toBeInTheDocument();
+        expect(screen.getByText("Player vs Player ranking: -8.")).toBeInTheDocument();
         expect(screen.getByText("Defeat")).toBeInTheDocument();
+    });
+
+    it("shows the round winner and answer, waits five seconds and unlocks the next question", async () => {
+        vi.useFakeTimers();
+        open();
+        act(() => updateRoom(room));
+        vi.mocked(pvpService.submitAnswer).mockResolvedValue({ data: { accepted: true } });
+        await act(async () => fireEvent.click(screen.getByRole("button", { name: /Ahri/ })));
+        act(() => updateRoom({ ...room, question: null, deadline: null, nextRoundAt: Date.now() + 5000,
+            players: room.players.map((player) => ({ ...player, score: player.uid === "host" ? 10 : 0 })),
+            roundResult: { winnerId: "host", answer: { id: "Ahri", name: "Ahri" }, correctIds: ["host"] },
+        }));
+        expect(screen.getByText("Host wins the round")).toBeInTheDocument();
+        expect(screen.getByText("Correct answer: Ahri")).toBeInTheDocument();
+        expect(screen.getByText("Correct answer +10")).toBeInTheDocument();
+        expect(screen.getByText("No points this round")).toBeInTheDocument();
+        expect(screen.getByText("Next round in 5s")).toBeInTheDocument();
+        expect(screen.queryByText("Test ability")).not.toBeInTheDocument();
+        expect(screen.queryByRole("button", { name: /Ahri/ })).not.toBeInTheDocument();
+        await act(async () => vi.advanceTimersByTimeAsync(4999));
+        expect(pvpService.advanceRound).not.toHaveBeenCalled();
+        await act(async () => vi.advanceTimersByTimeAsync(1));
+        expect(pvpService.advanceRound).toHaveBeenCalledExactlyOnceWith({ code: "ABC123", round: 0 });
+        expect(screen.getByText("Starting the next round...")).toBeInTheDocument();
+        act(() => updateRoom({ ...room, currentRound: 1, deadline: Date.now() + 60_000, nextRoundAt: null, roundResult: null }));
+        expect(screen.queryByText("Host wins the round")).not.toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /Ahri/ })).toBeEnabled();
+    });
+
+    it("restores a shared countdown after refresh, retries a failed transition and stops on exit", async () => {
+        vi.useFakeTimers();
+        vi.mocked(pvpService.advanceRound).mockRejectedValueOnce(new Error("Connection interrupted"));
+        const view = open();
+        act(() => updateRoom({ ...room, question: null, deadline: null, nextRoundAt: Date.now() + 2000,
+            roundResult: { winnerId: null, answer: { id: "Ahri", name: "Ahri" }, correctIds: [] },
+        }));
+        expect(screen.getByText("Round drawn")).toBeInTheDocument();
+        expect(screen.getByText("Next round in 2s")).toBeInTheDocument();
+        await act(async () => vi.advanceTimersByTimeAsync(2000));
+        expect(screen.getByText("Connection interrupted")).toBeInTheDocument();
+        expect(pvpService.advanceRound).toHaveBeenCalledTimes(1);
+        await act(async () => vi.advanceTimersByTimeAsync(1000));
+        expect(pvpService.advanceRound).toHaveBeenCalledTimes(2);
+        expect(screen.queryByText("Connection interrupted")).not.toBeInTheDocument();
+        view.unmount();
+        await act(async () => vi.advanceTimersByTimeAsync(10_000));
+        expect(pvpService.advanceRound).toHaveBeenCalledTimes(2);
     });
 
     it("renders mixed questions with text-only answers and submits their option ids", async () => {

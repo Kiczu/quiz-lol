@@ -58,7 +58,6 @@ const PvpGame = () => {
                 You have 60 seconds per question. Highest score wins; equal scores are a draw.
             </Typography>
             <WavingButton disabled={game.busy} onClick={game.matchmaking.start}>Find opponent</WavingButton>
-            <Typography variant="body2">Ranked: win +20, loss -20, draw 0. Your ranking cannot drop below 0.</Typography>
             <Typography color={colors.textSecondary}>Prefer to play with a friend?</Typography>
             <Button variant="outlined" disabled={game.busy} onClick={game.create}>Create private room</Button>
             <Typography variant="body2">Private matches never affect your ranking.</Typography>
@@ -101,7 +100,7 @@ const PvpGame = () => {
                     : "No ranking points were awarded. Create a new room to play again."}
             </Typography>
             {room?.status === "finished" && <Typography>
-                {room.mode === "ranked" ? `PVP ranking: ${rankingChange > 0 ? "+" : ""}${rankingChange}.`
+                {room.mode === "ranked" ? `Player vs Player ranking: ${rankingChange > 0 ? "+" : ""}${rankingChange}.`
                     : "Private match. Ranking unchanged."}
             </Typography>}
             {(room?.endReason === "forfeit" || room?.endReason === "disconnect") && <Typography>
@@ -115,7 +114,7 @@ const PvpGame = () => {
     return (
         <Box sx={pvpWrapper}>
             <Container maxWidth="lg" sx={pvpContent}>
-                <Typography variant="h1" sx={skillsTitle}>PVP</Typography>
+                <Typography variant="h1" sx={{ ...skillsTitle, fontSize: { xs: "2rem", sm: "2.5rem" } }}>Player vs Player</Typography>
                 <Typography color={colors.textSecondary}>League quiz · 1 vs 1</Typography>
                 {game.error && <Alert severity="error" role="alert">{game.error}</Alert>}
                 {game.connectionError && <Alert severity="warning">{game.connectionError}</Alert>}
@@ -130,7 +129,8 @@ const PvpGame = () => {
                                 </Typography>
                                 <Typography variant="h3">{player.score}</Typography>
                                 {room.status === "playing" && <Typography variant="body2">
-                                    {room.answeredIds.includes(player.uid) ? "Answer locked" : "Choosing an answer"}
+                                    {room.roundResult ? room.roundResult.correctIds.includes(player.uid) ? "Correct answer +10" : "No points this round"
+                                        : room.answeredIds.includes(player.uid) ? "Answer locked" : "Choosing an answer"}
                                 </Typography>}
                             </Box>
                         ))}
@@ -142,6 +142,18 @@ const PvpGame = () => {
                     startScreen={lobby}
                     endScreen={result}
                 >
+                    {room?.roundResult && <Box sx={lobbyPanel}>
+                        <Typography>Round {room.currentRound + 1} / {room.totalRounds} complete</Typography>
+                        <Typography variant="h2" sx={{ ...skillsTitle, overflowWrap: "anywhere" }}>
+                            {room.roundResult.winnerId
+                                ? `${room.players.find((player) => player.uid === room.roundResult?.winnerId)?.name ?? "Player"} wins the round`
+                                : "Round drawn"}
+                        </Typography>
+                        <Typography>Correct answer: {room.roundResult.answer.name}</Typography>
+                        <Typography role="status" aria-live="polite">
+                            {game.breakSecondsLeft > 0 ? `Next round in ${game.breakSecondsLeft}s` : "Starting the next round..."}
+                        </Typography>
+                    </Box>}
                     {room?.question && <Stack spacing={3} alignItems="center">
                         <Typography>Round {room.currentRound + 1} / {room.totalRounds} · {game.secondsLeft}s</Typography>
                         <PvpQuestionPanel

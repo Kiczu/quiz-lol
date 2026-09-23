@@ -11,6 +11,7 @@ export { loadPvpRounds } from "./pvpQuestions";
 
 const totalRounds = pvpRoundCount;
 const roundDuration = 60_000;
+const roundBreakDuration = 5_000;
 const roomDuration = 60 * 60_000;
 const options = { region: "europe-west1", maxInstances: 10 };
 
@@ -37,6 +38,12 @@ export type Room = {
   question: Question | null;
   answeredIds: string[];
   deadline: number | null;
+  nextRoundAt?: number | null;
+  roundResult?: {
+    winnerId: string | null;
+    answer: { id: string; name: string };
+    correctIds: string[];
+  } | null;
   expiresAt: number;
   winnerId: string | null;
 };
@@ -56,6 +63,8 @@ export const makePvpRoom = (players: Player[], question: Question | null = null,
   question,
   answeredIds: [],
   deadline: question ? Date.now() + roundDuration : null,
+  nextRoundAt: null,
+  roundResult: null,
   expiresAt: Date.now() + roomDuration,
   winnerId: null,
 });
@@ -90,6 +99,7 @@ const finishRound = async (
 ) => {
   const solution = secret.rounds[room.currentRound].secret;
   const answer = "answerId" in solution ? solution.answerId : solution.championId;
+  const correctIds = room.playerIds.filter((uid) => secret.answers[uid] === answer);
   const players = room.players.map((player) => ({
     ...player,
     score: player.score + (secret.answers[player.uid] === answer ? 10 : 0),
@@ -101,9 +111,13 @@ const finishRound = async (
       : players[0].score > players[1].score ? players[0].uid : players[1].uid;
     await finishMatch(transaction, ref, { ...room, players }, winnerId, "score");
   } else {
+    const correctOption = secret.rounds[room.currentRound].question.options.find((option) => option.id === answer)!;
     transaction.update(ref, {
-      players, currentRound: nextRound, question: secret.rounds[nextRound].question,
-      answeredIds: [], deadline: Date.now() + roundDuration,
+      players, question: null, deadline: null, nextRoundAt: Date.now() + roundBreakDuration,
+      roundResult: {
+        winnerId: correctIds.length === 1 ? correctIds[0] : null,
+        answer: { id: correctOption.id, name: correctOption.name }, correctIds,
+      },
     });
   }
   transaction.update(ref.collection("secret").doc("game"), { answers: {} });
@@ -165,6 +179,7 @@ export const submitPvpAnswer = onCall(options, async (request) => {
     const room = await readRoom(transaction, ref, uid);
     if ((await resolveDisconnectedPlayers(transaction, ref, room)).status !== room.status) return { accepted: false };
     checkRound(room, request.data?.round);
+    if (room.nextRoundAt) throw new HttpsError("failed-precondition", "The next round has not started yet.");
     if (room.answeredIds.includes(uid)) return { accepted: true };
     if (Date.now() >= room.deadline!) throw new HttpsError("deadline-exceeded", "Time is up for this round.");
     if (!room.question?.options.some((option) => option.id === guess)) {
@@ -186,17 +201,29 @@ export const submitPvpAnswer = onCall(options, async (request) => {
 export const advancePvpRound = onCall(options, async (request) => {
   const uid = requireUid(request.auth?.uid);
   const ref = roomRefFor(request.data?.code);
-  await db.runTransaction(async (transaction) => {
+  const advanced = await db.runTransaction(async (transaction) => {
     const room = await readRoom(transaction, ref, uid);
-    if ((await resolveDisconnectedPlayers(transaction, ref, room)).status !== room.status) return;
+    if ((await resolveDisconnectedPlayers(transaction, ref, room)).status !== room.status) return false;
+    if (room.status === "finished" || (Number.isInteger(request.data?.round) && request.data.round < room.currentRound)) return false;
     checkRound(room, request.data?.round);
+    if (room.nextRoundAt) {
+      if (Date.now() < room.nextRoundAt) return false;
+      const secret = (await transaction.get(ref.collection("secret").doc("game"))).data() as RoomSecret;
+      const nextRound = room.currentRound + 1;
+      transaction.update(ref, {
+        currentRound: nextRound, question: secret.rounds[nextRound].question,
+        answeredIds: [], deadline: Date.now() + roundDuration, nextRoundAt: null, roundResult: null,
+      });
+      return true;
+    }
     if (Date.now() < room.deadline!) {
       throw new HttpsError("failed-precondition", "The other player still has time to answer.");
     }
     const secret = (await transaction.get(ref.collection("secret").doc("game"))).data() as RoomSecret;
     await finishRound(transaction, ref, room, secret);
+    return true;
   });
-  return { advanced: true };
+  return { advanced };
 });
 
 export const leavePvpRoom = onCall(options, async (request) => {
@@ -208,7 +235,7 @@ export const leavePvpRoom = onCall(options, async (request) => {
     if (room.mode === "ranked" && room.status === "playing") {
       await finishMatch(transaction, ref, room, room.playerIds.find((playerId) => playerId !== uid)!, "forfeit");
     } else if (room.status === "waiting" || room.status === "playing") {
-      transaction.update(ref, { status: "cancelled", question: null, deadline: null });
+      transaction.update(ref, { status: "cancelled", question: null, deadline: null, nextRoundAt: null, roundResult: null });
     }
   });
   return { left: true };
