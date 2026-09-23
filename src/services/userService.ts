@@ -1,4 +1,4 @@
-import { doc, getDoc, setDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
 import { db } from "../api/firebase/db";
 import { EditableUserFields, UserPrivateData, } from "../api/types";
@@ -33,13 +33,8 @@ const updateUserPrivate = async (uid: string, updates: EditableUserFields) => {
         await updateDoc(doc(db, "users", uid), filtered);
     }
 };
-const deleteUserPrivate = async (uid: string) => {
-    await deleteDoc(doc(db, "users", uid));
-};
-
 export const userService = {
     createUserPrivate,
     getUserPrivate,
     updateUserPrivate,
-    deleteUserPrivate,
 };

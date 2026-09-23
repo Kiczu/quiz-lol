@@ -3,14 +3,10 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import backgroundMap from "../../assets/images/backgroundMap.webp";
-import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
 import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
-import { deleteAccountWithAuth } from "../../helpers/deleteAccountWithAuth";
 import { paths } from "../../paths";
-import { authService } from "../../services/authService";
-import { getErrorMessage, isFirebaseCode } from "../../utils/errorUtils";
 
 import AvatarSection from "./AvatarSection/AvatarSection";
 import DangerZone from "./DangerZone/DangerZone";
@@ -18,6 +14,7 @@ import EditUserForm from "./EditUserForm/EditUserForm";
 import PasswordSection from "./PasswordSection/PasswordSection";
 import ScoresSection from "./ScoresSection/ScoresSection";
 import { useScores } from "./ScoresSection/useScores";
+import useDeleteAccount from "./useDeleteAccount";
 import {
   dashboardOverlay,
   dashboardViewContainer,
@@ -32,9 +29,7 @@ const UserDashboard = () => {
   const navigate = useNavigate();
   const {
     userData,
-    handleSignOut,
     isLoading,
-    refreshUserData,
     updateUserData,
   } = useAuth();
   const { showModal } = useModal();
@@ -58,7 +53,6 @@ const UserDashboard = () => {
           <EditUserForm
             userData={userData}
             updateUserData={updateUserData}
-            refreshUserData={refreshUserData}
           />
         ),
         actions: null,
@@ -73,91 +67,9 @@ const UserDashboard = () => {
     navigate,
     showModal,
     updateUserData,
-    refreshUserData,
   ]);
 
-  const handleDeleteAccount = async () => {
-    if (!userData?.uid) return;
-    showModal({
-      title: "Are you sure?",
-      content: "This action cannot be undone. Do you want to proceed?",
-      variant: "warning",
-      onlyConfirm: false,
-      onConfirm: async () => {
-        const user = authService.getCurrentUser();
-        if (!user) return;
-
-        try {
-          await deleteAccountWithAuth();
-          await handleSignOut();
-          showModal({
-            title: "Account deleted",
-            content: "Your account has been deleted successfully.",
-            variant: "success",
-            onConfirm: () => navigate(paths.LOGIN),
-          });
-        } catch (error) {
-          if (isFirebaseCode(error, "auth/requires-recent-login")) {
-            const providerId = user?.providerData[0]?.providerId;
-            if (providerId === "password") {
-              showModal({
-                title: "Reauthenticate",
-                content: (
-                  <ReauthPasswordForm
-                    onSubmit={async (password) => {
-                      try {
-                        await deleteAccountWithAuth(password);
-                        await handleSignOut();
-                        showModal({
-                          title: "Account deleted",
-                          content:
-                            "Your account has been deleted successfully.",
-                          variant: "success",
-                          onConfirm: () => navigate(paths.LOGIN),
-                        });
-                      } catch (reauthError) {
-                        showModal({
-                          title: "Error",
-                          content: getErrorMessage(reauthError),
-                          variant: "error",
-                        });
-                      }
-                    }}
-                  />
-                ),
-                variant: "warning",
-                disableClose: true,
-              });
-            } else if (providerId === "google.com") {
-              try {
-                await authService.reauthenticateUser();
-                await deleteAccountWithAuth();
-                await handleSignOut();
-                showModal({
-                  title: "Account deleted",
-                  content: "Your account has been deleted successfully.",
-                  variant: "success",
-                  onConfirm: () => navigate(paths.LOGIN),
-                });
-              } catch (reauthError) {
-                showModal({
-                  title: "Error",
-                  content: getErrorMessage(reauthError),
-                  variant: "error",
-                });
-              }
-            }
-          } else {
-            showModal({
-              title: "Error",
-              content: getErrorMessage(error),
-              variant: "error",
-            });
-          }
-        }
-      },
-    });
-  };
+  const handleDeleteAccount = useDeleteAccount();
 
   return (
     <Box sx={dashboardViewContainer}>
@@ -175,7 +87,6 @@ const UserDashboard = () => {
               {userData?.username && (
                 <EditUserForm
                   userData={userData}
-                  refreshUserData={refreshUserData}
                   updateUserData={updateUserData}
                 />
               )}

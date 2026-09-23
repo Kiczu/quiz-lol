@@ -1,5 +1,5 @@
 import { Button } from "@mui/material";
-import { useState, ReactNode } from "react";
+import { useCallback, useState, ReactNode } from "react";
 
 import AppModal from "../../components/AppModal/AppModal";
 import ReauthPasswordForm from "../../components/ReauthPasswordForm/ReauthPasswordForm";
@@ -14,11 +14,11 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
     content: null,
   });
 
-  const showModal: ModalContextType["showModal"] = (modal) => {
+  const showModal = useCallback<ModalContextType["showModal"]>((modal) => {
     setModalState({ ...modal, open: true });
-  };
+  }, []);
 
-  const showErrorModal: ModalContextType["showErrorModal"] = (message) => {
+  const showErrorModal = useCallback<ModalContextType["showErrorModal"]>((message) => {
     showModal({
       variant: "error",
       title: "Error",
@@ -26,15 +26,15 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
       actions: undefined,
       disableClose: false,
     });
-  };
+  }, [showModal]);
 
-  const closeModal: ModalContextType["closeModal"] = () => {
+  const closeModal = useCallback(() => {
     setModalState((prev) => ({ ...prev, open: false }));
-  };
+  }, []);
 
   const requestReauthentication: ModalContextType["requestReauthentication"] =
     () =>
-      new Promise<string>((resolve, reject) => {
+      new Promise<string | null>((resolve) => {
         showModal({
           variant: "confirm",
           title: "Reauthentication required",
@@ -46,7 +46,7 @@ export const ModalProvider = ({ children }: { children: ReactNode }) => {
               }}
               onCancel={() => {
                 closeModal();
-                reject(new Error("User cancelled reauthentication"));
+                resolve(null);
               }}
             />
           ),

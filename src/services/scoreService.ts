@@ -1,4 +1,4 @@
-import { doc, setDoc, collection, query, orderBy, getDocs, getDoc, updateDoc, where, deleteDoc } from "firebase/firestore";
+import { doc, setDoc, collection, query, orderBy, getDocs, getDoc, updateDoc, where } from "firebase/firestore";
 
 import { db } from "../api/firebase/db";
 import { EditableUserFields, ScoresMap, UserPublicData } from "../api/types";
@@ -65,10 +65,6 @@ const getLeaderboard = async () => {
     }));
 };
 
-const deleteUserPublic = async (uid: string) => {
-    await deleteDoc(doc(db, "scores", uid));
-};
-
 export const scoreService = {
     createUserPublic,
     getUserPublic,
@@ -77,5 +73,4 @@ export const scoreService = {
     isUsernameTaken,
     getUserScores,
     getLeaderboard,
-    deleteUserPublic,
 };

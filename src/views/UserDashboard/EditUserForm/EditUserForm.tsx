@@ -12,7 +12,6 @@ import { inputStyle } from "../userDashboard.style";
 type EditUserFormProps = {
   userData: RawUserData;
   updateUserData: (values: EditableUserFields) => Promise<void>;
-  refreshUserData: () => Promise<void>;
 };
 
 const validationSchema = yup.object({
@@ -29,7 +28,6 @@ const validationSchema = yup.object({
 const EditUserForm = ({
   userData,
   updateUserData,
-  refreshUserData,
 }: EditUserFormProps) => {
   const { showModal } = useModal();
 
@@ -54,7 +52,6 @@ const EditUserForm = ({
 
     try {
       await updateUserData(values);
-      await refreshUserData();
       showModal({
         title: "Success",
         content: "User data updated successfully",

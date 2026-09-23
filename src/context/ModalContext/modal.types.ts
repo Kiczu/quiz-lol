@@ -26,5 +26,5 @@ export interface ModalContextType {
     showErrorModal: (message: string) => void;
     closeModal: () => void;
     modalState: ModalState;
-    requestReauthentication: () => Promise<string>;
+    requestReauthentication: () => Promise<string | null>;
 }

@@ -26,9 +26,9 @@ const initValues: Values = {
 const ForgotPassword = () => {
   const { showModal } = useModal();
 
-  const handleSendResetPasswordEmail = ({ email }: Values) => {
+  const handleSendResetPasswordEmail = async ({ email }: Values) => {
     try {
-      authService.sendResetPassword(email);
+      await authService.sendResetPassword(email);
       showModal({
         title: "Success",
         content: "Reset password email sent successfully",
@@ -70,6 +70,7 @@ const ForgotPassword = () => {
           handleBlur,
           errors,
           touched,
+          isSubmitting,
         }) => (
           <Form onSubmit={handleSubmit} style={{ width: "100%" }}>
             <TextField
@@ -89,6 +90,7 @@ const ForgotPassword = () => {
               type="submit"
               fullWidth
               variant="contained"
+              disabled={isSubmitting}
               sx={{ mt: 3, mb: 2 }}
             >
               Send email
