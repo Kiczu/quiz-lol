@@ -6,11 +6,10 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
-import { useEffect } from "react";
 import { Link as ReactRouter, useParams } from "react-router-dom";
 
 import backgroundMap from "../../assets/images/backgroundMap.webp";
-import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
+import usePageBackground from "../../hooks/usePageBackground";
 import { paths } from "../../paths";
 import { characterService } from "../../services/characterService";
 import { outlineButton } from "../../theme/buttons";
@@ -29,12 +28,7 @@ import { useChampionData } from "./useChampionData";
 const Champion = () => {
   const { id } = useParams<{ id: string }>();
   const { champion, version, isLoading, hasError } = useChampionData(id);
-  const { setImage } = useBackground();
-
-  useEffect(() => {
-    setImage(backgroundMap);
-    return () => setImage(undefined);
-  }, [setImage]);
+  usePageBackground(backgroundMap);
 
   const renderContent = () => {
     if (isLoading) {

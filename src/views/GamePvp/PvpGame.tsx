@@ -1,12 +1,12 @@
 import { Alert, Box, Button, CircularProgress, Container, Stack, TextField, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 import { GameState } from "../../api/types";
 import backgroundMap from "../../assets/images/backgroundMap.webp";
 import GameBox from "../../components/GameBox/GameBox";
-import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
+import usePageBackground from "../../hooks/usePageBackground";
 import { WavingButton } from "../../muiComponentsStyles";
 import { paths } from "../../paths";
 import { colors } from "../../theme/colors";
@@ -20,7 +20,7 @@ import usePvpGameData from "./usePvpGameData";
 const PvpGame = () => {
     const game = usePvpGameData();
     const [joinCode, setJoinCode] = useState("");
-    const { setImage } = useBackground();
+    usePageBackground(backgroundMap);
     const { showModal, closeModal } = useModal();
     const columns = useResponsiveColumns({ xs: 1, sm: 2, md: 4 });
     const { room } = game;
@@ -34,11 +34,6 @@ const PvpGame = () => {
         });
     };
     const rankingChange = room?.rankingChanges?.[game.uid ?? ""] ?? 0;
-
-    useEffect(() => {
-        setImage(backgroundMap);
-        return () => setImage(undefined);
-    }, [setImage]);
 
     const lobby = !game.code && game.matchmaking.searching ? (
         <Box sx={lobbyPanel}>

@@ -3,9 +3,9 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import backgroundMap from "../../assets/images/backgroundMap.webp";
-import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
 import { useAuth } from "../../context/LoginContext/LoginContext";
 import { useModal } from "../../context/ModalContext/ModalContext";
+import usePageBackground from "../../hooks/usePageBackground";
 import { paths } from "../../paths";
 
 import AvatarSection from "./AvatarSection/AvatarSection";
@@ -34,12 +34,7 @@ const UserDashboard = () => {
   } = useAuth();
   const { showModal } = useModal();
   const { scores, totalScore } = useScores(userData?.uid);
-  const { setImage } = useBackground();
-
-  useEffect(() => {
-    setImage(backgroundMap);
-    return () => setImage(undefined);
-  }, [setImage]);
+  usePageBackground(backgroundMap);
 
   useEffect(() => {
     if (!isLoading && !userData) {

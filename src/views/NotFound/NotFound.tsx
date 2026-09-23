@@ -1,9 +1,8 @@
 import { Box, Button, Typography } from "@mui/material";
-import { useEffect } from "react";
 import { Link as ReactRouter } from "react-router-dom";
 
 import backgroundMap from "../../assets/images/backgroundMap.webp";
-import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
+import usePageBackground from "../../hooks/usePageBackground";
 import { paths } from "../../paths";
 import { outlineButton } from "../../theme/buttons";
 
@@ -16,12 +15,7 @@ import {
 } from "./notFound.style";
 
 const NotFound = () => {
-  const { setImage } = useBackground();
-
-  useEffect(() => {
-    setImage(backgroundMap);
-    return () => setImage(undefined);
-  }, [setImage]);
+  usePageBackground(backgroundMap);
 
   return (
     <Box sx={notFoundWrapper}>

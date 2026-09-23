@@ -1,9 +1,9 @@
 import { Box, Typography, Tabs, Tab, Container } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import backgroundMap from "../../assets/images/backgroundMap.webp";
-import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
+import usePageBackground from "../../hooks/usePageBackground";
 import { colors } from "../../theme/colors";
 
 import {
@@ -21,12 +21,7 @@ const Ranking = () => {
   const [direction, setDirection] = useState(0);
   const selectedMode = gameModes[activeTab];
   const { ranking } = useRanking(selectedMode);
-  const { setImage } = useBackground();
-
-  useEffect(() => {
-    setImage(backgroundMap);
-    return () => setImage(undefined);
-  }, [setImage]);
+  usePageBackground(backgroundMap);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setDirection(newValue > activeTab ? 1 : -1);
