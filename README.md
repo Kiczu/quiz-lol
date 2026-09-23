@@ -18,7 +18,7 @@ Not deployed yet.
 
 | Mode | You see | You answer with | Scoring | Lives |
 |---|---|---|---|---|
-| **Hangman** | a masked champion name | one letter at a time | 1 per revealed letter, +10 for solving | 6 |
+| **Hangman** | a masked champion name | one letter at a time | 1 per distinct correct letter, +10 for solving | 6 |
 | **Regions** | a champion portrait | one of the 13 regions of Runeterra | 10 / 6 / 3 by wrong guesses | 3 |
 | **Skills** | an ability icon and name | one of four champions | 10 / 6 / 3 by wrong guesses | 3 |
 
@@ -61,8 +61,9 @@ Functions, and it owns every decision that affects a score:
 
 `firestore.rules` closes the `rounds` collection to every client and freezes `totalScore`
 and `scores` on the public profile, so a player can edit their username and avatar but
-cannot write their own points. The browser holds no answer and awards no points, which
-means the leaderboard cannot be forged from the developer console.
+cannot write their own points directly. Finishing a round and awarding its points share
+one Firestore transaction. Repeated solo submissions return the stored result without
+awarding points again.
 
 ## Tech stack
 
@@ -126,9 +127,11 @@ the first time; it lives only in the emulator. To run the dev server against the
 project instead, put `VITE_USE_EMULATORS=false` in `.env.local`.
 
 `npm run test:backend` builds the functions, starts isolated emulators for a demo project,
-runs security-rule tests, and shuts that test suite down. Its separate ports
+runs transaction and security-rule tests, and shuts that test suite down. Its separate ports
 are configured in `firebase.test.json`, so it can run alongside the development emulators.
-The tests use deterministic fixtures and do not need Data Dragon. Test accounts and documents are removed at the end of the run.
+The tests use deterministic fixtures and do not need Data Dragon. With the development
+emulators already running, `npm run test:emulator:live` also checks real question generation
+for solo modes. Test accounts and documents are removed at the end of the run.
 
 ## Scripts
 
