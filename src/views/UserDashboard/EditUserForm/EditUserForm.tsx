@@ -21,8 +21,8 @@ const validationSchema = yup.object({
   email: yup.string().email("Invalid email"),
   username: yup
     .string()
-    .test("is-username-editable", "Username is required", function (value) {
-      return this.options.context?.isUsername ? !!value : true;
+    .test("is-username-editable", "Username is required", (value, context) => {
+      return context.options.context?.isUsername ? !!value : true;
     }),
 });
 
