@@ -6,12 +6,13 @@ import { Link } from "react-router-dom";
 import Defeat from "../../assets/images/defeat.webp";
 import Victory from "../../assets/images/victory.webp";
 import { GameContext } from "../../context/GameContext/GameContext";
+import { WavingButton } from "../../muiComponentsStyles";
 import { paths } from "../../paths";
 
 import { endGameContainer, victoryGame, defeatGame } from "./gameBoxStyles";
 
 const EndGame = () => {
-  const { isWin, gameScore } = useContext(GameContext);
+  const { isWin, gameScore, gameId, startNewGame } = useContext(GameContext);
   return (
     <Box sx={endGameContainer}>
       {!isWin ? (
@@ -30,6 +31,7 @@ const EndGame = () => {
       <Typography component="p" fontSize="1.2rem">
         You can check your total ranking <Link to={paths.RANKING}>here</Link>
       </Typography>
+      <WavingButton onClick={() => gameId && startNewGame(gameId)}>Play again</WavingButton>
     </Box>
   );
 };

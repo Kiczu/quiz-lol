@@ -14,6 +14,7 @@ type Props = {
   usedChampions: string[];
   columns: number;
   onSelect: (championId: string) => void;
+  disabled?: boolean;
 };
 
 const ChampionOptions = ({
@@ -21,6 +22,7 @@ const ChampionOptions = ({
   usedChampions,
   columns,
   onSelect,
+  disabled = false,
 }: Props) => (
   <Grid container spacing={3} justifyContent="center">
     {options.map((option, idx) => {
@@ -31,7 +33,7 @@ const ChampionOptions = ({
           <Box
             component="button"
             type="button"
-            disabled={isUsed}
+            disabled={disabled || isUsed}
             onClick={() => onSelect(option.id)}
             sx={{
               ...getOptionWrapperSx(columns, idx, isUsed),

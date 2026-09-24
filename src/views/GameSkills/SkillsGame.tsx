@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Container, Typography } from "@mui/material";
+import { Alert, Button, Box, CircularProgress, Container, Typography } from "@mui/material";
 import { useEffect } from "react";
 
 import backgroundMap from "../../assets/images/backgroundMap.webp";
@@ -29,6 +29,8 @@ const SkillsGame = () => {
     usedChampions,
     isLoading,
     hasError,
+    isSubmitting,
+    startRound,
     handleSelectChampion,
   } = useSkillsGameData();
   const { setImage } = useBackground();
@@ -44,16 +46,18 @@ const SkillsGame = () => {
       return <CircularProgress sx={loader} />;
     }
 
-    if (hasError || !round) {
+    if (!round) {
       return (
-        <Typography component="p" sx={errorMessage}>
-          Could not load an ability. Try starting a new game.
-        </Typography>
+        <Box sx={errorMessage}>
+          <Typography component="p">Could not load a round. Please try again.</Typography>
+          <Button onClick={startRound}>Try again</Button>
+        </Box>
       );
     }
 
     return (
       <>
+        {hasError && <Alert severity="error">Could not send your answer. Choose it again to retry.</Alert>}
         <Box
           component="img"
           src={round.spellIcon}
@@ -66,6 +70,7 @@ const SkillsGame = () => {
         <Lives maxAttempts={maxAttempts} wrongGuesses={wrongGuesses} flex />
         <Box sx={optionsWrapper}>
           <ChampionOptions
+            disabled={isSubmitting}
             options={round.options}
             usedChampions={usedChampions}
             columns={columns}

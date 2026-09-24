@@ -1,4 +1,4 @@
-import { Box, CircularProgress, Container, Typography } from "@mui/material";
+import { Alert, Button, Box, CircularProgress, Container, Typography } from "@mui/material";
 import { useEffect } from "react";
 
 import backgroundMap from "../../assets/images/backgroundMap.webp";
@@ -29,6 +29,8 @@ const RegionGame = () => {
     usedRegions,
     isLoading,
     hasError,
+    isSubmitting,
+    startRound,
     handleSelectRegion,
   } = useRegionGameData();
   const { setImage } = useBackground();
@@ -44,16 +46,18 @@ const RegionGame = () => {
       return <CircularProgress sx={loader} />;
     }
 
-    if (hasError || !round) {
+    if (!round) {
       return (
-        <Typography component="p" sx={errorMessage}>
-          Could not load a champion. Try starting a new game.
-        </Typography>
+        <Box sx={errorMessage}>
+          <Typography component="p">Could not load a round. Please try again.</Typography>
+          <Button onClick={startRound}>Try again</Button>
+        </Box>
       );
     }
 
     return (
       <>
+        {hasError && <Alert severity="error">Could not send your answer. Choose it again to retry.</Alert>}
         <Box sx={regionContainer}>
           {round.championIcon && (
             <Box
@@ -67,6 +71,7 @@ const RegionGame = () => {
         </Box>
         <Box sx={regionListWrapper}>
           <RegionList
+            disabled={isSubmitting}
             regions={regions}
             onSelect={handleSelectRegion}
             columns={columns}

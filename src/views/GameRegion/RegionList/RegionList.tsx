@@ -16,9 +16,10 @@ type Props = {
   onSelect: (regionValue: string) => void;
   columns: number;
   usedRegions: string[];
+  disabled?: boolean;
 };
 
-const RegionList = ({ regions, onSelect, columns, usedRegions }: Props) => (
+const RegionList = ({ regions, onSelect, columns, usedRegions, disabled = false }: Props) => (
   <Grid container spacing={6} justifyContent="center">
     {regions.map((region, idx) => {
       const isUsed = usedRegions.includes(region.value);
@@ -26,7 +27,8 @@ const RegionList = ({ regions, onSelect, columns, usedRegions }: Props) => (
       return (
         <Grid item xs={12} sm={6} md={3} xl={2} key={region.value}>
           <Box
-            onClick={() => !isUsed && onSelect(region.value)}
+            onClick={() => !disabled && !isUsed && onSelect(region.value)}
+            aria-disabled={disabled || isUsed}
             sx={{
               ...getRegionCardWrapperSx(columns, idx, 2),
               ...(isUsed && {
