@@ -46,7 +46,8 @@ const modes: GameMode[] = [
   },
   {
     title: "PVP",
-    desc: "Play vs players from all over the world.",
+    desc: "Challenge a friend to a five-round skills duel.",
+    link: paths.PVP,
     img: pvpIcon,
   },
 ];
