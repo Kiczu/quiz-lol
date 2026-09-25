@@ -10,12 +10,11 @@ import { useModal } from "../../context/ModalContext/ModalContext";
 import { WavingButton } from "../../muiComponentsStyles";
 import { paths } from "../../paths";
 import { colors } from "../../theme/colors";
-import { COLUMN_MAP } from "../../theme/config";
 import { useResponsiveColumns } from "../../utils/useResponsiveColumns";
-import ChampionOptions from "../GameSkills/ChampionOptions/ChampionOptions";
-import { skillsTitle, spellIconStyle, spellNameStyle } from "../GameSkills/skillsGame.style";
+import { skillsTitle } from "../GameSkills/skillsGame.style";
 
 import { lobbyPanel, playerPanel, pvpContent, pvpWrapper, roomCode } from "./pvpGame.style";
+import PvpQuestionPanel from "./PvpQuestionPanel";
 import usePvpGameData from "./usePvpGameData";
 
 const PvpGame = () => {
@@ -23,7 +22,7 @@ const PvpGame = () => {
     const [joinCode, setJoinCode] = useState("");
     const { setImage } = useBackground();
     const { showModal, closeModal } = useModal();
-    const columns = useResponsiveColumns(COLUMN_MAP);
+    const columns = useResponsiveColumns({ xs: 1, sm: 2, md: 4 });
     const { room } = game;
     const leaveRoom = () => {
         if (room?.mode !== "ranked" || room.status !== "playing") return void game.leave();
@@ -55,7 +54,7 @@ const PvpGame = () => {
         <Box sx={lobbyPanel}>
             <Typography variant="h3">Play against an online opponent</Typography>
             <Typography color={colors.textSecondary}>
-                Five shared ability questions. One answer each, 10 points for a correct guess.
+                Five shared questions from different League categories. One answer each, 10 points for a correct guess.
                 You have 60 seconds per question. Highest score wins; equal scores are a draw.
             </Typography>
             <WavingButton disabled={game.busy} onClick={game.matchmaking.start}>Find opponent</WavingButton>
@@ -117,7 +116,7 @@ const PvpGame = () => {
         <Box sx={pvpWrapper}>
             <Container maxWidth="lg" sx={pvpContent}>
                 <Typography variant="h1" sx={skillsTitle}>PVP</Typography>
-                <Typography color={colors.textSecondary}>Skills duel · 1 vs 1</Typography>
+                <Typography color={colors.textSecondary}>League quiz · 1 vs 1</Typography>
                 {game.error && <Alert severity="error" role="alert">{game.error}</Alert>}
                 {game.connectionError && <Alert severity="warning">{game.connectionError}</Alert>}
                 {game.matchmaking.error && <Alert severity="warning">{game.matchmaking.error}</Alert>}
@@ -145,12 +144,8 @@ const PvpGame = () => {
                 >
                     {room?.question && <Stack spacing={3} alignItems="center">
                         <Typography>Round {room.currentRound + 1} / {room.totalRounds} · {game.secondsLeft}s</Typography>
-                        <Box component="img" src={room.question.spellIcon} alt={room.question.spellName} sx={spellIconStyle} />
-                        <Typography variant="h3" sx={spellNameStyle}>{room.question.spellName}</Typography>
-                        <Typography>Which champion does this ability belong to?</Typography>
-                        <ChampionOptions
-                            options={room.question.options}
-                            usedChampions={[]}
+                        <PvpQuestionPanel
+                            question={room.question}
                             columns={columns}
                             disabled={game.busy || game.answered || game.secondsLeft === 0}
                             onSelect={game.answer}

@@ -21,7 +21,7 @@ Not deployed yet.
 | **Hangman** | a masked champion name | one letter at a time | 1 per distinct correct letter, +10 for solving | 6 |
 | **Regions** | a champion portrait | one of the 13 regions of Runeterra | 10 / 6 / 3 by wrong guesses | 3 |
 | **Skills** | an ability icon and name | one of four champions | 10 / 6 / 3 by wrong guesses | 3 |
-| **PVP** | the same ability question as your opponent | one of four champions, once per round | 10 per correct answer across 5 rounds | 60 seconds per round |
+| **PVP** | the same mixed-category quiz as your opponent | one of four answers, once per round | 10 per correct answer across 5 rounds; separate ranked rewards | 60 seconds per round |
 
 Choose **Find opponent** to join the public PVP queue. Two signed-in players searching
 at the same time are paired automatically; being signed in alone does not join the queue.
@@ -47,6 +47,17 @@ score zero. Equal final scores are a draw. Match scores are separate from rankin
 The match result records each player's actual ranking change. TotalScore changes by
 the same amount as PVP, so a loss never spends points earned in solo modes. Existing
 scores are retained; rooms created before the ranked/private distinction are unranked.
+
+Each new match draws five distinct categories from abilities/passives, champion regions,
+items, champion titles, lore excerpts and summoner spells. Both players receive the same
+questions and four-choice answers. Correct answers remain in the server-only secret document.
+Data Dragon supplies the content and assets, with one pinned data version per match;
+the existing `championRegions` collection supplies region associations. This is template
+generation, not live AI-generated trivia. Lore excerpts omit the champion's name.
+Item questions use purchasable Summoner's Rift items and exclude special upgrades and
+duplicate names. Icon-identification questions use text-only answers to avoid revealing
+the choice through a matching image. Regions are skipped when there is no valid mapping;
+insufficient remaining categories produce a retryable error, not repeated questions.
 
 Refreshing keeps the room through the page URL. Rooms expire after an hour. This first
 version has no skill-based matchmaking, repeated-opponent protection or rematch voting.
@@ -185,7 +196,7 @@ runs transaction and security-rule tests, and shuts that test suite down. Its se
 are configured in `firebase.test.json`, so it can run alongside the development emulators.
 The tests use deterministic fixtures and do not need Data Dragon. `npm run test:emulator:live`
 starts its own isolated demo emulators and also checks real question generation, public
-matchmaking and a complete private PvP match. Run these two suites separately because
+matchmaking and complete public/private mixed quizzes. Run these two suites separately because
 they share test ports. Test accounts and documents are removed at the end of the run.
 
 ## Scripts

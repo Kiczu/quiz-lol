@@ -6,6 +6,15 @@ import { functions } from "../api/firebase/functions";
 
 import { ChampionOption } from "./gameRoundService";
 
+export type PvpQuestion = {
+    category: string;
+    prompt: string;
+    image: string | null;
+    text: string | null;
+    dataVersion: string;
+    options: { id: string; name: string; icon?: string }[];
+} | { spellName: string; spellIcon: string; options: ChampionOption[] };
+
 export type PvpRoom = {
     mode?: "private" | "ranked";
     rankingChanges?: Record<string, number>;
@@ -15,7 +24,7 @@ export type PvpRoom = {
     players: { uid: string; name: string; score: number }[];
     currentRound: number;
     totalRounds: number;
-    question: { spellName: string; spellIcon: string; options: ChampionOption[] } | null;
+    question: PvpQuestion | null;
     answeredIds: string[];
     deadline: number | null;
     expiresAt: number;
