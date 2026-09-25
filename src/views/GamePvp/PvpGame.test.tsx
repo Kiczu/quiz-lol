@@ -2,18 +2,20 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { MemoryRouter } from "react-router-dom";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { PvpRoom, pvpService } from "../../services/pvpService";
+import { PvpRoom, PvpSearch, pvpService } from "../../services/pvpService";
 
 import PvpGame from "./PvpGame";
 
 vi.mock("../../services/pvpService", () => ({ pvpService: {
     createRoom: vi.fn(), joinRoom: vi.fn(), watchRoom: vi.fn(), submitAnswer: vi.fn(), advanceRound: vi.fn(), leaveRoom: vi.fn(),
+    findMatch: vi.fn(), cancelSearch: vi.fn(), watchSearch: vi.fn(),
 } }));
 vi.mock("../../context/LoginContext/LoginContext", () => ({ useAuth: () => ({ userData: { uid: "host" } }) }));
 const setImage = vi.fn();
 vi.mock("../../context/BackgroundContext/BackgroundContext", () => ({ useBackground: () => ({ setImage }) }));
 
 let updateRoom: (room: PvpRoom) => void;
+let updateSearch: (search: PvpSearch) => void;
 const unsubscribe = vi.fn();
 const room: PvpRoom = {
     status: "playing", playerIds: ["host", "guest"],
@@ -31,12 +33,33 @@ describe("PvpGame", () => {
             updateRoom = onRoom;
             return unsubscribe;
         });
+        vi.mocked(pvpService.findMatch).mockResolvedValue({ data: { state: "waiting", code: null } });
+        vi.mocked(pvpService.cancelSearch).mockResolvedValue({ data: { state: "cancelled", code: null } });
+        vi.mocked(pvpService.watchSearch).mockImplementation((_uid, onSearch) => {
+            updateSearch = onSearch;
+            return vi.fn();
+        });
+    });
+
+    it("finds an online opponent and opens the match without a room code", async () => {
+        open("/game/pvp");
+        fireEvent.click(screen.getByRole("button", { name: "Find opponent" }));
+        expect(await screen.findByText("Finding an opponent")).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: "Cancel search" })).toBeEnabled();
+        expect(screen.queryByLabelText("Room code")).not.toBeInTheDocument();
+        const { searchId } = vi.mocked(pvpService.findMatch).mock.calls[0][0]!;
+        act(() => updateSearch({ searchId, state: "matched", code: "ABC123", expiresAt: 0 }));
+        await waitFor(() => expect(pvpService.watchRoom).toHaveBeenCalled());
+        act(() => updateRoom(room));
+        expect(screen.getByText("Test ability")).toBeInTheDocument();
+        expect(pvpService.createRoom).not.toHaveBeenCalled();
+        expect(pvpService.joinRoom).not.toHaveBeenCalled();
     });
 
     it("creates a room, shows its code and follows the opponent joining", async () => {
         vi.mocked(pvpService.createRoom).mockResolvedValue({ data: { code: "ABC123" } });
         open("/game/pvp");
-        fireEvent.click(screen.getByRole("button", { name: "Create room" }));
+        fireEvent.click(screen.getByRole("button", { name: "Create private room" }));
         await waitFor(() => expect(pvpService.watchRoom).toHaveBeenCalled());
         act(() => updateRoom({ ...room, status: "waiting", question: null, players: [room.players[0]] }));
         expect(screen.getByText("ABC123")).toBeInTheDocument();
