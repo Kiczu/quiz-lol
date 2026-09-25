@@ -6,7 +6,7 @@ const BASE_URL = 'https://ddragon.leagueoflegends.com';
 let versionRequest: Promise<string> | null = null;
 let championsRequest: Promise<ChampionDetails[]> | null = null;
 
-function getVersion() {
+const getVersion = () => {
     if (!versionRequest) {
         versionRequest = api
             .get<string[]>(`${BASE_URL}/api/versions.json`)
@@ -17,9 +17,9 @@ function getVersion() {
             });
     }
     return versionRequest;
-}
+};
 
-function getAll() {
+const getAll = () => {
     if (!championsRequest) {
         championsRequest = getVersion()
             .then((version) => api.get<ApiResponse>(`${BASE_URL}/cdn/${version}/data/en_US/champion.json`))
@@ -31,36 +31,36 @@ function getAll() {
     }
 
     return championsRequest;
-}
+};
 
-function getChampion(championName: string) {
+const getChampion = (championName: string) => {
     return getVersion()
         .then((version) => api.get<ApiResponse>(`${BASE_URL}/cdn/${version}/data/en_US/champion/${championName}.json`))
         .then((data) => data.data[championName]);
-}
+};
 
 const toSlug = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
 
-function findByLabel(champions: ChampionDetails[], label: string) {
+const findByLabel = (champions: ChampionDetails[], label: string) => {
     const slug = toSlug(label);
     return (
         champions.find(
             (champion) => toSlug(champion.id) === slug || toSlug(champion.name) === slug
         ) ?? null
     );
-}
+};
 
-function getImageUrl(championName: string, version: string) {
+const getImageUrl = (championName: string, version: string) => {
     return `${BASE_URL}/cdn/${version}/img/champion/${championName}.png`;
-}
+};
 
-function getSplashUrl(championId: string) {
+const getSplashUrl = (championId: string) => {
     return `${BASE_URL}/cdn/img/champion/splash/${championId}_0.jpg`;
-}
+};
 
-function getSpellImageUrl(spellImage: string, version: string) {
+const getSpellImageUrl = (spellImage: string, version: string) => {
     return `${BASE_URL}/cdn/${version}/img/spell/${spellImage}`;
-}
+};
 
 export const characterService = {
     getAll,

@@ -1,7 +1,8 @@
 import { DocumentReference, FieldValue, Transaction } from "firebase-admin/firestore";
 
-import type { Room } from "./pvp";
 import { db } from "./shared";
+
+import type { Room } from "./pvp";
 
 const rankingStake = 20;
 const reconnectWindow = 60_000;
