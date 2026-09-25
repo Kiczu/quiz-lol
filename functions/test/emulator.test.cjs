@@ -58,7 +58,7 @@ const room = async (overrides = {}) => {
     const ref = db.collection("pvpRooms").doc(randomBytes(3).toString("hex").toUpperCase());
     refs.push(ref);
     await ref.set({
-        status: "waiting", playerIds: [players[0].uid],
+        mode: "private", status: "waiting", playerIds: [players[0].uid],
         players: [{ uid: players[0].uid, name: "Host", score: 0 }],
         currentRound: 0, totalRounds: 5, question: null, answeredIds: [], deadline: null,
         expiresAt: Date.now() + 3_600_000, winnerId: null, ...overrides,
@@ -182,7 +182,7 @@ test("pvp: only two distinct players can join, even concurrently", async () => {
     assert.equal((await ref.get()).data().playerIds.length, 2);
 });
 
-test("pvp: five rounds finish once and both scores reach PVP ranking", async () => {
+test("pvp: private matches keep their scores out of both rankings", async () => {
     const ref = await room();
     await call("joinPvpRoom", { code: ref.id }, players[1]);
     for (let round = 0; round < 5; round += 1) {
@@ -198,10 +198,10 @@ test("pvp: five rounds finish once and both scores reach PVP ranking", async () 
     assert.equal(completed.status, "finished");
     assert.equal(completed.winnerId, players[0].uid);
     assert.equal(completed.question, null);
-    assert.equal((await score()).scores.PVP, 50);
-    assert.equal((await score(players[1])).scores.PVP, 10);
+    assert.equal((await score()).scores.PVP, undefined);
+    assert.equal((await score(players[1])).scores.PVP, undefined);
     await assert.rejects(call("submitPvpAnswer", { code: ref.id, round: 4, guess: "Ahri" }), { code: "FAILED_PRECONDITION" });
-    assert.equal((await score()).totalScore, 50);
+    assert.equal((await score()).totalScore, 0);
 });
 
 test("pvp: simultaneous final answers produce a draw without duplicate points", async () => {
@@ -211,8 +211,8 @@ test("pvp: simultaneous final answers produce a draw without duplicate points", 
     await Promise.allSettled([...players.slice(0, 2), ...players.slice(0, 2)].map((player) => call("submitPvpAnswer", { code: ref.id, round: 4, guess: "Ahri" }, player)));
     assert.equal((await ref.get()).data().winnerId, null);
     assert.equal((await ref.get()).data().status, "finished");
-    assert.equal((await score()).totalScore, 10);
-    assert.equal((await score(players[1])).totalScore, 10);
+    assert.equal((await score()).totalScore, 0);
+    assert.equal((await score(players[1])).totalScore, 0);
 });
 
 test("pvp: timeouts count missing answers as wrong and advance only once", async () => {
@@ -277,6 +277,89 @@ test("queue: waiting players renew their lease without matching themselves", asy
     await assert.rejects(findOpponent(players[0], randomUUID()), { code: "already-exists" });
 });
 
+const rankedRoom = async (overrides = {}) => {
+    const ref = await room();
+    await call("joinPvpRoom", { code: ref.id }, players[1]);
+    await ref.update({ mode: "ranked", lastSeen: Object.fromEntries(players.slice(0, 2).map((player) => [player.uid, Date.now()])), ...overrides });
+    return ref;
+};
+
+test("ranked: a win awards 20 once and a loss is floored without spending solo points", async () => {
+    await profile(players[0]).update({ scores: { PVP: 40, Skills: 100 }, totalScore: 140 });
+    await profile(players[1]).update({ scores: { PVP: 8, Skills: 100 }, totalScore: 108 });
+    const ref = await rankedRoom({ currentRound: 4 });
+    await call("submitPvpAnswer", { code: ref.id, round: 4, guess: "Ahri" });
+    await Promise.allSettled(Array.from({ length: 4 }, () => call("submitPvpAnswer", { code: ref.id, round: 4, guess: "Ashe" }, players[1])));
+    assert.equal((await score()).scores.PVP, 60);
+    assert.equal((await score()).totalScore, 160);
+    assert.equal((await score(players[1])).scores.PVP, 0);
+    assert.equal((await score(players[1])).scores.Skills, 100);
+    assert.equal((await score(players[1])).totalScore, 100);
+    assert.deepEqual((await ref.get()).data().rankingChanges, { [players[0].uid]: 20, [players[1].uid]: -8 });
+    await call("leavePvpRoom", { code: ref.id });
+    assert.equal((await score()).scores.PVP, 60);
+});
+
+test("ranked: draws leave both rankings unchanged", async () => {
+    const ref = await rankedRoom({ currentRound: 4 });
+    await Promise.all(players.slice(0, 2).map((player) => call("submitPvpAnswer", { code: ref.id, round: 4, guess: "Ahri" }, player)));
+    assert.equal((await ref.get()).data().winnerId, null);
+    for (const player of players.slice(0, 2)) assert.equal((await score(player)).totalScore, 0);
+});
+
+test("ranked: leaving forfeits regardless of the current score and cannot award twice", async () => {
+    await profile(players[0]).update({ scores: { PVP: 30 }, totalScore: 30 });
+    const ref = await rankedRoom({ players: [
+        { uid: players[0].uid, name: "Host", score: 40 }, { uid: players[1].uid, name: "Guest", score: 0 },
+    ] });
+    await Promise.all(Array.from({ length: 3 }, () => call("leavePvpRoom", { code: ref.id })));
+    assert.equal((await score()).scores.PVP, 10);
+    assert.equal((await score(players[1])).scores.PVP, 20);
+    assert.equal((await ref.get()).data().winnerId, players[1].uid);
+    assert.equal((await ref.get()).data().endReason, "forfeit");
+});
+
+test("ranked: reconnecting before the grace deadline renews presence, but a late return loses", async () => {
+    const ref = await rankedRoom();
+    await ref.update({ [`lastSeen.${players[0].uid}`]: Date.now() - 30_000 });
+    await call("heartbeatPvpRoom", { code: ref.id });
+    assert.ok((await ref.get()).data().lastSeen[players[0].uid] > Date.now() - 5000);
+    await ref.update({ [`lastSeen.${players[0].uid}`]: Date.now() - 61_000 });
+    await Promise.all(players.slice(0, 2).map((player) => call("heartbeatPvpRoom", { code: ref.id }, player)));
+    assert.equal((await ref.get()).data().winnerId, players[1].uid);
+    assert.equal((await ref.get()).data().endReason, "disconnect");
+    assert.equal((await score(players[1])).scores.PVP, 20);
+    await assert.rejects(call("heartbeatPvpRoom", { code: ref.id }, players[2]), { code: "PERMISSION_DENIED" });
+    await assert.rejects(call("heartbeatPvpRoom", { code: ref.id }, null), { code: "UNAUTHENTICATED" });
+});
+
+test("ranked: simultaneous abandonment is settled on the next queue request", async () => {
+    const firstId = randomUUID();
+    await findOpponent(players[0], firstId);
+    const paired = await findOpponent(players[1], randomUUID());
+    await Promise.all(players.slice(0, 2).map((player) => profile(player).update({ scores: { PVP: 40 }, totalScore: 40 })));
+    const ref = db.collection("pvpRooms").doc(paired.code);
+    await ref.update({ lastSeen: Object.fromEntries(players.slice(0, 2).map((player) => [player.uid, Date.now() - 61_000])) });
+    assert.equal((await findOpponent(players[0], firstId)).state, "cancelled");
+    assert.equal((await ref.get()).data().endReason, "abandoned");
+    for (const player of players.slice(0, 2)) assert.equal((await score(player)).scores.PVP, 20);
+    assert.equal((await findOpponent(players[0], randomUUID())).state, "waiting");
+});
+
+test("ranked: missing profiles are not recreated and old rooms remain unranked", async () => {
+    const ranked = await rankedRoom();
+    await profile(players[1]).delete();
+    await call("leavePvpRoom", { code: ranked.id });
+    assert.equal((await profile(players[1]).get()).exists, false);
+    const legacy = await room();
+    await profile(players[1]).set({ username: "Guest", scores: {}, totalScore: 0 });
+    await call("joinPvpRoom", { code: legacy.id }, players[1]);
+    await legacy.update({ mode: admin.firestore.FieldValue.delete(), currentRound: 4 });
+    await call("submitPvpAnswer", { code: legacy.id, round: 4, guess: "Ahri" });
+    await call("submitPvpAnswer", { code: legacy.id, round: 4, guess: "Ashe" }, players[1]);
+    assert.equal((await score()).totalScore, 0);
+});
+
 test("queue: three simultaneous players form exactly one match", async () => {
     const searchIds = players.map(() => randomUUID());
     await findOpponent(players[0], searchIds[0]);
@@ -288,6 +371,7 @@ test("queue: three simultaneous players form exactly one match", async () => {
     assert.equal(entries.filter((entry) => entry.state === "waiting").length, 1);
     const game = (await db.collection("pvpRooms").doc(paired[0].code).get()).data();
     assert.equal(game.status, "playing");
+    assert.equal(game.mode, "ranked");
     assert.equal(new Set(game.playerIds).size, 2);
     assert.equal(game.question.spellName, question.spellName);
     const pairedIndex = entries.findIndex((entry) => entry.state === "matched");
@@ -411,6 +495,6 @@ test("live: create, join and complete a real five-question PvP match", async () 
         await Promise.all(players.slice(0, 2).map((player) => call("submitPvpAnswer", { code, round, guess }, player)));
     }
     assert.equal((await ref.get()).data().status, "finished");
-    assert.equal((await score()).scores.PVP, 50);
-    assert.equal((await score(players[1])).scores.PVP, 50);
+    assert.equal((await score()).scores.PVP, undefined);
+    assert.equal((await score(players[1])).scores.PVP, undefined);
 });

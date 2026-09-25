@@ -3,6 +3,7 @@ import { randomBytes } from "node:crypto";
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { Room, loadPvpRounds, makePvpRoom, playerName } from "./pvp";
+import { resolveDisconnectedPlayers } from "./pvpRanking";
 import { db, requireString, requireUid } from "./shared";
 
 const options = { region: "europe-west1", maxInstances: 10 };
@@ -27,7 +28,9 @@ export const searchForOpponent = async (
     const profile = await transaction.get(db.collection("scores").doc(uid));
     if (!profile.exists) throw new HttpsError("failed-precondition", "Create your profile before playing.");
     if (own?.state === "matched" && own.code) {
-      const room = (await transaction.get(db.collection("pvpRooms").doc(own.code))).data() as Room | undefined;
+      const roomRef = db.collection("pvpRooms").doc(own.code);
+      const stored = (await transaction.get(roomRef)).data() as Room | undefined;
+      const room = stored ? await resolveDisconnectedPlayers(transaction, roomRef, stored) : undefined;
       if (room?.status === "playing" && room.expiresAt > Date.now()) {
         return { state: "matched", code: own.code };
       }
@@ -70,7 +73,7 @@ export const searchForOpponent = async (
       const result: SearchResult = { state: "matched", code: roomRef.id };
       transaction.create(roomRef, makePvpRoom(profiles.map((profile) => ({
         uid: profile.id, name: playerName(profile.data()?.username), score: 0,
-      })), rounds[0].question));
+      })), rounds[0].question, "ranked"));
       transaction.create(roomRef.collection("secret").doc("game"), { rounds, answers: {} });
       transaction.set(ref, { ...result, searchId, expiresAt: 0 });
       transaction.set(opponent.ref, { ...result, searchId: other.searchId, expiresAt: 0 });
