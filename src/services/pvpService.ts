@@ -27,6 +27,12 @@ export type PvpRoom = {
     question: PvpQuestion | null;
     answeredIds: string[];
     deadline: number | null;
+    nextRoundAt?: number | null;
+    roundResult?: {
+        winnerId: string | null;
+        answer: { id: string; name: string };
+        correctIds: string[];
+    } | null;
     expiresAt: number;
     winnerId: string | null;
 };
