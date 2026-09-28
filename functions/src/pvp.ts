@@ -11,7 +11,7 @@ const roundDuration = 60_000;
 const roomDuration = 60 * 60_000;
 const options = { region: "europe-west1", maxInstances: 10 };
 
-const playerName = (value: unknown) =>
+export const playerName = (value: unknown) =>
   typeof value === "string" && value.trim() ? value.trim().slice(0, 40) : "Player";
 
 type Question = {
@@ -21,7 +21,7 @@ type Question = {
 };
 
 type Player = { uid: string; name: string; score: number };
-type Room = {
+export type Room = {
   status: "waiting" | "playing" | "finished" | "cancelled";
   playerIds: string[];
   players: Player[];
@@ -33,10 +33,26 @@ type Room = {
   expiresAt: number;
   winnerId: string | null;
 };
-type RoomSecret = {
+export type RoomSecret = {
   rounds: { question: Question; secret: { championId: string } }[];
   answers: Record<string, string>;
 };
+
+export const loadPvpRounds = async () =>
+  await Promise.all(Array.from({ length: totalRounds }, () => skills.start())) as RoomSecret["rounds"];
+
+export const makePvpRoom = (players: Player[], question: Question | null = null): Room => ({
+  status: question ? "playing" : "waiting",
+  playerIds: players.map((player) => player.uid),
+  players,
+  currentRound: 0,
+  totalRounds,
+  question,
+  answeredIds: [],
+  deadline: question ? Date.now() + roundDuration : null,
+  expiresAt: Date.now() + roomDuration,
+  winnerId: null,
+});
 
 const roomRefFor = (value: unknown) => {
   const code = requireString(value, "room code", /^[A-F0-9]{6}$/);
@@ -96,24 +112,13 @@ export const createPvpRoom = onCall(options, async (request) => {
   const uid = requireUid(request.auth?.uid);
   const profile = await db.collection("scores").doc(uid).get();
   if (!profile.exists) throw new HttpsError("failed-precondition", "Create your profile before playing.");
-  const rounds = await Promise.all(Array.from({ length: totalRounds }, () => skills.start()));
+  const rounds = await loadPvpRounds();
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
     const code = randomBytes(3).toString("hex").toUpperCase();
     const ref = roomRefFor(code);
     const batch = db.batch();
-    batch.create(ref, {
-      status: "waiting",
-      playerIds: [uid],
-      players: [{ uid, name: playerName(profile.data()?.username), score: 0 }],
-      currentRound: 0,
-      totalRounds,
-      question: null,
-      answeredIds: [],
-      deadline: null,
-      expiresAt: Date.now() + roomDuration,
-      winnerId: null,
-    });
+    batch.create(ref, makePvpRoom([{ uid, name: playerName(profile.data()?.username), score: 0 }]));
     batch.create(ref.collection("secret").doc("game"), { rounds, answers: {} });
     try {
       await batch.commit();

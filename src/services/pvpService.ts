@@ -25,6 +25,16 @@ const submitAnswer = httpsCallable<{ code: string; round: number; guess: string 
 const advanceRound = httpsCallable<{ code: string; round: number }>(functions, "advancePvpRound");
 const leaveRoom = httpsCallable<{ code: string }>(functions, "leavePvpRoom");
 
+export type PvpSearchResult = { state: "waiting" | "matched" | "cancelled"; code: string | null };
+export type PvpSearch = PvpSearchResult & { searchId: string; expiresAt: number };
+
+const findMatch = httpsCallable<{ searchId: string }, PvpSearchResult>(functions, "findPvpMatch");
+const cancelSearch = httpsCallable<{ searchId: string }, PvpSearchResult>(functions, "cancelPvpSearch");
+const watchSearch = (uid: string, onSearch: (search: PvpSearch) => void, onError: (error: Error) => void) =>
+    onSnapshot(doc(db, "pvpQueue", uid), (snapshot) => {
+        if (snapshot.exists()) onSearch(snapshot.data() as PvpSearch);
+    }, onError);
+
 const watchRoom = (code: string, onRoom: (room: PvpRoom) => void, onError: (error: Error) => void) =>
     onSnapshot(doc(db, "pvpRooms", code), (snapshot) => {
         if (!snapshot.exists()) {
@@ -34,4 +44,4 @@ const watchRoom = (code: string, onRoom: (room: PvpRoom) => void, onError: (erro
         onRoom(snapshot.data() as PvpRoom);
     }, onError);
 
-export const pvpService = { createRoom, joinRoom, submitAnswer, advanceRound, leaveRoom, watchRoom };
+export const pvpService = { createRoom, joinRoom, submitAnswer, advanceRound, leaveRoom, watchRoom, findMatch, cancelSearch, watchSearch };

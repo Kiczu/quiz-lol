@@ -30,6 +30,11 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
     }
 
+    match /pvpQueue/{userId} {
+      allow get: if isOwner(userId);
+      allow list, write: if false;
+    }
+
     match /pvpRooms/{roomId} {
       allow get: if request.auth != null && request.auth.uid in resource.data.playerIds;
       allow list, write: if false;

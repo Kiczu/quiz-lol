@@ -29,14 +29,26 @@ const PvpGame = () => {
         return () => setImage(undefined);
     }, [setImage]);
 
-    const lobby = !game.code ? (
+    const lobby = !game.code && game.matchmaking.searching ? (
         <Box sx={lobbyPanel}>
-            <Typography variant="h3">Challenge a friend</Typography>
+            <Typography variant="h3">Finding an opponent</Typography>
+            <CircularProgress size={32} sx={{ alignSelf: "center", color: colors.gold2 }} />
+            <Typography role="status">Waiting for another player to join the queue…</Typography>
+            <Typography color={colors.textSecondary}>Keep this page open. Your match will start automatically when an opponent is found.</Typography>
+            <Button variant="outlined" disabled={game.matchmaking.cancelling} onClick={game.matchmaking.cancel}>
+                {game.matchmaking.cancelling ? "Cancelling…" : "Cancel search"}
+            </Button>
+        </Box>
+    ) : !game.code ? (
+        <Box sx={lobbyPanel}>
+            <Typography variant="h3">Play against an online opponent</Typography>
             <Typography color={colors.textSecondary}>
                 Five shared ability questions. One answer each, 10 points for a correct guess.
                 You have 60 seconds per question. Highest score wins; equal scores are a draw.
             </Typography>
-            <WavingButton disabled={game.busy} onClick={game.create}>Create room</WavingButton>
+            <WavingButton disabled={game.busy} onClick={game.matchmaking.start}>Find opponent</WavingButton>
+            <Typography color={colors.textSecondary}>Prefer to play with a friend?</Typography>
+            <Button variant="outlined" disabled={game.busy} onClick={game.create}>Create private room</Button>
             <Typography>or join with a room code</Typography>
             <Box component="form" onSubmit={(event) => { event.preventDefault(); void game.join(joinCode); }}>
                 <Stack spacing={2}>
@@ -86,6 +98,7 @@ const PvpGame = () => {
                 <Typography variant="h1" sx={skillsTitle}>PVP</Typography>
                 <Typography color={colors.textSecondary}>Skills duel · 1 vs 1</Typography>
                 {game.error && <Alert severity="error" role="alert">{game.error}</Alert>}
+                {game.matchmaking.error && <Alert severity="warning">{game.matchmaking.error}</Alert>}
                 {game.busy && <CircularProgress size={24} aria-label="Saving" />}
                 {room && (
                     <Stack direction="row" spacing={2} sx={{ width: "100%" }}>

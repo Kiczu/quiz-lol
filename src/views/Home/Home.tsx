@@ -46,7 +46,7 @@ const modes: GameMode[] = [
   },
   {
     title: "PVP",
-    desc: "Challenge a friend to a five-round skills duel.",
+    desc: "Find an online opponent for a skills duel.",
     link: paths.PVP,
     img: pvpIcon,
   },
