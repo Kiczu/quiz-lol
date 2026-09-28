@@ -28,7 +28,10 @@
     "test:run": "vitest run",
     "images": "node scripts/optimize-images.mjs",
     "emulators": "npm --prefix functions run build && node scripts/emulators.mjs",
-    "seed:emulator": "node scripts/seed-emulator.mjs"
+    "seed:emulator": "node scripts/seed-emulator.mjs",
+    "test:emulator": "node --test --test-skip-pattern=live functions/test/emulator.test.cjs",
+    "test:emulator:live": "node --test functions/test/emulator.test.cjs",
+    "test:backend": "npm --prefix functions run build && firebase emulators:exec --config firebase.test.json --project demo-quiz-lol --only auth,firestore,functions \"npm run test:emulator\""
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^7.0.1",
@@ -44,6 +47,7 @@
     "eslint-import-resolver-typescript": "^4.4.5",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-react": "^7.37.5",
+    "firebase-tools": "^15.28.2",
     "jsdom": "^30.0.1",
     "sharp": "^0.35.4",
     "typescript": "^5.9.3",
