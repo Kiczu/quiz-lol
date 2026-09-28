@@ -1,5 +1,5 @@
 import { sendEmailVerification, updateEmail } from "firebase/auth";
-import React, { createContext, useEffect, useRef, useState, useContext } from "react";
+import React, { createContext, useCallback, useEffect, useRef, useState, useContext } from "react";
 
 import { EditableUserFields, RawUserData } from "../../api/types";
 import { authService } from "../../services/authService";
@@ -34,20 +34,7 @@ export const LoginProvider = ({ children }: Props) => {
   const { showErrorModal, showModal } = useModal();
   const latestRefresh = useRef(0);
 
-  useEffect(() => {
-    setIsLoading(true);
-    const unsubscribe = authService.onAuthStateChanged(async (user) => {
-      if (user) {
-        await refreshUserData();
-      } else {
-        setUserData(null);
-        setIsLoading(false);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-
-  const refreshUserData = async () => {
+  const refreshUserData = useCallback(async () => {
     const request = (latestRefresh.current += 1);
     setIsLoading(true);
     const user = authService.getCurrentUser();
@@ -56,14 +43,32 @@ export const LoginProvider = ({ children }: Props) => {
       setIsLoading(false);
       return;
     }
-    await user.reload();
-    const fetchedData = await userAggregateService.getUserData(user.uid);
+    try {
+      await user.reload();
+      const fetchedData = await userAggregateService.getUserData(user.uid);
+      if (request === latestRefresh.current) setUserData(fetchedData ?? null);
+    } catch (error) {
+      if (request === latestRefresh.current) throw error;
+    } finally {
+      if (request === latestRefresh.current) setIsLoading(false);
+    }
+  }, []);
 
-    if (request !== latestRefresh.current) return;
-
-    setUserData(fetchedData ?? null);
-    setIsLoading(false);
-  };
+  useEffect(() => {
+    const unsubscribe = authService.onAuthStateChanged((user) => {
+      if (user) {
+        void refreshUserData().catch((error) => showErrorModal(getErrorMessage(error)));
+      } else {
+        latestRefresh.current += 1;
+        setUserData(null);
+        setIsLoading(false);
+      }
+    });
+    return () => {
+      latestRefresh.current += 1;
+      unsubscribe();
+    };
+  }, [refreshUserData, showErrorModal]);
 
   const handleSignIn = async (email: string, password: string) => {
     await authService.loginUser(email, password);
@@ -133,7 +138,7 @@ export const LoginProvider = ({ children }: Props) => {
     });
   };
 
-  const updateUserData = async (updates: EditableUserFields) => {
+  const updateUserData = useCallback(async (updates: EditableUserFields) => {
     const user = authService.getCurrentUser();
     if (!user) throw new Error("User not logged in.");
 
@@ -167,7 +172,7 @@ export const LoginProvider = ({ children }: Props) => {
       await userAggregateService.updateUserData(user.uid, updates);
     }
     await refreshUserData();
-  };
+  }, [refreshUserData, showErrorModal]);
   return (
     <LoginContext.Provider
       value={{

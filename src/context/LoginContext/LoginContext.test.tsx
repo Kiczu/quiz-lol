@@ -21,8 +21,10 @@ vi.mock("../../services/userAggregateService", () => ({
   },
 }));
 
+const showModal = vi.fn();
+const showErrorModal = vi.fn();
 vi.mock("../ModalContext/ModalContext", () => ({
-  useModal: () => ({ showModal: vi.fn(), showErrorModal: vi.fn() }),
+  useModal: () => ({ showModal, showErrorModal }),
 }));
 
 const profile: RawUserData = { uid: "u1", username: "kiczu" };
@@ -62,7 +64,7 @@ describe("LoginProvider registration", () => {
     vi.clearAllMocks();
 
     vi.mocked(authService.onAuthStateChanged).mockImplementation((callback) => {
-      notifyAuthChange = callback;
+      notifyAuthChange = callback as typeof notifyAuthChange;
       return () => {};
     });
     vi.mocked(authService.getCurrentUser).mockReturnValue({
@@ -122,5 +124,25 @@ describe("LoginProvider registration", () => {
     await act(async () => releaseSlowRead(null));
 
     expect(screen.getByText("profil: kiczu")).toBeInTheDocument();
+  });
+
+  it("clears loading and reports a failed profile refresh", async () => {
+    vi.mocked(userAggregateService.getUserData).mockRejectedValueOnce(new Error("offline"));
+    renderProvider();
+    await act(async () => notifyAuthChange({ uid: "u1" }));
+    expect(screen.getByText("brak profilu")).toBeInTheDocument();
+    expect(showErrorModal).toHaveBeenCalledWith("offline");
+  });
+
+  it("does not restore a profile after sign-out while a refresh is pending", async () => {
+    let complete: (value: RawUserData) => void = () => {};
+    vi.mocked(userAggregateService.getUserData).mockImplementationOnce(
+      () => new Promise((resolve) => { complete = resolve; })
+    );
+    renderProvider();
+    await act(async () => notifyAuthChange({ uid: "u1" }));
+    await act(async () => notifyAuthChange(null));
+    await act(async () => complete(profile));
+    expect(screen.getByText("brak profilu")).toBeInTheDocument();
   });
 });

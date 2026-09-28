@@ -116,6 +116,27 @@ after(async () => {
     await admin.app().delete();
 });
 
+test("accounts: Auth deletion cleans up only that user's profile and queue", async () => {
+    const response = await fetch(`http://${process.env.FIREBASE_AUTH_EMULATOR_HOST}/identitytoolkit.googleapis.com/v1/accounts:signUp?key=test-key`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: `delete-${randomUUID()}@example.com`, password: "local-test-password", returnSecureToken: true }),
+    });
+    const account = await response.json();
+    const documents = ["users", "scores", "pvpQueue"].map((collection) => db.collection(collection).doc(account.localId));
+    refs.push(...documents);
+    await Promise.all(documents.map((ref) => ref.set({ username: "delete-test" })));
+    const removed = await fetch(`http://${process.env.FIREBASE_AUTH_EMULATOR_HOST}/identitytoolkit.googleapis.com/v1/accounts:delete?key=test-key`, {
+        method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idToken: account.idToken }),
+    });
+    assert.equal(removed.status, 200);
+    const deadline = Date.now() + 15_000;
+    while (Date.now() < deadline && (await documents[0].get()).exists) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    for (const ref of documents) assert.equal((await ref.get()).exists, false);
+    for (const player of players) assert.equal((await profile(player).get()).exists, true);
+});
+
 test("solo: concurrent winning requests and retries award points once", async () => {
     const ref = await solo();
     const results = await Promise.all(Array.from({ length: 4 }, () => call("submitGuess", { roundId: ref.id, guess: "Ahri" })));

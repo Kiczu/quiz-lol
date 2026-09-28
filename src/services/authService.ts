@@ -1,4 +1,4 @@
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, EmailAuthProvider, linkWithCredential, reauthenticateWithCredential, reauthenticateWithPopup } from "firebase/auth";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, deleteUser, GoogleAuthProvider, signInWithPopup, signOut, updatePassword, sendPasswordResetEmail, EmailAuthProvider, linkWithCredential, reauthenticateWithCredential, reauthenticateWithPopup, User } from "firebase/auth";
 
 import { auth } from "../api/firebase/auth";
 import { isFirebaseCode } from "../utils/errorUtils";
@@ -9,28 +9,14 @@ const getCurrentUser = () => {
     return auth.currentUser;
 }
 
-const onAuthStateChanged = (callback: (user: any) => void) => {
+const onAuthStateChanged = (callback: (user: User | null) => void) => {
     return auth.onAuthStateChanged(callback);
 }
 
 const registerUser = async (email: string, password: string, userData: { username: string, firstName: string; lastName: string; }) => {
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-        const { user } = userCredential;
-
-        await userAggregateService.createUser({
-            uid: user.uid,
-            username: userData.username,
-            email: user.email!,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-        });
-
-        return user;
-    } catch (error: unknown) {
-        throw error;
-    }
+    const { user } = await createUserWithEmailAndPassword(auth, email, password);
+    await userAggregateService.createUser({ uid: user.uid, email: user.email!, ...userData });
+    return user;
 }
 const setPasswordForGoogleUser = async (email: string, password: string) => {
     const user = auth.currentUser;
@@ -60,14 +46,13 @@ const updateUserPassword = async (newPassword: string, currentPassword?: string)
     }
 };
 
-const sendResetPassword = async (email: string) => {
-    try {
-        await sendPasswordResetEmail(auth, email);
-        return true;
-    } catch (error: unknown) {
-        throw error;
-    }
-}
+const sendResetPassword = (email: string) => sendPasswordResetEmail(auth, email);
+
+const deleteAccount = async () => {
+    const user = auth.currentUser;
+    if (!user) throw new Error("User not authenticated");
+    await deleteUser(user);
+};
 
 const loginUser = async (email: string, password: string) => {
     const userCredential = await signInWithEmailAndPassword(auth, email, password);
@@ -117,4 +102,5 @@ export const authService = {
     signInWithGoogle,
     logoutUser,
     reauthenticateUser,
+    deleteAccount,
 };

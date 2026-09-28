@@ -75,6 +75,11 @@ Expiry prevents further play; it does not delete room documents from Firestore.
 
 - Sign in with email and password or with Google, password reset, email verification
 - User dashboard: avatar, profile details, password change, per-mode scores, account deletion
+
+Deleting an Auth account triggers server-side deletion of its private profile, public
+scores and matchmaking ticket. The cleanup is idempotent and retries on failure; it
+does not depend on the browser retaining a session after deletion. Deploy the
+`deleteUserProfile` Auth trigger together with the frontend account changes.
 - Leaderboard per game mode and by total score
 - Champion browser with search, and a detail page per champion with abilities and splash art
 

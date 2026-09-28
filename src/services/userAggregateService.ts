@@ -45,14 +45,8 @@ const updateUserData = async (uid: string, updates: EditableUserFields) => {
     ]);
 };
 
-const deleteUserData = async (uid: string) => {
-    await userService.deleteUserPrivate(uid);
-    await scoreService.deleteUserPublic(uid);
-};
-
 export const userAggregateService = {
     createUser,
     getUserData,
     updateUserData,
-    deleteUserData,
 };
