@@ -9,6 +9,8 @@ import { GameHandler, GuessResult, Round, awardPoints, db, requireString, requir
 
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
+export { createPvpRoom, joinPvpRoom, submitPvpAnswer, advancePvpRound, leavePvpRoom } from "./pvp";
+
 const handlers: Record<string, GameHandler> = {
   Skills: skills,
   Regions: regions,

@@ -18,6 +18,7 @@ import ForgotPassword from "./views/AuthPage/ForgotPassword/ForgotPassword";
 import LoginForm from "./views/AuthPage/LoginForm/LoginForm";
 import RegisterForm from "./views/AuthPage/RegisterForm/RegisterForm";
 import Champion from "./views/Champion/Champion";
+import PvpGame from "./views/GamePvp/PvpGame";
 import GuessRegion from "./views/GameRegion/RegionGame";
 import SkillsGame from "./views/GameSkills/SkillsGame";
 import Hangman from "./views/Hangman/Hangman";
@@ -78,6 +79,7 @@ root.render(
                       </RequireAuth>
                     }
                   />
+                  <Route path={paths.PVP} element={<RequireAuth><PvpGame /></RequireAuth>} />
                   <Route path={paths.AUTH} element={<AuthPage />}>
                     <Route path={paths.LOGIN} element={<LoginForm />} />
                     <Route path={paths.REGISTER} element={<RegisterForm />} />
