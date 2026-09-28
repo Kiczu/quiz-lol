@@ -7,6 +7,9 @@ import { functions } from "../api/firebase/functions";
 import { ChampionOption } from "./gameRoundService";
 
 export type PvpRoom = {
+    mode?: "private" | "ranked";
+    rankingChanges?: Record<string, number>;
+    endReason?: "score" | "forfeit" | "disconnect" | "abandoned";
     status: "waiting" | "playing" | "finished" | "cancelled";
     playerIds: string[];
     players: { uid: string; name: string; score: number }[];
@@ -24,6 +27,7 @@ const joinRoom = httpsCallable<{ code: string }, { code: string }>(functions, "j
 const submitAnswer = httpsCallable<{ code: string; round: number; guess: string }>(functions, "submitPvpAnswer");
 const advanceRound = httpsCallable<{ code: string; round: number }>(functions, "advancePvpRound");
 const leaveRoom = httpsCallable<{ code: string }>(functions, "leavePvpRoom");
+const heartbeat = httpsCallable<{ code: string }>(functions, "heartbeatPvpRoom");
 
 export type PvpSearchResult = { state: "waiting" | "matched" | "cancelled"; code: string | null };
 export type PvpSearch = PvpSearchResult & { searchId: string; expiresAt: number };
@@ -44,4 +48,4 @@ const watchRoom = (code: string, onRoom: (room: PvpRoom) => void, onError: (erro
         onRoom(snapshot.data() as PvpRoom);
     }, onError);
 
-export const pvpService = { createRoom, joinRoom, submitAnswer, advanceRound, leaveRoom, watchRoom, findMatch, cancelSearch, watchSearch };
+export const pvpService = { createRoom, joinRoom, submitAnswer, advanceRound, leaveRoom, heartbeat, watchRoom, findMatch, cancelSearch, watchSearch };
