@@ -1,8 +1,9 @@
-import { Box, Button, Grid, TextField, Typography, Link } from "@mui/material";
+import { Box, Button, Grid, Typography, Link } from "@mui/material";
 import { Form, Formik } from "formik";
 import { Link as RouterLink } from "react-router-dom";
 import * as yup from "yup";
 
+import FormTextField from "../../../components/FormTextField/FormTextField";
 import { useModal } from "../../../context/ModalContext/ModalContext";
 import { paths } from "../../../paths";
 import { authService } from "../../../services/authService";
@@ -63,28 +64,16 @@ const ForgotPassword = () => {
         onSubmit={handleSendResetPasswordEmail}
         validationSchema={emailSchema}
       >
-        {({
-          values,
-          handleChange,
-          handleSubmit,
-          handleBlur,
-          errors,
-          touched,
-          isSubmitting,
-        }) => (
-          <Form onSubmit={handleSubmit} style={{ width: "100%" }}>
-            <TextField
+        {({ isSubmitting }) => (
+          <Form style={{ width: "100%" }}>
+            <FormTextField
               margin="normal"
               fullWidth
               id="email"
               label="Adres e-mail"
               name="email"
               autoComplete="email"
-              value={values.email}
-              onChange={handleChange}
-              onBlur={handleBlur}
-              error={Boolean(touched.email) && Boolean(errors.email)}
-              helperText={touched.email && errors.email}
+              helperText={null}
             />
             <Button
               type="submit"
