@@ -46,7 +46,7 @@ const modes: GameMode[] = [
   },
   {
     title: "PVP",
-    desc: "Find an online opponent for a skills duel.",
+    desc: "Test your League knowledge against an online opponent.",
     link: paths.PVP,
     img: pvpIcon,
   },

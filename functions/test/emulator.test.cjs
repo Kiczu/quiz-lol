@@ -448,7 +448,32 @@ test("queue: callable authentication, validation and private queue rules", async
     assert.equal(response.status, 403);
 });
 
-test("live: online players are automatically paired into a playable room", async () => {
+test("pvp: mixed questions accept generic answer ids and finish through the same ranking rules", async () => {
+    const ref = await rankedRoom();
+    const rounds = ["Regions", "Items", "Lore", "Champions", "Summoner spells"].map((category, index) => ({
+        question: {
+            category, prompt: "Test question " + index, image: null, text: null, dataVersion: "test",
+            options: ["a", "b", "c", "d"].map((id) => ({ id: index + "-" + id, name: "Answer " + id })),
+        },
+        secret: { answerId: index + "-a" },
+    }));
+    await ref.collection("secret").doc("game").set({ rounds, answers: {} });
+    await ref.update({ question: rounds[0].question });
+    await assert.rejects(call("submitPvpAnswer", { code: ref.id, round: 0, guess: "not-offered" }), { code: "INVALID_ARGUMENT" });
+    for (let index = 0; index < rounds.length; index += 1) {
+        assert.deepEqual((await ref.get()).data().question, rounds[index].question);
+        await call("submitPvpAnswer", { code: ref.id, round: index, guess: index + "-a" });
+        await call("submitPvpAnswer", { code: ref.id, round: index, guess: index + "-b" }, players[1]);
+    }
+    assert.equal((await ref.get()).data().players[0].score, 50);
+    assert.equal((await score()).scores.PVP, 20);
+    assert.equal((await score(players[1])).scores.PVP, 0);
+});
+
+test("live: online players complete the same mixed quiz and receive ranked rewards", async () => {
+    const region = db.collection("championRegions").doc("Ahri");
+    refs.push(region);
+    await region.set({ region: "Ionia" });
     const firstId = randomUUID();
     assert.equal((await call("findPvpMatch", { searchId: firstId })).state, "waiting");
     const paired = await call("findPvpMatch", { searchId: randomUUID() }, players[1]);
@@ -457,9 +482,23 @@ test("live: online players are automatically paired into a playable room", async
     refs.push(ref);
     assert.equal((await call("findPvpMatch", { searchId: firstId })).code, paired.code);
     const secret = (await ref.collection("secret").doc("game").get()).data();
-    const guess = secret.rounds[0].secret.championId;
-    await Promise.all(players.slice(0, 2).map((player) => call("submitPvpAnswer", { code: paired.code, round: 0, guess }, player)));
-    assert.equal((await ref.get()).data().currentRound, 1);
+    assert.equal(new Set(secret.rounds.map((round) => round.question.category)).size, 5);
+    assert.equal(new Set(secret.rounds.map((round) => round.question.dataVersion)).size, 1);
+    for (let index = 0; index < secret.rounds.length; index += 1) {
+        const { question, secret: solution } = secret.rounds[index];
+        assert.deepEqual((await ref.get()).data().question, question);
+        assert.equal(question.answerId, undefined);
+        if (question.image) {
+            const asset = await fetch(question.image, { method: "HEAD", signal: AbortSignal.timeout(5000) });
+            assert.equal(asset.status, 200, question.image);
+        }
+        const wrong = question.options.find((option) => option.id !== solution.answerId).id;
+        await call("submitPvpAnswer", { code: paired.code, round: index, guess: solution.answerId });
+        await call("submitPvpAnswer", { code: paired.code, round: index, guess: wrong }, players[1]);
+    }
+    assert.equal((await ref.get()).data().status, "finished");
+    assert.equal((await score()).scores.PVP, 20);
+    assert.equal((await score(players[1])).scores.PVP, 0);
 });
 
 test("live: all solo modes start and complete against Data Dragon", async () => {
@@ -483,15 +522,16 @@ test("live: all solo modes start and complete against Data Dragon", async () => 
 });
 
 test("live: create, join and complete a real five-question PvP match", async () => {
-    const { code } = await call("createPvpRoom", {});
+    const { code } = await call("createPvpRoom", { mode: "ranked" });
     const ref = db.collection("pvpRooms").doc(code);
     refs.push(ref);
     assert.match(code, /^[A-F0-9]{6}$/);
+    assert.equal((await ref.get()).data().mode, "private");
     await call("joinPvpRoom", { code }, players[1]);
     const { rounds } = (await ref.collection("secret").doc("game").get()).data();
     for (let round = 0; round < rounds.length; round += 1) {
-        assert.equal((await ref.get()).data().question.spellName, rounds[round].question.spellName);
-        const guess = rounds[round].secret.championId;
+        assert.deepEqual((await ref.get()).data().question, rounds[round].question);
+        const guess = rounds[round].secret.answerId;
         await Promise.all(players.slice(0, 2).map((player) => call("submitPvpAnswer", { code, round, guess }, player)));
     }
     assert.equal((await ref.get()).data().status, "finished");

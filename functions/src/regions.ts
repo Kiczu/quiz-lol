@@ -10,7 +10,7 @@ import {
   scoreByWrongGuesses,
 } from "./shared";
 
-const regionValues: Record<string, string> = {
+export const regionValues: Record<string, string> = {
   "bandle city": "bandle-city",
   bilgewater: "bilgewater",
   demacia: "demacia",
@@ -28,7 +28,7 @@ const regionValues: Record<string, string> = {
   zaun: "zaun",
 };
 
-const toRegionValue = (region: string): string | null =>
+export const toRegionValue = (region: string): string | null =>
   regionValues[region.toLowerCase()] ?? null;
 
 export const regions: GameHandler = {
