@@ -21,7 +21,7 @@ Not deployed yet.
 | **Hangman** | a masked champion name | one letter at a time | 1 per distinct correct letter, +10 for solving | 6 |
 | **Regions** | a champion portrait | one of the 13 regions of Runeterra | 10 / 6 / 3 by wrong guesses | 3 |
 | **Skills** | an ability icon and name | one of four champions | 10 / 6 / 3 by wrong guesses | 3 |
-| **PVP** | the same mixed-category quiz as your opponent | one of four answers, once per round | 10 per correct answer across 5 rounds; separate ranked rewards | 60 seconds per round |
+| **Player vs Player** | the same mixed-category quiz as your opponent | one of four answers, once per round | 10 per correct answer across 5 rounds; separate ranked rewards | 60 seconds per round |
 
 Choose **Find opponent** to join the public PVP queue. Two signed-in players searching
 at the same time are paired automatically; being signed in alone does not join the queue.
@@ -32,8 +32,12 @@ leaves the queue; if a match has already been created, it opens that match inste
 For a private duel, create a room and share its six-character code with a second
 signed-in player. The match starts when they join. Both players answer the same five
 questions; points and correctness stay hidden until both answers are in or time runs out.
-After a timeout, either player can select **Time is up — continue**; unanswered questions
-score zero. Equal final scores are a draw. Match scores are separate from ranking points:
+Timeouts advance automatically, with **Time is up - continue** available as a retry;
+unanswered questions score zero. Between rounds, both players see the round winner (or
+a draw), the correct answer and a shared five-second countdown. Both correct or both
+wrong is a draw; answer speed does not break ties. The server withholds the next question
+until the break ends, then gives both players a fresh 60 seconds. The last round goes
+straight to the match result. Equal final scores are a draw. Match scores are separate from ranking points:
 
 - Public matches award the winner 20 ranking points and deduct up to 20 from the loser.
   PVP ranking points never fall below zero. Draws change neither player's ranking.

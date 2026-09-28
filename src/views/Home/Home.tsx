@@ -45,7 +45,7 @@ const modes: GameMode[] = [
     img: skillsIcon,
   },
   {
-    title: "PVP",
+    title: "Player vs Player",
     desc: "Test your League knowledge against an online opponent.",
     link: paths.PVP,
     img: pvpIcon,
