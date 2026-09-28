@@ -1,7 +1,6 @@
 import * as admin from "firebase-admin";
-import { FieldValue } from "firebase-admin/firestore";
+import { DocumentSnapshot, FieldValue, Transaction } from "firebase-admin/firestore";
 import { HttpsError } from "firebase-functions/v2/https";
-import { warn } from "firebase-functions/logger";
 
 admin.initializeApp();
 
@@ -23,6 +22,17 @@ export type Round = {
   used: string[];
   points: number;
   finished: boolean;
+  results?: Record<string, GuessResult>;
+};
+
+export type GuessResult = {
+  correct: boolean;
+  won: boolean;
+  finished: boolean;
+  wrongGuesses: number;
+  points: number;
+  mask: string[] | null;
+  answer: string | null;
 };
 
 export type Secret = Record<string, unknown>;
@@ -109,22 +119,23 @@ export const requireUid = (uid?: string) => {
   return uid;
 };
 
-const NOT_FOUND = 5;
+export const awardPoints = (
+  transaction: Transaction,
+  profile: DocumentSnapshot,
+  gameId: string,
+  points: number
+) => {
+  if (points <= 0 || !profile.exists) return;
 
-export const awardPoints = async (uid: string, gameId: string, points: number) => {
-  if (points <= 0) return;
+  transaction.update(profile.ref, {
+    totalScore: FieldValue.increment(points),
+    [`scores.${gameId}`]: FieldValue.increment(points),
+  });
+};
 
-  try {
-    await db
-      .collection("scores")
-      .doc(uid)
-      .update({
-        totalScore: FieldValue.increment(points),
-        [`scores.${gameId}`]: FieldValue.increment(points),
-      });
-  } catch (error) {
-    if ((error as { code?: number }).code !== NOT_FOUND) throw error;
-
-    warn("Dropped points for a player with no public profile", { uid, gameId, points });
+export const requireString = (value: unknown, label: string, pattern: RegExp) => {
+  if (typeof value !== "string" || !pattern.test(value)) {
+    throw new HttpsError("invalid-argument", `Invalid ${label}.`);
   }
+  return value;
 };
