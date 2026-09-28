@@ -63,4 +63,15 @@ const watchRoom = (code: string, onRoom: (room: PvpRoom) => void, onError: (erro
         onRoom(snapshot.data() as PvpRoom);
     }, onError);
 
-export const pvpService = { createRoom, joinRoom, submitAnswer, advanceRound, leaveRoom, heartbeat, watchRoom, findMatch, cancelSearch, watchSearch };
+export const pvpService = {
+    createRoom,
+    joinRoom,
+    submitAnswer,
+    advanceRound,
+    leaveRoom,
+    heartbeat,
+    watchRoom,
+    findMatch,
+    cancelSearch,
+    watchSearch,
+};

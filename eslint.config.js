@@ -5,10 +5,10 @@ import reactPlugin from "eslint-plugin-react";
 
 export default [
   {
-    ignores: ["node_modules", "build", "public"],
+    ignores: ["**/node_modules/**", "build", "public", "functions/lib/**"],
   },
   {
-    files: ["src/**/*.{js,jsx,ts,tsx}"],
+    files: ["src/**/*.{js,jsx,ts,tsx}", "functions/src/**/*.ts"],
     plugins: {
       "@typescript-eslint": tsPlugin,
       react: reactPlugin,
@@ -31,6 +31,8 @@ export default [
     },
     rules: {
       "react/react-in-jsx-scope": "off",
+      "func-style": ["error", "expression"],
+      "prefer-arrow-callback": ["error", { allowUnboundThis: false }],
       "import/order": [
         "warn",
         {
