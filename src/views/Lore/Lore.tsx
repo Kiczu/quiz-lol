@@ -1,9 +1,8 @@
 import { Box, Container, Typography } from "@mui/material";
-import { useEffect } from "react";
 
 import backgroundMap from "../../assets/images/backgroundMap.webp";
 import SearchBar from "../../components/SearchBar/SearchBar";
-import { useBackground } from "../../context/BackgroundContext/BackgroundContext";
+import usePageBackground from "../../hooks/usePageBackground";
 
 import ChampionList from "./ChampionList/ChampionList";
 import { loreViewHeader, loreViewOverlay, loreViewWrapper } from "./lore.style";
@@ -11,12 +10,7 @@ import { useLoreData } from "./useLoreData";
 
 const Lore = () => {
   const { champions, search, handleSearchChange } = useLoreData();
-  const { setImage } = useBackground();
-
-  useEffect(() => {
-    setImage(backgroundMap);
-    return () => setImage(undefined);
-  }, [setImage]);
+  usePageBackground(backgroundMap);
 
   return (
     <Box sx={loreViewWrapper}>

@@ -1,6 +1,6 @@
-import { colors } from "../../../theme/colors";
-import { typography } from "../../../theme/typography";
-import { getMultiColumnGradientSx } from "../../../utils/gradient";
+import { colors } from "../../theme/colors";
+import { typography } from "../../theme/typography";
+import { getMultiColumnGradientSx } from "../../utils/gradient";
 
 export const getOptionWrapperSx = (
     columns: number,

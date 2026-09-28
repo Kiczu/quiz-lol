@@ -1,54 +1,52 @@
 import { Box, Grid, Typography } from "@mui/material";
 
-import { ChampionOption } from "../../../services/gameRoundService";
-
 import {
   getOptionWrapperSx,
   optionCard,
   optionIcon,
   optionName,
-} from "./championOptions.style";
+} from "./answerOptions.style";
 
 type Props = {
-  options: ChampionOption[];
-  usedChampions: string[];
+  options: { id: string; name: string; icon?: string }[];
+  usedIds?: string[];
   columns: number;
   onSelect: (championId: string) => void;
   disabled?: boolean;
 };
 
-const ChampionOptions = ({
+const AnswerOptions = ({
   options,
-  usedChampions,
+  usedIds = [],
   columns,
   onSelect,
   disabled = false,
 }: Props) => (
   <Grid container spacing={3} justifyContent="center">
     {options.map((option, idx) => {
-      const isUsed = usedChampions.includes(option.id);
+      const isUsed = usedIds.includes(option.id);
 
       return (
-        <Grid item xs={12} sm={6} md={3} key={option.id}>
+        <Grid item xs={12} sm={6} md={3} key={option.id} sx={{ display: "flex" }}>
           <Box
             component="button"
             type="button"
             disabled={disabled || isUsed}
             onClick={() => onSelect(option.id)}
             sx={{
-              ...getOptionWrapperSx(columns, idx, isUsed),
+              ...getOptionWrapperSx(columns, idx, disabled || isUsed),
               width: "100%",
               border: "none",
               font: "inherit",
             }}
           >
-            <Box sx={optionCard}>
-              <Box
+            <Box sx={{ ...optionCard, height: "100%", boxSizing: "border-box", overflowWrap: "anywhere" }}>
+              {option.icon && <Box
                 component="img"
                 src={option.icon}
-                alt={option.name}
+                alt=""
                 sx={optionIcon}
-              />
+              />}
               <Typography component="span" sx={optionName}>
                 {option.name}
               </Typography>
@@ -60,4 +58,4 @@ const ChampionOptions = ({
   </Grid>
 );
 
-export default ChampionOptions;
+export default AnswerOptions;
