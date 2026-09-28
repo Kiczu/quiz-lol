@@ -1,12 +1,19 @@
 import { randomNumberTo } from "../../utils/number";
 
-const images = Object.values(
-    import.meta.glob<string>("../../assets/images/login/*", {
-        eager: true,
-        query: "?url",
-        import: "default",
-    })
-);
+const SPLASH_URL = "https://ddragon.leagueoflegends.com/cdn/img/champion/splash";
+
+const champions = [
+    "Aurora",
+    "Hwei",
+    "Malphite",
+    "MasterYi",
+    "Singed",
+    "Teemo",
+    "Udyr",
+    "Zed",
+];
+
+const images = champions.map((champion) => `${SPLASH_URL}/${champion}_0.jpg`);
 
 export const getRandomImage = () => {
     const savedImage = sessionStorage.getItem("backgroundImage");

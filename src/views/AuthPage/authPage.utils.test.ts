@@ -7,8 +7,10 @@ describe("getRandomImage", () => {
     sessionStorage.clear();
   });
 
-  it("returns one of the bundled backgrounds", () => {
-    expect(getRandomImage()).toMatch(/login\//);
+  it("returns an official Data Dragon splash art", () => {
+    expect(getRandomImage()).toMatch(
+      /^https:\/\/ddragon\.leagueoflegends\.com\/cdn\/img\/champion\/splash\/\w+_0\.jpg$/
+    );
   });
 
   it("reuses the background stored for the session", () => {
