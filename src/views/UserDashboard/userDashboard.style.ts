@@ -1,7 +1,7 @@
 import { alpha } from "@mui/material";
 
 import { colors } from "../../theme/colors";
-import { fill } from "../../theme/layout";
+import { fill, pageBottomSpacing } from "../../theme/layout";
 
 export const inputStyle = {
     backgroundColor: "transparent",
@@ -29,6 +29,7 @@ export const dashboardOverlay = {
     backdropFilter: "blur(4px)",
     backgroundColor: alpha(colors.overlayBackground, 0.75),
     width: "100%",
+    ...pageBottomSpacing,
 }
 
 export const dataFormsContainer = {

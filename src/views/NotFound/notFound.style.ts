@@ -1,5 +1,5 @@
 import { colors } from "../../theme/colors";
-import { fill, fillColumn } from "../../theme/layout";
+import { fill, fillColumn, pageBottomSpacing } from "../../theme/layout";
 import { typography } from "../../theme/typography";
 
 export const notFoundWrapper = {
@@ -23,6 +23,7 @@ export const notFoundOverlay = {
         md: "20px 60px",
         lg: "20px 80px"
     },
+    ...pageBottomSpacing,
 }
 
 export const notFoundCode = {

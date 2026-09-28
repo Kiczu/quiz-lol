@@ -1,5 +1,5 @@
 import { colors } from "../../theme/colors";
-import { fill, fillColumn } from "../../theme/layout";
+import { fill, fillColumn, pageBottomSpacing } from "../../theme/layout";
 import { typography } from "../../theme/typography";
 
 export const privacyWrapper = {
@@ -14,6 +14,7 @@ export const privacyOverlay = {
     backdropFilter: "blur(4px)",
     backgroundColor: colors.overlayBackground,
     padding: { xs: "32px 16px", md: "48px 80px" },
+    ...pageBottomSpacing,
 }
 
 export const privacyContent = {

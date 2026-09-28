@@ -1,6 +1,6 @@
 import backgroundMap from "../../assets/images/backgroundMap.webp";
 import { colors } from "../../theme/colors";
-import { fill, fillColumn } from "../../theme/layout";
+import { fill, fillColumn, pageBottomSpacing } from "../../theme/layout";
 
 export const hangmanViewWrapper = {
   ...fillColumn,
@@ -21,6 +21,7 @@ export const hangmanViewOverlay = {
     md: "20px 60px",
     lg: "20px 80px",
   },
+  ...pageBottomSpacing,
 };
 
 export const titleGame = {
