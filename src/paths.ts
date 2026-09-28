@@ -12,4 +12,5 @@ export const paths = {
     SKILLS: '/game/skills',
     PVP: '/game/pvp',
     CHAMPION_DETAIL: '/champions/:id',
+    PRIVACY: '/privacy',
 }
