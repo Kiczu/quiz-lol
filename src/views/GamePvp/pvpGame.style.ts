@@ -1,5 +1,5 @@
 import { colors } from "../../theme/colors";
-import { fillColumn } from "../../theme/layout";
+import { fillColumn, pageBottomSpacing } from "../../theme/layout";
 
 export const pvpWrapper = {
     ...fillColumn,
@@ -7,6 +7,7 @@ export const pvpWrapper = {
     backgroundColor: colors.overlayBackground,
     backdropFilter: "blur(4px)",
     py: { xs: 3, md: 5 },
+    ...pageBottomSpacing,
 };
 
 export const pvpContent = {

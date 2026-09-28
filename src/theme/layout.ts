@@ -18,3 +18,7 @@ export const errorMessage = {
     color: colors.textSecondary,
     textAlign: "center",
 };
+
+export const pageBottomSpacing = {
+    paddingBottom: { xs: "48px", sm: "48px", md: "72px", lg: "72px", xl: "72px" },
+};

@@ -1,5 +1,5 @@
 import { colors } from "../../theme/colors"
-import { fill, fillColumn } from "../../theme/layout";
+import { fill, fillColumn, pageBottomSpacing } from "../../theme/layout";
 import { getMultiColumnGradientSx } from "../../utils/gradient";
 
 export const rankingContainer = {
@@ -18,6 +18,7 @@ export const rankingOverlay = {
         md: "20px 60px",
         lg: "20px 80px"
     },
+    ...pageBottomSpacing,
 }
 
 export const rankingHeader = {
