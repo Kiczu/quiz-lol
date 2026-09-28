@@ -11,6 +11,8 @@ import {
 } from "@mui/material";
 import { motion } from "framer-motion";
 
+import { LeaderboardEntry } from "../../services/scoreService";
+
 import {
   getRankingWrapperSx,
   rankingTable,
@@ -26,12 +28,7 @@ import {
 } from "./ranking.style";
 
 interface RankingTableProps {
-  ranking: {
-    userId: string;
-    username: string;
-    score: number;
-    avatar?: string;
-  }[];
+  ranking: LeaderboardEntry[];
 }
 const RankingTable = ({ ranking }: RankingTableProps) => {
   return (

@@ -1,4 +1,4 @@
-import { doc, setDoc, collection, query, orderBy, getDocs, getDoc, updateDoc, where } from "firebase/firestore";
+import { doc, setDoc, collection, query, getDocs, getDoc, updateDoc, where } from "firebase/firestore";
 
 import { db } from "../api/firebase/db";
 import { EditableUserFields, ScoresMap, UserPublicData } from "../api/types";
@@ -54,15 +54,23 @@ const getUserScores = async (userId: string): Promise<{ scores: ScoresMap; total
     };
 };
 
-const getLeaderboard = async () => {
-    const userRef = collection(db, "scores");
-    const leaderboardQuery = query(userRef, orderBy("totalScore", "desc"));
-    const querySnapshot = await getDocs(leaderboardQuery);
+export type LeaderboardEntry = {
+    userId: string;
+    username: string;
+    score: number;
+    avatar?: string;
+};
 
-    return querySnapshot.docs.map(doc => ({
-        userId: doc.id,
-        ...doc.data(),
-    }));
+const getLeaderboard = async (gameId: string): Promise<LeaderboardEntry[]> => {
+    const snapshot = await getDocs(collection(db, "scores"));
+    const isTotal = gameId === "TotalScore";
+    return snapshot.docs.flatMap((document) => {
+        const data = document.data();
+        const score = (isTotal ? data.totalScore : data.scores?.[gameId]) ?? 0;
+        if (!data.username || (isTotal && document.id.includes("_"))
+            || !Number.isFinite(score) || (!isTotal && score <= 0)) return [];
+        return [{ userId: document.id, username: data.username, avatar: data.avatar || "", score }];
+    }).sort((a, b) => b.score - a.score);
 };
 
 export const scoreService = {
