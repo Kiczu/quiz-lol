@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 
+import { pvpRules } from "../../../functions/src/contracts/pvp";
 import { pvpService } from "../../services/pvpService";
 
 const usePvpPresence = (code: string, enabled: boolean) => {
@@ -14,9 +15,9 @@ const usePvpPresence = (code: string, enabled: boolean) => {
                 await pvpService.heartbeat({ code });
                 if (active) setError("");
             } catch {
-                if (active) setError("Connection interrupted. Reconnect within 60 seconds to avoid a forfeit.");
+                if (active) setError(`Connection interrupted. Reconnect within ${pvpRules.reconnectWindow / 1000} seconds to avoid a forfeit.`);
             } finally {
-                if (active) timer = setTimeout(pulse, 15_000);
+                if (active) timer = setTimeout(pulse, pvpRules.heartbeatInterval);
             }
         };
         void pulse();

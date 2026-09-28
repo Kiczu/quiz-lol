@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+import { pvpRules } from "../../../functions/src/contracts/pvp";
 import { PvpSearchResult, pvpService } from "../../services/pvpService";
 
 const useMatchmaking = (uid: string | undefined, onMatched: (code: string) => void) => {
@@ -35,14 +36,14 @@ const useMatchmaking = (uid: string | undefined, onMatched: (code: string) => vo
             } catch (cause) {
                 if (!active) return;
                 if ((cause as { code?: string }).code === "functions/already-exists") {
-                    setError("A search is already active. Cancel it in the other window or wait up to 45 seconds after closing it.");
+                    setError(`A search is already active. Cancel it in the other window or wait up to ${pvpRules.searchLeaseDuration / 1000} seconds after closing it.`);
                     setSearchId(null);
                     active = false;
                 } else {
                     setError("Search interrupted. Reconnecting automatically…");
                 }
             } finally {
-                if (active) timer = setTimeout(poll, 10_000);
+                if (active) timer = setTimeout(poll, pvpRules.searchPollInterval);
             }
         };
         const unsubscribe = pvpService.watchSearch(uid, (ticket) => {

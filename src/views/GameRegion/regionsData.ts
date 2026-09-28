@@ -1,3 +1,4 @@
+import { RegionId, regionNames } from "../../../functions/src/contracts/regions";
 import bandleCityBg from "../../assets/regions/backgrounds/bandle_city.webp";
 import bilgewaterBg from "../../assets/regions/backgrounds/bilgewater.webp";
 import demaciaBg from "../../assets/regions/backgrounds/demacia.webp";
@@ -28,88 +29,80 @@ import zaunCrest from "../../assets/regions/icons/zaun_crest_icon.webp";
 
 export type Region = {
     name: string;
-    value: string;
+    value: RegionId;
     crest: string;
     background: string;
 };
 
-export const regions: Region[] = [
+const regionAssets: Omit<Region, "name">[] = [
     {
-        name: "Bandle City",
         value: "bandle-city",
         crest: bandleCityCrest,
         background: bandleCityBg,
     },
     {
-        name: "Bilgewater",
         value: "bilgewater",
         crest: bilgewaterCrest,
         background: bilgewaterBg,
     },
     {
-        name: "Demacia",
         value: "demacia",
         crest: demaciaCrest,
         background: demaciaBg,
     },
     {
-        name: "Freljord",
         value: "freljord",
         crest: freljordCrest,
         background: freljordBg,
     },
     {
-        name: "Ionia",
         value: "ionia",
         crest: ioniaCrest,
         background: ioniaBg,
     },
     {
-        name: "Ixtal",
         value: "ixtal",
         crest: ixtalCrest,
         background: ixtalBg,
     },
     {
-        name: "Mt. Targon",
         value: "mt-targon",
         crest: mtTargonCrest,
         background: targonBg,
     },
     {
-        name: "Noxus",
         value: "noxus",
         crest: noxusCrest,
         background: noxusBg,
     },
     {
-        name: "Piltover",
         value: "piltover",
         crest: piltoverCrest,
         background: piltoverBg,
     },
     {
-        name: "Shadow Isles",
         value: "shadow-isles",
         crest: shadowIslesCrest,
         background: shadowIslandBg,
     },
     {
-        name: "Shurima",
         value: "shurima",
         crest: shurimaCrest,
         background: shurimaBg,
     },
     {
-        name: "The Void",
         value: "void",
         crest: voidCrest,
         background: pustkaBg,
     },
     {
-        name: "Zaun",
         value: "zaun",
         crest: zaunCrest,
         background: zaunBg,
     },
 ];
+
+export const regions: Region[] = regionAssets.map((region) => ({
+    ...region,
+    name: regionNames[region.value],
+}));
