@@ -18,6 +18,12 @@ import { lobbyPanel, playerPanel, pvpContent, pvpWrapper, roomCode } from "./pvp
 import PvpQuestionPanel from "./PvpQuestionPanel";
 import usePvpGameData from "./usePvpGameData";
 
+const rematchHours = pvpRules.rematchCooldown / 3_600_000;
+const unrankedMessages = {
+    early: "No ranking points: the match ended before the first round was decided.",
+    rematch: `No ranking points: you already played a ranked match against this opponent in the last ${rematchHours} hours.`,
+};
+
 const PvpGame = () => {
     const game = usePvpGameData();
     const [joinCode, setJoinCode] = useState("");
@@ -27,9 +33,12 @@ const PvpGame = () => {
     const { room } = game;
     const leaveRoom = () => {
         if (room?.mode !== "ranked" || room.status !== "playing") return void game.leave();
+        const stakes = room.unrankedReason === "rematch" ? "This rematch is unranked, so no ranking points change."
+            : room.currentRound === 0 && !room.nextRoundAt ? "The first round is not decided yet, so no ranking points change."
+                : `It costs up to ${pvpRules.rankingStake} ranking points.`;
         showModal({
             variant: "confirm", title: "Forfeit this ranked match?",
-            content: `Leaving gives your opponent the win and costs up to ${pvpRules.rankingStake} ranking points.`,
+            content: `Leaving gives your opponent the win. ${stakes}`,
             onlyConfirm: false, onCancel: closeModal,
             onConfirm: () => { closeModal(); void game.leave(); },
         });
@@ -96,8 +105,9 @@ const PvpGame = () => {
                     : "No ranking points were awarded. Create a new room to play again."}
             </Typography>
             {room?.status === "finished" && <Typography>
-                {room.mode === "ranked" ? `Player vs Player ranking: ${rankingChange > 0 ? "+" : ""}${rankingChange}.`
-                    : "Private match. Ranking unchanged."}
+                {room.mode !== "ranked" ? "Private match. Ranking unchanged."
+                    : room.unrankedReason ? unrankedMessages[room.unrankedReason]
+                        : `Player vs Player ranking: ${rankingChange > 0 ? "+" : ""}${rankingChange}.`}
             </Typography>}
             {(room?.endReason === "forfeit" || room?.endReason === "disconnect") && <Typography>
                 {room.endReason === "forfeit" ? "The match ended by forfeit." : "The match ended after a player failed to reconnect within 60 seconds."}
@@ -173,6 +183,9 @@ const PvpGame = () => {
                             ? "Leaving forfeits the match. After a disconnect you have 60 seconds to return. Keep this page open while playing."
                             : "Leaving cancels this private match. No ranking points are awarded."}
                     </Typography>}
+                    {room?.status === "playing" && room.unrankedReason === "rematch" && <Alert severity="info">
+                        This rematch is unranked: you already played a ranked match against this opponent in the last {rematchHours} hours.
+                    </Alert>}
                 </>}
             </Container>
         </Box>

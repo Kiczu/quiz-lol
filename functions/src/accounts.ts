@@ -9,5 +9,7 @@ export const deleteUserProfile = region("europe-west1")
     for (const collection of ["users", "scores", "pvpQueue"]) {
       batch.delete(db.collection(collection).doc(user.uid));
     }
+    const pairs = await db.collection("pvpPairs").where("playerIds", "array-contains", user.uid).get();
+    pairs.docs.forEach((pair) => batch.delete(pair.ref));
     await batch.commit();
   });

@@ -44,6 +44,10 @@ service cloud.firestore {
       }
     }
 
+    match /pvpPairs/{pairId} {
+      allow read, write: if false;
+    }
+
     match /rounds/{roundId} {
       allow read, write: if false;
 
