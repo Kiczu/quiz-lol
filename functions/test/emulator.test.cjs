@@ -597,10 +597,7 @@ test("live: online players complete the same mixed quiz and receive ranked rewar
         const { question, secret: solution } = secret.rounds[index];
         assert.deepEqual((await ref.get()).data().question, question);
         assert.equal(question.answerId, undefined);
-        if (question.image) {
-            const asset = await fetch(question.image, { method: "HEAD", signal: AbortSignal.timeout(5000) });
-            assert.equal(asset.status, 200, question.image);
-        }
+        if (question.image) assert.match(question.image, /^data:image\/png;base64,/);
         const wrong = question.options.find((option) => option.id !== solution.answerId).id;
         await call("submitPvpAnswer", { code: paired.code, round: index, guess: solution.answerId });
         await call("submitPvpAnswer", { code: paired.code, round: index, guess: wrong }, players[1]);
@@ -620,6 +617,7 @@ test("live: all solo modes start and complete against Data Dragon", async () => 
         const ref = db.collection("rounds").doc(started.roundId);
         refs.push(ref);
         assert.equal(started.answer, undefined);
+        if (gameId === "Skills") assert.match(started.spellIcon, /^data:image\/png;base64,/);
         const secret = (await ref.collection("secret").doc("answer").get()).data();
         const guesses = gameId === "Hangman" ? [...new Set(secret.name.replace(/[^A-Z]/g, ""))]
             : [gameId === "Skills" ? secret.championId : secret.region];

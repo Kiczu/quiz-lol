@@ -6,6 +6,7 @@ import {
   DDRAGON,
   GameHandler,
   championIcon,
+  inlineImage,
   loadRoster,
   pick,
   readJson,
@@ -32,7 +33,7 @@ const start: GameHandler["start"] = async () => {
   return {
     question: {
       spellName: spell.name,
-      spellIcon: spellIcon(spell.image.full, version),
+      spellIcon: await inlineImage(spellIcon(spell.image.full, version)),
       options: shuffle([answer, ...distractors]).map((champion) => ({
         id: champion.id,
         name: champion.name,

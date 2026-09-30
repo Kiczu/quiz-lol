@@ -60,6 +60,15 @@ export const readJson = async <T>(url: string): Promise<T> => {
   return (await response.json()) as T;
 };
 
+export const inlineImage = async (url: string) => {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new HttpsError("unavailable", `Data Dragon replied ${response.status}.`);
+  }
+  const type = response.headers.get("content-type") ?? "image/png";
+  return `data:${type};base64,${Buffer.from(await response.arrayBuffer()).toString("base64")}`;
+};
+
 let roster: { version: string; champions: Champion[] } | null = null;
 
 export const loadRoster = async () => {
