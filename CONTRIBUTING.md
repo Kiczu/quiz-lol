@@ -15,6 +15,7 @@
 - Use a separate `feat/`, `fix/`, `refactor/` or `chore/` branch for each concern.
 - Keep tests with the code they cover. Use short conventional commit subjects with a scope.
 - Dependent branches may form a stack; review and merge them in base-to-tip order.
+- Before merging a stacked branch, rebase it onto the current `main` so every merge bubble forks from `main`.
 - Rewrite only unpublished commits, with a local backup before rebasing.
 - Merge with `--no-ff` only after review. Do not push or merge as part of preparing a change.
 
