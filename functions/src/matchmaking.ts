@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 
 import { HttpsError, onCall } from "firebase-functions/v2/https";
 
-import { PvpSearch, PvpSearchResult, pvpRules } from "./contracts/pvp";
+import { PvpActivity, PvpSearch, PvpSearchResult, pvpRules } from "./contracts/pvp";
 import { Room, loadPvpRounds, makePvpRoom, playerName } from "./pvp";
 import { isRecentPair, resolveDisconnectedPlayers } from "./pvpRanking";
 import { db, requireString, requireUid } from "./shared";
@@ -100,3 +100,17 @@ export const findPvpMatch = onCall(options, (request) =>
 
 export const cancelPvpSearch = onCall(options, (request) =>
   cancelSearch(requireUid(request.auth?.uid), searchIdFor(request.data?.searchId)));
+
+export const countPvpPlayers = async (): Promise<PvpActivity> => {
+  const now = Date.now();
+  const [searching, matches] = await Promise.all([
+    queue.where("expiresAt", ">", now).count().get(),
+    db.collection("pvpRooms").where("status", "==", "playing").where("expiresAt", ">", now).count().get(),
+  ]);
+  return { searching: searching.data().count, playing: matches.data().count * 2 };
+};
+
+export const getPvpActivity = onCall(options, (request) => {
+  requireUid(request.auth?.uid);
+  return countPvpPlayers();
+});

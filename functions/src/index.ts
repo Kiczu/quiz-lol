@@ -10,7 +10,7 @@ import { skills } from "./skills";
 setGlobalOptions({ region: "europe-west1", maxInstances: 10 });
 
 export { createPvpRoom, joinPvpRoom, submitPvpAnswer, advancePvpRound, leavePvpRoom, heartbeatPvpRoom } from "./pvp";
-export { findPvpMatch, cancelPvpSearch } from "./matchmaking";
+export { findPvpMatch, cancelPvpSearch, getPvpActivity } from "./matchmaking";
 export { deleteUserProfile } from "./accounts";
 
 const handlers: Record<string, GameHandler> = {

@@ -12,7 +12,7 @@ for (const host of [process.env.FIRESTORE_EMULATOR_HOST, process.env.FIREBASE_AU
     assert.match(host, /^(127\.0\.0\.1|localhost):\d+$/, "Tests only run against local emulators.");
 }
 admin.initializeApp({ projectId });
-const { searchForOpponent, cancelSearch } = require("../lib/matchmaking");
+const { searchForOpponent, cancelSearch, countPvpPlayers } = require("../lib/matchmaking");
 const db = admin.firestore();
 const refs = [];
 const players = [];
@@ -523,6 +523,20 @@ test("ranked: missing profiles are not recreated and old rooms remain unranked",
     await call("submitPvpAnswer", { code: legacy.id, round: 4, guess: "Ahri" });
     await call("submitPvpAnswer", { code: legacy.id, round: 4, guess: "Ashe" }, players[1]);
     assert.equal((await score()).totalScore, 0);
+});
+
+test("queue: the activity count includes searching players and live matches only", async () => {
+    const before = await countPvpPlayers();
+    await findOpponent(players[0], randomUUID());
+    await room({ status: "playing", playerIds: [players[1].uid, players[2].uid] });
+    await room({ status: "playing", expiresAt: Date.now() - 1 });
+    await room({ status: "finished" });
+    const after = await countPvpPlayers();
+    assert.equal(after.searching, before.searching + 1);
+    assert.equal(after.playing, before.playing + 2);
+    const counted = await call("getPvpActivity", {});
+    assert.equal(counted.searching, after.searching);
+    await assert.rejects(call("getPvpActivity", {}, null), { code: "UNAUTHENTICATED" });
 });
 
 test("queue: three simultaneous players form exactly one match", async () => {
