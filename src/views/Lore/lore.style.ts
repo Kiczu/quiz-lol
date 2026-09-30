@@ -28,13 +28,20 @@ export const loreViewHeader = {
     m: 4,
 }
 
-export const championCard = {
+const splashAspectRatio = "1215 / 717";
+
+export const championCardFrame = {
     position: "relative",
     background: "rgba(28,34,48, 0.92)",
     borderRadius: "0px",
     boxShadow: `0 4px 24px 2px ${colors.gold2}22, 0 1px 8px #0008`,
     overflow: "hidden",
     border: "none",
+    aspectRatio: splashAspectRatio,
+};
+
+export const championCard = {
+    ...championCardFrame,
     transition: "transform 0.5s cubic-bezier(.34,1.56,.64,1)",
     "&:hover": {
         boxShadow: `0 8px 32px 4px ${colors.gold2}55, 0 4px 24px ${colors.blue2}88`,
@@ -46,8 +53,26 @@ export const championCard = {
 export const championImage = {
     width: "100%",
     display: "block",
+    aspectRatio: splashAspectRatio,
+    objectFit: "cover",
     borderRadius: 0,
     filter: "brightness(0.98) contrast(1.08)",
+    transition: "opacity 0.3s ease",
+};
+
+export const championImagePlaceholder = {
+    position: "absolute",
+    inset: 0,
+    width: "100%",
+    height: "100%",
+    bgcolor: `${colors.gold2}14`,
+};
+
+export const championNameSkeleton = {
+    width: "40%",
+    mx: "auto",
+    fontSize: "1.1rem",
+    bgcolor: `${colors.gold1}33`,
 };
 
 export const championNameBanner = {
