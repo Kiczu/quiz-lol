@@ -3,7 +3,7 @@ import { HttpsError } from "firebase-functions/v2/https";
 import { QuizChoice, QuizQuestion, pvpRules } from "./contracts/pvp";
 import { regionNames } from "./contracts/regions";
 import { toRegionValue } from "./regions";
-import { Champion, DDRAGON, championIcon, db, findByLabel, loadRoster, pick, readJson, shuffle as shuffleItems, spellIcon } from "./shared";
+import { Champion, DDRAGON, championIcon, db, findByLabel, inlineImage, loadRoster, pick, readJson, shuffle as shuffleItems, spellIcon } from "./shared";
 
 export type QuizRound = { question: QuizQuestion; secret: { answerId: string } };
 type QuizChampion = Champion & { title?: string; blurb?: string };
@@ -131,5 +131,8 @@ export const loadPvpRounds = async (): Promise<QuizRound[]> => {
     const region = typeof value === "string" ? toRegionValue(value) : null;
     return matched && region ? [{ championId: matched.id, region }] : [];
   });
-  return buildPvpRounds({ ...assets, version, champions, abilities, regions: regionEntries });
+  const rounds = buildPvpRounds({ ...assets, version, champions, abilities, regions: regionEntries });
+  return Promise.all(rounds.map(async (round) => round.question.image
+    ? { ...round, question: { ...round.question, image: await inlineImage(round.question.image) } }
+    : round));
 };

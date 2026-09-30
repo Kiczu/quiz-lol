@@ -1,6 +1,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const { buildPvpRounds } = require("../lib/pvpQuestions");
+const { inlineImage } = require("../lib/shared");
 const { toRegionValue } = require("../lib/regions");
 const { regionNames } = require("../lib/contracts/regions");
 
@@ -115,4 +116,19 @@ test("questions: incomplete data fails instead of producing ambiguous or short q
     const data = catalog();
     data.champions.forEach((champion) => { champion.title = "Duplicate title"; });
     assert.ok(buildPvpRounds(data).every(({ question }) => question.category !== "Champions"));
+});
+
+test("images: icons reach the browser as data URIs without their file name", async (t) => {
+    const url = "https://ddragon.leagueoflegends.com/cdn/test/img/item/3031.png";
+    const fetch = t.mock.method(globalThis, "fetch", async () =>
+        new Response(new Uint8Array([137, 80, 78, 71]), { headers: { "content-type": "image/png" } }));
+    const image = await inlineImage(url);
+    assert.equal(fetch.mock.calls[0].arguments[0], url);
+    assert.equal(image, "data:image/png;base64,iVBORw==");
+    assert.doesNotMatch(image, /3031/);
+});
+
+test("images: a missing icon fails the round instead of leaking its URL", async (t) => {
+    t.mock.method(globalThis, "fetch", async () => new Response(null, { status: 404 }));
+    await assert.rejects(inlineImage("https://example.com/missing.png"), { code: "unavailable" });
 });
