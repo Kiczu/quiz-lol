@@ -40,6 +40,7 @@ const question = {
 
 const loadMatchQuestions = async () => Array.from({ length: 5 }, () => ({ question, secret: { championId: "Ahri" } }));
 const ticket = (player) => db.collection("pvpQueue").doc(player.uid);
+const pair = (a = players[0], b = players[1]) => db.collection("pvpPairs").doc([a.uid, b.uid].sort().join("_"));
 const findOpponent = async (player, searchId, load = loadMatchQuestions) => {
     const result = await searchForOpponent(player.uid, searchId, load);
     if (result.code) refs.push(db.collection("pvpRooms").doc(result.code));
@@ -105,6 +106,7 @@ before(async () => {
 beforeEach(async () => {
     await Promise.all(players.map((player, i) => profile(player).set({ username: `Test ${i}`, avatar: null, scores: {}, totalScore: 0 })));
     await Promise.all(players.map((player) => ticket(player).delete()));
+    await Promise.all(players.flatMap((a, i) => players.slice(i + 1).map((b) => pair(a, b).delete())));
 });
 
 after(async () => {
@@ -123,8 +125,11 @@ test("accounts: Auth deletion cleans up only that user's profile and queue", asy
     });
     const account = await response.json();
     const documents = ["users", "scores", "pvpQueue"].map((collection) => db.collection(collection).doc(account.localId));
-    refs.push(...documents);
+    const pairs = [pair(players[0], { uid: account.localId }), pair(players[0], players[1])];
+    refs.push(...documents, ...pairs);
     await Promise.all(documents.map((ref) => ref.set({ username: "delete-test" })));
+    await pairs[0].set({ playerIds: [players[0].uid, account.localId], rankedUntil: new Date(Date.now() + 60_000) });
+    await pairs[1].set({ playerIds: [players[0].uid, players[1].uid], rankedUntil: new Date(Date.now() + 60_000) });
     const removed = await fetch(`http://${process.env.FIREBASE_AUTH_EMULATOR_HOST}/identitytoolkit.googleapis.com/v1/accounts:delete?key=test-key`, {
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idToken: account.idToken }),
     });
@@ -134,6 +139,8 @@ test("accounts: Auth deletion cleans up only that user's profile and queue", asy
         await new Promise((resolve) => setTimeout(resolve, 100));
     }
     for (const ref of documents) assert.equal((await ref.get()).exists, false);
+    assert.equal((await pairs[0].get()).exists, false);
+    assert.equal((await pairs[1].get()).exists, true);
     for (const player of players) assert.equal((await profile(player).get()).exists, true);
 });
 
@@ -417,7 +424,7 @@ test("ranked: forfeiting during the break ends the match and clears the pending 
 
 test("ranked: leaving forfeits regardless of the current score and cannot award twice", async () => {
     await profile(players[0]).update({ scores: { PVP: 30 }, totalScore: 30 });
-    const ref = await rankedRoom({ players: [
+    const ref = await rankedRoom({ currentRound: 4, players: [
         { uid: players[0].uid, name: "Host", score: 40 }, { uid: players[1].uid, name: "Guest", score: 0 },
     ] });
     await Promise.all(Array.from({ length: 3 }, () => call("leavePvpRoom", { code: ref.id })));
@@ -428,7 +435,7 @@ test("ranked: leaving forfeits regardless of the current score and cannot award 
 });
 
 test("ranked: reconnecting before the grace deadline renews presence, but a late return loses", async () => {
-    const ref = await rankedRoom();
+    const ref = await rankedRoom({ currentRound: 1 });
     await ref.update({ [`lastSeen.${players[0].uid}`]: Date.now() - 30_000 });
     await call("heartbeatPvpRoom", { code: ref.id });
     assert.ok((await ref.get()).data().lastSeen[players[0].uid] > Date.now() - 5000);
@@ -447,11 +454,61 @@ test("ranked: simultaneous abandonment is settled on the next queue request", as
     const paired = await findOpponent(players[1], randomUUID());
     await Promise.all(players.slice(0, 2).map((player) => profile(player).update({ scores: { PVP: 40 }, totalScore: 40 })));
     const ref = db.collection("pvpRooms").doc(paired.code);
-    await ref.update({ lastSeen: Object.fromEntries(players.slice(0, 2).map((player) => [player.uid, Date.now() - 61_000])) });
+    await ref.update({ currentRound: 1, lastSeen: Object.fromEntries(players.slice(0, 2).map((player) => [player.uid, Date.now() - 61_000])) });
     assert.equal((await findOpponent(players[0], firstId)).state, "cancelled");
     assert.equal((await ref.get()).data().endReason, "abandoned");
     for (const player of players.slice(0, 2)) assert.equal((await score(player)).scores.PVP, 20);
     assert.equal((await findOpponent(players[0], randomUUID())).state, "waiting");
+});
+
+test("ranked: leaving or disconnecting before the first round is decided costs no points", async () => {
+    await profile(players[0]).update({ scores: { PVP: 40 }, totalScore: 40 });
+    const left = await rankedRoom();
+    await call("leavePvpRoom", { code: left.id });
+    const forfeit = (await left.get()).data();
+    assert.equal(forfeit.endReason, "forfeit");
+    assert.equal(forfeit.winnerId, players[1].uid);
+    assert.equal(forfeit.unrankedReason, "early");
+    assert.deepEqual(forfeit.rankingChanges, { [players[0].uid]: 0, [players[1].uid]: 0 });
+    const dropped = await rankedRoom();
+    await dropped.update({ [`lastSeen.${players[0].uid}`]: Date.now() - 61_000 });
+    await call("heartbeatPvpRoom", { code: dropped.id }, players[1]);
+    assert.equal((await dropped.get()).data().endReason, "disconnect");
+    assert.equal((await dropped.get()).data().unrankedReason, "early");
+    assert.equal((await score()).scores.PVP, 40);
+    assert.equal((await score(players[1])).scores.PVP, undefined);
+    assert.equal((await pair().get()).exists, false);
+});
+
+test("ranked: the same pair earns ranking points once per 24 hours", async () => {
+    const win = async () => {
+        const ref = await rankedRoom({ currentRound: 4 });
+        await call("submitPvpAnswer", { code: ref.id, round: 4, guess: "Ahri" });
+        await call("submitPvpAnswer", { code: ref.id, round: 4, guess: "Ashe" }, players[1]);
+        return (await ref.get()).data();
+    };
+    assert.equal((await win()).unrankedReason, undefined);
+    const cooldown = (await pair().get()).data().rankedUntil.toMillis() - Date.now();
+    assert.ok(cooldown > 24 * 3_600_000 - 60_000 && cooldown <= 24 * 3_600_000);
+    const repeat = await win();
+    assert.equal(repeat.unrankedReason, "rematch");
+    assert.equal(repeat.winnerId, players[0].uid);
+    assert.equal((await score()).scores.PVP, 20);
+    await pair().update({ rankedUntil: new Date(Date.now() - 1) });
+    await win();
+    assert.equal((await score()).scores.PVP, 40);
+});
+
+test("queue: a rematch within 24 hours is announced as unranked when the match starts", async () => {
+    await pair().set({ playerIds: [players[0].uid, players[1].uid], rankedUntil: new Date(Date.now() + 60_000) });
+    await findOpponent(players[0], randomUUID());
+    const paired = await findOpponent(players[1], randomUUID());
+    assert.equal((await db.collection("pvpRooms").doc(paired.code).get()).data().unrankedReason, "rematch");
+});
+
+test("rules: clients cannot read the rematch cooldown", async () => {
+    await pair().set({ playerIds: [players[0].uid, players[1].uid], rankedUntil: new Date(Date.now() + 60_000) });
+    assert.equal((await readAs(`pvpPairs/${pair().id}`, players[0])).status, 403);
 });
 
 test("ranked: missing profiles are not recreated and old rooms remain unranked", async () => {

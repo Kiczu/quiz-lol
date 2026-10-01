@@ -4,7 +4,7 @@ import { HttpsError, onCall } from "firebase-functions/v2/https";
 
 import { PvpSearch, PvpSearchResult, pvpRules } from "./contracts/pvp";
 import { Room, loadPvpRounds, makePvpRoom, playerName } from "./pvp";
-import { resolveDisconnectedPlayers } from "./pvpRanking";
+import { isRecentPair, resolveDisconnectedPlayers } from "./pvpRanking";
 import { db, requireString, requireUid } from "./shared";
 
 const options = { region: "europe-west1", maxInstances: 10 };
@@ -59,6 +59,7 @@ export const searchForOpponent = async (
       const profiles = await transaction.getAll(db.collection("scores").doc(uid), db.collection("scores").doc(opponent.id));
       const collision = await transaction.get(roomRef);
       if (collision.exists) return null;
+      const rematch = await isRecentPair(transaction, [uid, opponent.id]);
       if (!profiles.every((profile) => profile.exists)) {
         profiles.forEach((profile) => {
           if (!profile.exists) transaction.set(queue.doc(profile.id), {
@@ -69,9 +70,12 @@ export const searchForOpponent = async (
       }
 
       const result: PvpSearchResult = { state: "matched", code: roomRef.id };
-      transaction.create(roomRef, makePvpRoom(profiles.map((profile) => ({
-        uid: profile.id, name: playerName(profile.data()?.username), score: 0,
-      })), rounds[0].question, "ranked"));
+      transaction.create(roomRef, {
+        ...makePvpRoom(profiles.map((profile) => ({
+          uid: profile.id, name: playerName(profile.data()?.username), score: 0,
+        })), rounds[0].question, "ranked"),
+        ...(rematch ? { unrankedReason: "rematch" } : {}),
+      });
       transaction.create(roomRef.collection("secret").doc("game"), { rounds, answers: {} });
       transaction.set(ref, { ...result, searchId, expiresAt: 0 });
       transaction.set(opponent.ref, { ...result, searchId: other.searchId, expiresAt: 0 });

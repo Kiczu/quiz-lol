@@ -1,11 +1,18 @@
-import { DocumentReference, FieldValue, Transaction } from "firebase-admin/firestore";
+import { DocumentReference, FieldValue, Timestamp, Transaction } from "firebase-admin/firestore";
 
 import { pvpRules } from "./contracts/pvp";
 import { db } from "./shared";
 
 import type { Room } from "./pvp";
 
-const { rankingStake, reconnectWindow } = pvpRules;
+const { rankingStake, reconnectWindow, rematchCooldown } = pvpRules;
+
+export const pvpPairRef = (playerIds: string[]) => db.collection("pvpPairs").doc([...playerIds].sort().join("_"));
+
+export const isRecentPair = async (transaction: Transaction, playerIds: string[]) => {
+  const pair = await transaction.get(pvpPairRef(playerIds));
+  return (pair.data()?.rankedUntil?.toMillis() ?? 0) > Date.now();
+};
 
 export const finishMatch = async (
   transaction: Transaction,
@@ -15,7 +22,11 @@ export const finishMatch = async (
   endReason: NonNullable<Room["endReason"]>
 ): Promise<Room> => {
   const rankingChanges: Record<string, number> = Object.fromEntries(room.playerIds.map((uid) => [uid, 0]));
-  if (room.mode === "ranked" && (winnerId || endReason === "abandoned")) {
+  const stakes = room.mode === "ranked" && (winnerId || endReason === "abandoned");
+  let unrankedReason = room.unrankedReason;
+  if (stakes && !unrankedReason && room.currentRound === 0 && !room.nextRoundAt) unrankedReason = "early";
+  if (stakes && !unrankedReason && await isRecentPair(transaction, room.playerIds)) unrankedReason = "rematch";
+  if (stakes && !unrankedReason) {
     const profiles = await transaction.getAll(...room.playerIds.map((uid) => db.collection("scores").doc(uid)));
     for (const profile of profiles) {
       if (!profile.exists) continue;
@@ -24,9 +35,13 @@ export const finishMatch = async (
       rankingChanges[profile.id] = next - previous;
       transaction.update(profile.ref, { "scores.PVP": next, totalScore: FieldValue.increment(next - previous) });
     }
+    transaction.set(pvpPairRef(room.playerIds), {
+      playerIds: room.playerIds, rankedUntil: Timestamp.fromMillis(Date.now() + rematchCooldown),
+    });
   }
   const result = {
     status: "finished" as const, players: room.players, winnerId, endReason, rankingChanges,
+    ...(unrankedReason ? { unrankedReason } : {}),
     question: null, deadline: null, answeredIds: [], nextRoundAt: null, roundResult: null,
   };
   transaction.update(ref, result);

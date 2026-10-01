@@ -2,6 +2,7 @@ export const pvpRules = {
   totalRounds: 5,
   pointsPerAnswer: 10,
   rankingStake: 20,
+  rematchCooldown: 24 * 60 * 60_000,
   roundDuration: 60_000,
   roundBreakDuration: 5_000,
   reconnectWindow: 60_000,
@@ -32,6 +33,7 @@ export type PvpPlayer = { uid: string; name: string; score: number };
 export type PvpRoom = {
   mode?: "private" | "ranked";
   rankingChanges?: Record<string, number>;
+  unrankedReason?: "early" | "rematch";
   endReason?: "score" | "forfeit" | "disconnect" | "abandoned";
   status: "waiting" | "playing" | "finished" | "cancelled";
   playerIds: string[];

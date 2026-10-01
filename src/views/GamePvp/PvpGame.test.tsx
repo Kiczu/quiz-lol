@@ -126,6 +126,22 @@ describe("PvpGame", () => {
         expect(screen.getByText("Defeat")).toBeInTheDocument();
     });
 
+    it("explains why an early exit or a rematch leaves the ranking unchanged", () => {
+        open();
+        const finished = { ...room, mode: "ranked" as const, status: "finished" as const, winnerId: "host", rankingChanges: { host: 0, guest: 0 } };
+        act(() => updateRoom({ ...finished, endReason: "forfeit", unrankedReason: "early" }));
+        expect(screen.getByText("No ranking points: the match ended before the first round was decided.")).toBeInTheDocument();
+        act(() => updateRoom({ ...finished, endReason: "score", unrankedReason: "rematch" }));
+        expect(screen.getByText(/already played a ranked match against this opponent in the last 24 hours/)).toBeInTheDocument();
+        expect(screen.queryByText(/Player vs Player ranking/)).not.toBeInTheDocument();
+    });
+
+    it("announces an unranked rematch while it is being played", () => {
+        open();
+        act(() => updateRoom({ ...room, mode: "ranked", unrankedReason: "rematch" }));
+        expect(screen.getByText(/This rematch is unranked/)).toBeInTheDocument();
+    });
+
     it("shows the round winner and answer, waits five seconds and unlocks the next question", async () => {
         vi.useFakeTimers();
         open();
@@ -197,5 +213,19 @@ describe("PvpGame", () => {
         vi.mocked(pvpService.leaveRoom).mockResolvedValue({ data: { left: true } });
         await act(async () => showModal.mock.calls[0][0].onConfirm());
         expect(pvpService.leaveRoom).toHaveBeenCalledWith({ code: "ABC123" });
+    });
+
+    it("tells the player what a forfeit costs at each stage of the match", () => {
+        open();
+        const content = () => showModal.mock.lastCall![0].content;
+        act(() => updateRoom({ ...room, mode: "ranked" }));
+        fireEvent.click(screen.getByRole("button", { name: "Leave room" }));
+        expect(content()).toMatch(/first round is not decided yet, so no ranking points change/);
+        act(() => updateRoom({ ...room, mode: "ranked", currentRound: 2 }));
+        fireEvent.click(screen.getByRole("button", { name: "Leave room" }));
+        expect(content()).toMatch(/costs up to 20 ranking points/);
+        act(() => updateRoom({ ...room, mode: "ranked", currentRound: 2, unrankedReason: "rematch" }));
+        fireEvent.click(screen.getByRole("button", { name: "Leave room" }));
+        expect(content()).toMatch(/rematch is unranked/);
     });
 });
