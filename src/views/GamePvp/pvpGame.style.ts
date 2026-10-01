@@ -45,3 +45,19 @@ export const roomCode = {
     fontSize: { xs: "2rem", sm: "3rem" },
     fontWeight: 700,
 };
+
+export const activityStatus = {
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 1,
+    color: colors.textSecondary,
+    "&::before": {
+        content: '""',
+        width: 8,
+        height: 8,
+        borderRadius: "50%",
+        backgroundColor: colors.gradientBlue,
+        boxShadow: `0 0 6px ${colors.gradientBlue}`,
+    },
+};

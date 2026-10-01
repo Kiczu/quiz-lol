@@ -8,7 +8,7 @@ import PvpGame from "./PvpGame";
 
 vi.mock("../../services/pvpService", () => ({ pvpService: {
     createRoom: vi.fn(), joinRoom: vi.fn(), watchRoom: vi.fn(), submitAnswer: vi.fn(), advanceRound: vi.fn(), leaveRoom: vi.fn(),
-    findMatch: vi.fn(), cancelSearch: vi.fn(), watchSearch: vi.fn(), heartbeat: vi.fn(),
+    findMatch: vi.fn(), cancelSearch: vi.fn(), watchSearch: vi.fn(), heartbeat: vi.fn(), getActivity: vi.fn(),
 } }));
 vi.mock("../../context/LoginContext/LoginContext", () => ({ useAuth: () => ({ userData: { uid: "host" } }) }));
 const setImage = vi.fn();
@@ -39,6 +39,7 @@ describe("PvpGame", () => {
         vi.mocked(pvpService.findMatch).mockResolvedValue({ data: { state: "waiting", code: null } });
         vi.mocked(pvpService.heartbeat).mockResolvedValue({ data: { acknowledged: true } });
         vi.mocked(pvpService.advanceRound).mockResolvedValue({ data: { advanced: true } });
+        vi.mocked(pvpService.getActivity).mockResolvedValue({ data: { searching: 1, playing: 2 } });
         vi.mocked(pvpService.cancelSearch).mockResolvedValue({ data: { state: "cancelled", code: null } });
         vi.mocked(pvpService.watchSearch).mockImplementation((_uid, onSearch) => {
             updateSearch = onSearch;
@@ -53,6 +54,19 @@ describe("PvpGame", () => {
         expect(screen.getByRole("heading", { name: "Player vs Player" })).toBeInTheDocument();
         expect(screen.queryByText(/Ranked: win/)).not.toBeInTheDocument();
         expect(screen.getByText("Private matches never affect your ranking.")).toBeInTheDocument();
+    });
+
+    it("shows how many players are in PvP in the lobby and while searching, but not during a match", async () => {
+        open("/game/pvp");
+        expect(await screen.findByText("3 players in PvP right now · 1 searching")).toBeInTheDocument();
+        fireEvent.click(screen.getByRole("button", { name: "Find opponent" }));
+        expect(await screen.findByText("Finding an opponent")).toBeInTheDocument();
+        expect(screen.getByText("3 players in PvP right now · 1 searching")).toBeInTheDocument();
+        const { searchId } = vi.mocked(pvpService.findMatch).mock.calls[0][0]!;
+        act(() => updateSearch({ searchId, state: "matched", code: "ABC123", expiresAt: 0 }));
+        await waitFor(() => expect(pvpService.watchRoom).toHaveBeenCalled());
+        act(() => updateRoom(room));
+        expect(screen.queryByText(/players in PvP right now/)).not.toBeInTheDocument();
     });
 
     it("finds an online opponent and opens the match without a room code", async () => {

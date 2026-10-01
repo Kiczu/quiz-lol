@@ -14,8 +14,9 @@ import { colors } from "../../theme/colors";
 import { useResponsiveColumns } from "../../utils/useResponsiveColumns";
 import { skillsTitle } from "../GameSkills/skillsGame.style";
 
-import { lobbyPanel, playerPanel, pvpContent, pvpWrapper, roomCode } from "./pvpGame.style";
+import { activityStatus, lobbyPanel, playerPanel, pvpContent, pvpWrapper, roomCode } from "./pvpGame.style";
 import PvpQuestionPanel from "./PvpQuestionPanel";
+import usePvpActivity from "./usePvpActivity";
 import usePvpGameData from "./usePvpGameData";
 
 const rematchHours = pvpRules.rematchCooldown / 3_600_000;
@@ -44,12 +45,20 @@ const PvpGame = () => {
         });
     };
     const rankingChange = room?.rankingChanges?.[game.uid ?? ""] ?? 0;
+    const activity = usePvpActivity(!game.code);
+    const online = activity ? activity.searching + activity.playing : 0;
+    const activityLine = activity && (
+        <Typography variant="body2" sx={activityStatus}>
+            {online} {online === 1 ? "player" : "players"} in PvP right now · {activity.searching} searching
+        </Typography>
+    );
 
     const lobby = !game.code && game.matchmaking.searching ? (
         <Box sx={lobbyPanel}>
             <Typography variant="h3">Finding an opponent</Typography>
             <CircularProgress size={32} sx={{ alignSelf: "center", color: colors.gold2 }} />
             <Typography role="status">Waiting for another player to join the queue…</Typography>
+            {activityLine}
             <Typography color={colors.textSecondary}>Keep this page open. Your match will start automatically when an opponent is found.</Typography>
             <Button variant="outlined" disabled={game.matchmaking.cancelling} onClick={game.matchmaking.cancel}>
                 {game.matchmaking.cancelling ? "Cancelling…" : "Cancel search"}
@@ -58,6 +67,7 @@ const PvpGame = () => {
     ) : !game.code ? (
         <Box sx={lobbyPanel}>
             <Typography variant="h3">Play against an online opponent</Typography>
+            {activityLine}
             <Typography color={colors.textSecondary}>
                 {pvpRules.totalRounds} shared questions from different League categories. One answer each, {pvpRules.pointsPerAnswer} points for a correct guess.
                 You have {pvpRules.roundDuration / 1000} seconds per question. Highest score wins; equal scores are a draw.

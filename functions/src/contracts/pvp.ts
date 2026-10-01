@@ -9,6 +9,7 @@ export const pvpRules = {
   heartbeatInterval: 15_000,
   searchLeaseDuration: 45_000,
   searchPollInterval: 10_000,
+  activityPollInterval: 30_000,
 } as const;
 
 export type QuizChoice = { id: string; name: string; icon?: string };
@@ -52,6 +53,8 @@ export type PvpRoom = {
   expiresAt: number;
   winnerId: string | null;
 };
+
+export type PvpActivity = { searching: number; playing: number };
 
 export type PvpSearchResult = { state: "waiting" | "matched" | "cancelled"; code: string | null };
 export type PvpSearch = PvpSearchResult & { searchId: string; expiresAt: number };

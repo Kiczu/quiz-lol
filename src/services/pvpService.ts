@@ -4,9 +4,9 @@ import { httpsCallable } from "firebase/functions";
 import { db } from "../api/firebase/db";
 import { functions } from "../api/firebase/functions";
 
-import type { PvpRoom, PvpSearch, PvpSearchResult } from "../../functions/src/contracts/pvp";
+import type { PvpActivity, PvpRoom, PvpSearch, PvpSearchResult } from "../../functions/src/contracts/pvp";
 
-export type { PvpQuestion, PvpRoom, PvpSearch, PvpSearchResult } from "../../functions/src/contracts/pvp";
+export type { PvpActivity, PvpQuestion, PvpRoom, PvpSearch, PvpSearchResult } from "../../functions/src/contracts/pvp";
 
 const createRoom = httpsCallable<void, { code: string }>(functions, "createPvpRoom");
 const joinRoom = httpsCallable<{ code: string }, { code: string }>(functions, "joinPvpRoom");
@@ -17,6 +17,7 @@ const heartbeat = httpsCallable<{ code: string }>(functions, "heartbeatPvpRoom")
 
 const findMatch = httpsCallable<{ searchId: string }, PvpSearchResult>(functions, "findPvpMatch");
 const cancelSearch = httpsCallable<{ searchId: string }, PvpSearchResult>(functions, "cancelPvpSearch");
+const getActivity = httpsCallable<void, PvpActivity>(functions, "getPvpActivity");
 const watchSearch = (uid: string, onSearch: (search: PvpSearch) => void, onError: (error: Error) => void) =>
     onSnapshot(doc(db, "pvpQueue", uid), (snapshot) => {
         if (snapshot.exists()) onSearch(snapshot.data() as PvpSearch);
@@ -42,4 +43,5 @@ export const pvpService = {
     findMatch,
     cancelSearch,
     watchSearch,
+    getActivity,
 };
